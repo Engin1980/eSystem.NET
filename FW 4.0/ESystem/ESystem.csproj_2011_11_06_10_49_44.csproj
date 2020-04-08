@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{5304D7CC-F2CA-4F8C-8841-2E8227EB0747}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ESystem</RootNamespace>
+    <AssemblyName>ESystem</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;FW40</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\FW 3.5\ESystem\_Attributes\DisplayAttribute.cs">
+      <Link>_Attributes\DisplayAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Constans\Constants.cs">
+      <Link>_Constans\Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Exceptions\CodeErrorException.cs">
+      <Link>_Exceptions\CodeErrorException.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Exceptions\ProgramException.cs">
+      <Link>_Exceptions\ProgramException.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Extensions\DateTimeExt.cs">
+      <Link>_Extensions\DateTimeExt.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Extensions\EnumExt.cs">
+      <Link>_Extensions\EnumExt.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Extensions\ExceptionExt.cs">
+      <Link>_Extensions\ExceptionExt.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Extensions\ICollectionExt.cs">
+      <Link>_Extensions\ICollectionExt.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Extensions\IComparableExt.cs">
+      <Link>_Extensions\IComparableExt.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Extensions\IEnumerableExt.cs">
+      <Link>_Extensions\IEnumerableExt.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Extensions\IListExt.cs">
+      <Link>_Extensions\IListExt.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Extensions\ObjectExt.cs">
+      <Link>_Extensions\ObjectExt.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Extensions\StringBuilderExt.cs">
+      <Link>_Extensions\StringBuilderExt.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Extensions\StringExt.cs">
+      <Link>_Extensions\StringExt.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Extensions\System_IO_FileExt.cs">
+      <Link>_Extensions\System_IO_FileExt.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Extensions\System_Reflection_MemberInfoExt.cs">
+      <Link>_Extensions\System_Reflection_MemberInfoExt.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Extensions\TimeSpanExt.cs">
+      <Link>_Extensions\TimeSpanExt.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Extensions\TypeExt.cs">
+      <Link>_Extensions\TypeExt.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Interfaces\ICloneable.cs">
+      <Link>_Interfaces\ICloneable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Types\Collections\EList.cs">
+      <Link>_Types\Collections\EList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Types\Collections\StringCollection.cs">
+      <Link>_Types\Collections\StringCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Types\IO\INIFile.cs">
+      <Link>_Types\IO\INIFile.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Types\Pair.cs">
+      <Link>_Types\Pair.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem\_Types\PairStruct.cs">
+      <Link>_Types\PairStruct.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{B7D74DC8-64EF-4925-9C34-B66CA62441A5}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ESystem.Forms</RootNamespace>
+    <AssemblyName>ESystem.Forms</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;FW35</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="EProgressBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="EProgressBar.Designer.cs">
+      <DependentUpon>EProgressBar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Extenders\EnumComboBoxExtender.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Extenders\EnumComboBoxExtender.Designer.cs">
+      <DependentUpon>EnumComboBoxExtender.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Extenders\GenericEnumComboBoxExtender.cs" />
+    <Compile Include="Extenders\TypeListViewExtender.cs" />
+    <Compile Include="FileBrowser.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="FileBrowser.Designer.cs">
+      <DependentUpon>FileBrowser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FolderBrowser.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="FolderBrowser.Designer.cs">
+      <DependentUpon>FolderBrowser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ImagePanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ImagePanel.Designer.cs">
+      <DependentUpon>ImagePanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="InputBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InputBox.Designer.cs">
+      <DependentUpon>InputBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LabelPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="LabelPanel.Designer.cs">
+      <DependentUpon>LabelPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OutputTextBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="OutputTextBox.Designer.cs">
+      <DependentUpon>OutputTextBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ETextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ETextBox.Designer.cs">
+      <DependentUpon>ETextBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="_Browser.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="FileBrowser.resx">
+      <DependentUpon>FileBrowser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FolderBrowser.resx">
+      <DependentUpon>FolderBrowser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ImagePanel.resx">
+      <DependentUpon>ImagePanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="InputBox.resx">
+      <DependentUpon>InputBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OutputTextBox.resx">
+      <DependentUpon>OutputTextBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\folder-yellow-open-icon-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="OtherNewItems.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ESystem\ESystem.csproj">
+      <Project>{EC5A5900-6256-48E6-B402-E923F697DF71}</Project>
+      <Name>ESystem %28FW 3.5\ESystem%29</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

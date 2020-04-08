@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D9E4F20B-8074-43B7-A748-6B8FA4A5D320}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ESystem.Forms</RootNamespace>
+    <AssemblyName>ESystem.Forms</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;FW40</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\EProgressBar.cs">
+      <Link>EProgressBar.cs</Link>
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\EProgressBar.designer.cs">
+      <Link>EProgressBar.designer.cs</Link>
+      <DependentUpon>EProgressBar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\ETextBox.cs">
+      <Link>ETextBox.cs</Link>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\ETextBox.designer.cs">
+      <Link>ETextBox.designer.cs</Link>
+      <DependentUpon>ETextBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\Extenders\EnumComboBoxExtender.cs">
+      <Link>Extenders\EnumComboBoxExtender.cs</Link>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\Extenders\EnumComboBoxExtender.designer.cs">
+      <Link>Extenders\EnumComboBoxExtender.designer.cs</Link>
+      <DependentUpon>EnumComboBoxExtender.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\Extenders\GenericEnumComboBoxExtender.cs">
+      <Link>Extenders\GenericEnumComboBoxExtender.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\Extenders\TypeListViewExtender.cs">
+      <Link>Extenders\TypeListViewExtender.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\FileBrowser.cs">
+      <Link>FileBrowser.cs</Link>
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\FileBrowser.designer.cs">
+      <Link>FileBrowser.designer.cs</Link>
+      <DependentUpon>FileBrowser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\FolderBrowser.cs">
+      <Link>FolderBrowser.cs</Link>
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\FolderBrowser.designer.cs">
+      <Link>FolderBrowser.designer.cs</Link>
+      <DependentUpon>FolderBrowser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\ImagePanel.cs">
+      <Link>ImagePanel.cs</Link>
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\ImagePanel.designer.cs">
+      <Link>ImagePanel.designer.cs</Link>
+      <DependentUpon>ImagePanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\InputBox.cs">
+      <Link>InputBox.cs</Link>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\InputBox.designer.cs">
+      <Link>InputBox.designer.cs</Link>
+      <DependentUpon>InputBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\LabelPanel.cs">
+      <Link>LabelPanel.cs</Link>
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\LabelPanel.designer.cs">
+      <Link>LabelPanel.designer.cs</Link>
+      <DependentUpon>LabelPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\OutputTextBox.cs">
+      <Link>OutputTextBox.cs</Link>
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\OutputTextBox.Designer.cs">
+      <Link>OutputTextBox.Designer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\FW 3.5\ESystem.Forms\_Browser.cs">
+      <Link>_Browser.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\FW 3.5\ESystem.Forms\FileBrowser.resx">
+      <Link>FileBrowser.resx</Link>
+      <DependentUpon>FileBrowser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\FW 3.5\ESystem.Forms\FolderBrowser.resx">
+      <Link>FolderBrowser.resx</Link>
+      <DependentUpon>FolderBrowser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\FW 3.5\ESystem.Forms\ImagePanel.resx">
+      <Link>ImagePanel.resx</Link>
+      <DependentUpon>ImagePanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\FW 3.5\ESystem.Forms\InputBox.resx">
+      <Link>InputBox.resx</Link>
+      <DependentUpon>InputBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\FW 3.5\ESystem.Forms\OutputTextBox.resx">
+      <Link>OutputTextBox.resx</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ESystem\ESystem.csproj">
+      <Project>{5304D7CC-F2CA-4F8C-8841-2E8227EB0747}</Project>
+      <Name>ESystem</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\folder-yellow-open-icon-16.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
