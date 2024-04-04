@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ELoging\ELogging.csproj" />
+    <ProjectReference Include="..\ELogging\ELogging.csproj" />
   </ItemGroup>
 
   <ItemGroup>
