@@ -1,5 +1,4 @@
-﻿using ELogging.Model;
-using ESystem.Asserting;
+﻿using ESystem.Asserting;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
@@ -228,7 +227,7 @@ namespace ELogging
       {
         LogRule? rule = actionInfo.TryGetFirstRule(senderName);
         if (rule == null) continue;
-        if (rule.IsLogLevelMatch(level) == false) continue;
+        if (rule.IsAcceptingLogLevel(level) == false) continue;
 
         LogItem item = new(sender, senderName, level, message);
         actionInfo.Action.Invoke(item);
