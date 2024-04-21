@@ -90,11 +90,11 @@ namespace ESimConnect
 
     #region Delegates
 
-    public delegate void ESimConnectDataReceived(ESimConnect sender, ESimConnectDataReceivedEventArgs e);
+    public delegate void ESimConnectDataReceivedDelegate(ESimConnect sender, ESimConnectDataReceivedEventArgs e);
 
     public delegate void ESimConnectDelegate(ESimConnect sender);
 
-    public delegate void ESimConnectEventInvoked(ESimConnect sender, ESimConnectEventInvokedEventArgs e);
+    public delegate void ESimConnectEventInvokedDelegate(ESimConnect sender, ESimConnectEventInvokedEventArgs e);
 
     public delegate void ESimConnectExceptionDelegate(ESimConnect sender, SIMCONNECT_EXCEPTION ex);
 
@@ -104,11 +104,11 @@ namespace ESimConnect
 
     public event ESimConnectDelegate? Connected;
 
-    public event ESimConnectDataReceived? DataReceived;
+    public event ESimConnectDataReceivedDelegate? DataReceived;
 
     public event ESimConnectDelegate? Disconnected;
 
-    public event ESimConnectEventInvoked? EventInvoked;
+    public event ESimConnectEventInvokedDelegate? EventInvoked;
 
     public event ESimConnectExceptionDelegate? ThrowsException;
 

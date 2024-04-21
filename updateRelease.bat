@@ -16,3 +16,5 @@ copy %ES%\ESimConnect\bin\debug\net6.0-windows\ESimConnect.pdb %OUT%
 copy %ES%\ESimConnect\bin\debug\net6.0-windows\ESimConnect.deps.json %OUT%
 copy %ES%\ESimConnect\DLLs\simconnect.dll %OUT%
 copy %ES%\ESimConnect\bin\debug\net6.0-windows\Microsoft.FlightSimulator.SimConnect.dll %OUT%
+
+pause
