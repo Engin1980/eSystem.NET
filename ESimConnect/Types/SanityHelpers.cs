@@ -1,4 +1,5 @@
-﻿using Microsoft.FlightSimulator.SimConnect;
+﻿using ESimConnect.Definitions;
+using Microsoft.FlightSimulator.SimConnect;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ESimConnect.Types
 {
-  internal static class SanityHelpers
+    internal static class SanityHelpers
   {
     private readonly static Dictionary<Type, SIMCONNECT_DATATYPE> typeMapping;
     private readonly static Dictionary<int, SIMCONNECT_DATATYPE> typeStringMapping;

@@ -1,4 +1,5 @@
-﻿using Microsoft.FlightSimulator.SimConnect;
+﻿using ESimConnect.Definitions;
+using Microsoft.FlightSimulator.SimConnect;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ESimConnect
 {
-  [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field)]
   public class DataDefinitionAttribute : Attribute
   {
     public const int EMPTY_INDEX = -1;

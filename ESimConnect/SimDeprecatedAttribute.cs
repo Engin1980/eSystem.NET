@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace ESimConnect
 {
+  /// <summary>
+  /// Used to defined sim-definitions (events/simvars) that are deprecated in FS2020.
+  /// </summary>
   [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
   internal class SimDeprecatedAttribute : Attribute
   {

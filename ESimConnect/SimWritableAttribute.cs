@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace ESimConnect
 {
+  /// <summary>
+  /// Mark SimVar as writable in FS2020.
+  /// </summary>
+  /// <remarks>
+  /// Writable SimVars may write a value into the sim.
+  /// </remarks>
   [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
   public class SimWritableAttribute : Attribute
   {
