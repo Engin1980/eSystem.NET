@@ -7,6 +7,69 @@ using System.Threading.Tasks;
 
 namespace ESimConnect
 {
+  public enum SimConnectException
+  {
+    NONE,
+    ERROR,
+    SIZE_MISMATCH,
+    UNRECOGNIZED_ID,
+    UNOPENED,
+    VERSION_MISMATCH,
+    TOO_MANY_GROUPS,
+    NAME_UNRECOGNIZED,
+    TOO_MANY_EVENT_NAMES,
+    EVENT_ID_DUPLICATE,
+    TOO_MANY_MAPS,
+    TOO_MANY_OBJECTS,
+    TOO_MANY_REQUESTS,
+    WEATHER_INVALID_PORT,
+    WEATHER_INVALID_METAR,
+    WEATHER_UNABLE_TO_GET_OBSERVATION,
+    WEATHER_UNABLE_TO_CREATE_STATION,
+    WEATHER_UNABLE_TO_REMOVE_STATION,
+    INVALID_DATA_TYPE,
+    INVALID_DATA_SIZE,
+    DATA_ERROR,
+    INVALID_ARRAY,
+    CREATE_OBJECT_FAILED,
+    LOAD_FLIGHTPLAN_FAILED,
+    OPERATION_INVALID_FOR_OBJECT_TYPE,
+    ILLEGAL_OPERATION,
+    ALREADY_SUBSCRIBED,
+    INVALID_ENUM,
+    DEFINITION_ERROR,
+    DUPLICATE_ID,
+    DATUM_ID,
+    OUT_OF_BOUNDS,
+    ALREADY_CREATED,
+    OBJECT_OUTSIDE_REALITY_BUBBLE,
+    OBJECT_CONTAINER,
+    OBJECT_AI,
+    OBJECT_ATC,
+    OBJECT_SCHEDULE
+  }
+
+  public enum SimConnectSimTypeName
+  {
+    INVALID,
+    INT32,
+    INT64,
+    FLOAT32,
+    FLOAT64,
+    STRING8,
+    STRING32,
+    STRING64,
+    STRING128,
+    STRING256,
+    STRING260,
+    STRINGV,
+    INITPOSITION,
+    MARKERSTATE,
+    WAYPOINT,
+    LATLONALT,
+    XYZ,
+    MAX
+  }
   public enum SimConnectSimObjectType
   {
     USER,
@@ -78,7 +141,7 @@ namespace ESimConnect
       return (TTargetEnum)matchingTargetField.GetValue(null);
     }
 
-    public static TEnum ParseEnum<TEnum>(string value, bool ignoreCase = true) where TEnum : Enum 
+    public static TEnum ParseEnum<TEnum>(string value, bool ignoreCase = true) where TEnum : Enum
     {
       if (Enum.TryParse(typeof(TEnum), value, ignoreCase, out object? result) && result != null)
       {

@@ -5,11 +5,13 @@ VisualStudioVersion = 17.9.34714.143
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESystem", "ESystem\ESystem.csproj", "{86617BE9-BD2B-4E15-B82F-4630040B8081}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESystem.WPF", "ESystem.WPF\ESystem.WPF.csproj", "{79BFCCD4-2581-4CA1-985E-AA0A905C77E3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESystem.WPF", "ESystem.WPF\ESystem.WPF.csproj", "{79BFCCD4-2581-4CA1-985E-AA0A905C77E3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ELogging", "ELogging\ELogging.csproj", "{417EBEEB-127E-410E-BD4A-D3D0319F1FF9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESimConnect", "ESimConnect\ESimConnect.csproj", "{715908DD-97C2-48AD-8D02-8D9204824FAE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESimConnectTest", "ESimConnectTest\ESimConnectTest.csproj", "{A0884F0D-7C5F-4C41-AB4D-43139BB66922}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{715908DD-97C2-48AD-8D02-8D9204824FAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{715908DD-97C2-48AD-8D02-8D9204824FAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{715908DD-97C2-48AD-8D02-8D9204824FAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0884F0D-7C5F-4C41-AB4D-43139BB66922}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0884F0D-7C5F-4C41-AB4D-43139BB66922}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0884F0D-7C5F-4C41-AB4D-43139BB66922}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0884F0D-7C5F-4C41-AB4D-43139BB66922}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
