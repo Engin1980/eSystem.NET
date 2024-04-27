@@ -24,19 +24,20 @@ namespace ESimConnectTest
     private static Dictionary<int, string> onceRequestId = new();
     private static Dictionary<int, string> repeatedRequestId = new();
 
-    public static void Start()
+    public static void Run()
     {
-      Console.WriteLine("Starting");
+      Console.WriteLine("Starting non-WPF");
       Open();
+      Sleep(500);
       Register();
       RequestOnce();
-      Sleep(5000);
+      Sleep(3000);
       RequestRepeatedly();
-      //Sleep(10000);
+      Sleep(3000);
       DeleteFirstRepeated();
-      //Sleep(10000);
+      Sleep(3000);
       DeleteAllRepeated();
-      Sleep(1000);
+      Sleep(3000);
       Close();
       Sleep(1000);
       Console.WriteLine("Done");
@@ -83,6 +84,7 @@ namespace ESimConnectTest
 
     private static void Sleep(int ms)
     {
+      Console.WriteLine("Sleeping for " + ms + " ms");
       Thread.Sleep(ms);
     }
 
