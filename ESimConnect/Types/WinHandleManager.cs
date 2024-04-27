@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Threading;
 
 namespace ESimConnect.Types
 {
@@ -23,6 +24,7 @@ namespace ESimConnect.Types
     /// </summary>
     public const int WM_USER_SIMCONNECT = 0x0402;
 
+    private bool windowCreatedByCustomThread = false;
     private Window? window = null;
     private IntPtr windowHandle = IntPtr.Zero;
     private HwndSource? hwndSource = null;
@@ -121,11 +123,14 @@ namespace ESimConnect.Types
           this.hwndSource = null;
         }
 
-        if (this.window != null)
+        if (this.window != null && !windowCreatedByCustomThread)
         {
-          this.window.Close();
-          this.window = null;
+          if (!this.window.Dispatcher.CheckAccess())
+            this.window.Dispatcher.Invoke(() => this.window.Close());
+          else
+            this.window.Close();
         }
+        this.window = null;
         this.windowHandle = IntPtr.Zero;
       };
       if (Application.Current == null)
@@ -154,13 +159,16 @@ namespace ESimConnect.Types
         t.SetApartmentState(ApartmentState.STA);
         t.Start();
         t.Join();
+        windowCreatedByCustomThread = true;
       }
-        
       else
+      {
         Application.Current.Dispatcher.Invoke(() => createWindowHandle());
+        windowCreatedByCustomThread = false;
+      }
 
       while (this.window == null)
-        System.Threading.Thread.Sleep(50);
+        Thread.Sleep(50);
     }
 
     public void Dispose()

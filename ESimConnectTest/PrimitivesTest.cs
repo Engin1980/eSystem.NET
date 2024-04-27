@@ -30,11 +30,11 @@ namespace ESimConnectTest
       Open();
       Register();
       RequestOnce();
-      Sleep(1000);
+      Sleep(5000);
       RequestRepeatedly();
-      Sleep(10000);
+      //Sleep(10000);
       DeleteFirstRepeated();
-      Sleep(10000);
+      //Sleep(10000);
       DeleteAllRepeated();
       Sleep(1000);
       Close();
