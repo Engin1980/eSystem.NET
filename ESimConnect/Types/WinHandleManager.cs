@@ -24,7 +24,6 @@ namespace ESimConnect.Types
     /// </summary>
     public const int WM_USER_SIMCONNECT = 0x0402;
 
-    private bool windowCreatedByCustomThread = false;
     private Window? window = null;
     private IntPtr windowHandle = IntPtr.Zero;
     private HwndSource? hwndSource = null;
@@ -55,7 +54,7 @@ namespace ESimConnect.Types
       Logger.LogMethodEnd();
     }
 
-
+    private bool hwndSourceInUse = false;
     protected IntPtr DefWndProc(IntPtr _hwnd, int msg, IntPtr _wParam, IntPtr _lParam, ref bool handled)
     {
       handled = false;
@@ -68,7 +67,6 @@ namespace ESimConnect.Types
           try
           {
             this._SimConnect.ReceiveMessage();
-
           }
           catch (Exception ex)
           {
@@ -90,18 +88,12 @@ namespace ESimConnect.Types
       return (IntPtr)0;
     }
 
-    private void TryInvokExceptionInMainThread(Exception newException)
-    {
-      //TODO remove if not used
-      Application.Current.Dispatcher.Invoke(() => throw newException);
-    }
-
     private string ExpandExceptionString(Exception ex)
     {
       List<string> tmp = new();
       while (ex != null)
       {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new();
         sb.Append(ex.Message);
         sb.Append("\n\t");
         sb.Append(ex.StackTrace ?? "");
@@ -123,7 +115,7 @@ namespace ESimConnect.Types
           this.hwndSource = null;
         }
 
-        if (this.window != null && !windowCreatedByCustomThread)
+        if (this.window != null)
         {
           if (!this.window.Dispatcher.CheckAccess())
             this.window.Dispatcher.Invoke(() => this.window.Close());
@@ -139,7 +131,7 @@ namespace ESimConnect.Types
         Application.Current.Dispatcher.Invoke(() => destroyWindowHandle());
 
       while (this.windowHandle != IntPtr.Zero)
-        System.Threading.Thread.Sleep(50);
+        Thread.Sleep(50);
     }
 
     private void CreateWindow()
@@ -147,25 +139,28 @@ namespace ESimConnect.Types
       void createWindowHandle()
       {
         this.windowHandle = Process.GetCurrentProcess().MainWindowHandle;
-        this.window = new Window();
+        var window = new Window();
         var wih = new WindowInteropHelper(window);
         wih.EnsureHandle();
-        this.windowHandle = new WindowInteropHelper(this.window).Handle;
+        this.windowHandle = new WindowInteropHelper(window).Handle;
+        this.window = window;
       };
 
       if (Application.Current == null)
       {
-        Thread t = new Thread(createWindowHandle);
+        Thread t = new(() =>
+        {
+          Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() =>
+          {
+            createWindowHandle();
+          }));
+          Dispatcher.Run();
+        });
         t.SetApartmentState(ApartmentState.STA);
         t.Start();
-        t.Join();
-        windowCreatedByCustomThread = true;
       }
       else
-      {
         Application.Current.Dispatcher.Invoke(() => createWindowHandle());
-        windowCreatedByCustomThread = false;
-      }
 
       while (this.window == null)
         Thread.Sleep(50);

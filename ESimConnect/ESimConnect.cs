@@ -619,10 +619,11 @@ namespace ESimConnect
         this.Primitives.UnregisterAll();
         this.Events.UnregisterAll();
 
+        this.winHandleManager.Dispose();
+
         this.simConnect.Dispose();
         this.simConnect = null;
       }
-      this.winHandleManager.Dispose();
       Logger.LogMethodEnd();
     }
 
