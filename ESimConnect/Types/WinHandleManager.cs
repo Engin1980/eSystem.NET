@@ -117,18 +117,25 @@ namespace ESimConnect.Types
 
         if (this.window != null)
         {
-          if (!this.window.Dispatcher.CheckAccess())
-            this.window.Dispatcher.Invoke(() => this.window.Close());
-          else
+          void closeAndShutdown()
+          {
             this.window.Close();
+            this.window.Dispatcher.InvokeShutdown();
+          }
+
+          if (!this.window.Dispatcher.CheckAccess())
+            this.window.Dispatcher.Invoke(closeAndShutdown);
+          else
+            closeAndShutdown();
         }
         this.window = null;
         this.windowHandle = IntPtr.Zero;
       };
+
       if (Application.Current == null)
         destroyWindowHandle();
       else
-        Application.Current.Dispatcher.Invoke(() => destroyWindowHandle());
+        Application.Current.Dispatcher.Invoke(destroyWindowHandle);
 
       while (this.windowHandle != IntPtr.Zero)
         Thread.Sleep(50);
