@@ -37,7 +37,7 @@ namespace ESimConnectTest
       DeleteFirstRepeated();
       Sleep(3000);
       DeleteAllRepeated();
-      Sleep(3000);
+      Sleep(10000);
       Close();
       Sleep(1000);
       Console.WriteLine("Done");

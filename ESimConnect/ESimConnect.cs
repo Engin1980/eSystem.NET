@@ -169,38 +169,40 @@ namespace ESimConnect
       {
         uint radius = 0;
         requestId = IdProvider.GetNext();
-        RequestData<T>(requestId, radius, SIMCONNECT_SIMOBJECT_TYPE.USER);
+        RequestData<T>(requestId, radius, SimConnectSimObjectType.USER);
       }
 
-      public void RequestData<T>(out int requestId, uint radius, SIMCONNECT_SIMOBJECT_TYPE simObjectType)
+      public void RequestData<T>(out int requestId, uint radius, SimConnectSimObjectType simObjectType)
       {
         requestId = IdProvider.GetNext();
         RequestData<T>(requestId, radius, simObjectType);
       }
 
       public void RequestData<T>(int? customRequestId = null)
-        => RequestData<T>(customRequestId, 0, SIMCONNECT_SIMOBJECT_TYPE.USER);
+        => RequestData<T>(customRequestId, 0, SimConnectSimObjectType.USER);
 
-      public void RequestData<T>(int? customRequestId, uint radius, SIMCONNECT_SIMOBJECT_TYPE simObjectType)
+      public void RequestData<T>(int? customRequestId, uint radius, SimConnectSimObjectType simObjectType)
       {
         Logger.LogMethodStart(new object?[] { customRequestId, radius, simObjectType });
         parent.EnsureConnected();
 
         EEnum eTypeId = typeManager.GetIdAsEnum(typeof(T));
         EEnum eRequestId = IdProvider.GetNextAsEnum();
-        parent.Try(() => this.parent.simConnect!.RequestDataOnSimObjectType(eRequestId, eTypeId, radius, simObjectType),
+        SIMCONNECT_SIMOBJECT_TYPE simConObjectType = EnumConverter.ConvertEnum2<SimConnectSimObjectType, SIMCONNECT_SIMOBJECT_TYPE>(simObjectType);
+
+        parent.Try(() => this.parent.simConnect!.RequestDataOnSimObjectType(eRequestId, eTypeId, radius, simConObjectType),
           ex => throw new InternalException("Failed to invoke 'RequestDataOnSimObjectType(...)'.", ex));
         this.parent.requestDataManager.Register(customRequestId, typeof(T), eRequestId);
         Logger.LogMethodEnd();
       }
 
-      public void RequestDataRepeatedly<T>(SIMCONNECT_PERIOD period, bool sendOnlyOnChange = true,
+      public void RequestDataRepeatedly<T>(SimConnectPeriod period, bool sendOnlyOnChange = true,
         int initialDelayFrames = 0, int skipBetweenFrames = 0, int numberOfReturnedFrames = 0)
       {
         RequestDataRepeatedly<T>(out int _, period, sendOnlyOnChange, initialDelayFrames, skipBetweenFrames, numberOfReturnedFrames);
       }
 
-      public void RequestDataRepeatedly<T>(out int requestId, SIMCONNECT_PERIOD period, bool sendOnlyOnChange = true,
+      public void RequestDataRepeatedly<T>(out int requestId, SimConnectPeriod period, bool sendOnlyOnChange = true,
         int initialDelayFrames = 0, int skipBetweenFrames = 0, int numberOfReturnedFrames = 0)
       {
         requestId = IdProvider.GetNext();
@@ -209,7 +211,7 @@ namespace ESimConnect
       }
 
       public void RequestDataRepeatedly<T>(
-        int? customRequestId, SIMCONNECT_PERIOD period, bool sendOnlyOnChange = true,
+        int? customRequestId, SimConnectPeriod period, bool sendOnlyOnChange = true,
         int initialDelayFrames = 0, int skipBetweenFrames = 0, int numberOfReturnedFrames = 0)
       {
         Logger.LogMethodStart(new object?[] {
@@ -226,10 +228,11 @@ namespace ESimConnect
 
         EEnum eTypeId = typeManager.GetIdAsEnum(typeof(T));
         EEnum eRequestId = IdProvider.GetNextAsEnum();
+        SIMCONNECT_PERIOD simConPeriod = EnumConverter.ConvertEnum2<SimConnectPeriod, SIMCONNECT_PERIOD>(period);
 
         parent.Try(() =>
           this.parent.simConnect.RequestDataOnSimObject(
-            eRequestId, eTypeId, SimConnect.SIMCONNECT_OBJECT_ID_USER, period,
+            eRequestId, eTypeId, SimConnect.SIMCONNECT_OBJECT_ID_USER, simConPeriod,
             flag, (uint)initialDelayFrames, (uint)skipBetweenFrames, (uint)numberOfReturnedFrames),
           ex => new InternalException($"Failed to invoke 'RequestDataOnSimObject(...)'.", ex));
         this.parent.requestDataManager.Register(customRequestId, typeof(T), eRequestId);

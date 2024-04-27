@@ -1,3 +1,7 @@
 ﻿using ESimConnectTest;
+using System.Windows.Threading;
 
-PrimitivesTest.Start();
+//PrimitivesTest.Run();
+TypesTest.Run();
+
+
