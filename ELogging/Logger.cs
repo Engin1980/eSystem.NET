@@ -288,7 +288,7 @@ namespace ELogging
 
       string msg = objectName == null
         ? $"{string.Join(",", tmp)}"
-        : $"{objectName} ::({string.Join(",", tmp)})";
+        : $"{objectName} :{{ {string.Join(", ", tmp)} }}";
 
       Log(level, msg);
     }
