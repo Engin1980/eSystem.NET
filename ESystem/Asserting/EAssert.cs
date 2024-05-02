@@ -11,7 +11,7 @@ namespace ESystem.Asserting
   {
     public class Argument
     {
-      public static void IsNotNull(object value, string? argumentName = null)
+      public static void IsNotNull(object? value, string? argumentName = null)
       {
         if (argumentName == null)
           EAssert.IsNotNull(value, "Argument is null.");

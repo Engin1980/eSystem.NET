@@ -1,6 +1,8 @@
 set ES=.
 set OUT=.\_Release\
 
+mkdir %OUT%
+
 copy %ES%\ESystem\bin\debug\net6.0\esystem.dll %OUT%
 copy %ES%\ESystem\bin\debug\net6.0\esystem.pdb %OUT%
 
