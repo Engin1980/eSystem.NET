@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ELogging
 {
-    public class Logger
+  public class Logger
   {
     private record NameInfo(string Name, bool AddId);
 
@@ -18,6 +18,7 @@ namespace ELogging
 
     private class ActionInfo
     {
+
       #region Private Fields
 
       private static int nextId = 1;
@@ -60,10 +61,12 @@ namespace ELogging
       }
 
       #endregion Public Methods
+
     }
 
     private class ObjectIdManager
     {
+
       #region Private Fields
 
       private readonly Dictionary<object, int> inner = new();
@@ -85,13 +88,18 @@ namespace ELogging
         }
       }
 
+      #endregion Public Indexers
+
+      #region Internal Methods
+
       internal void TryRemove(object sender)
       {
         if (inner.ContainsKey(sender))
           inner.Remove(sender);
       }
 
-      #endregion Public Indexers
+      #endregion Internal Methods
+
     }
 
     #endregion Private Classes
@@ -101,6 +109,9 @@ namespace ELogging
     private static readonly List<ActionInfo> actions = new();
     private static readonly ObjectIdManager senderIds = new();
     private static readonly Dictionary<object, NameInfo> senderNames = new();
+
+    private readonly object sender;
+
     #endregion Private Fields
 
     #region Public Properties
@@ -109,9 +120,7 @@ namespace ELogging
 
     #endregion Public Properties
 
-    #region Public Methods
-
-    private readonly object sender;
+    #region Private Constructors
 
     private Logger(object sender)
     {
@@ -119,22 +128,26 @@ namespace ELogging
       this.sender = sender;
     }
 
+    #endregion Private Constructors
+
+    #region Public Methods
+
     public static Logger Create(object sender)
     {
       Logger ret = new(sender);
       return ret;
     }
 
-    public static Logger CreateChild(object sender, string customSenderName, object parent, char nameSeparator = '.', bool addObjectId = false)
+    public static Logger Create(object sender, string customSenderName, bool addObjectId = false)
     {
-      RegisterChildSenderName(sender, customSenderName, parent, nameSeparator, addObjectId);
+      RegisterSenderName(sender, customSenderName, addObjectId);
       var ret = Create(sender);
       return ret;
     }
 
-    public static Logger Create(object sender, string customSenderName, bool addObjectId = false)
+    public static Logger CreateChild(object sender, string customSenderName, object parent, char nameSeparator = '.', bool addObjectId = false)
     {
-      RegisterSenderName(sender, customSenderName, addObjectId);
+      RegisterChildSenderName(sender, customSenderName, parent, nameSeparator, addObjectId);
       var ret = Create(sender);
       return ret;
     }
@@ -192,6 +205,13 @@ namespace ELogging
         .ForEach(q => actions.Remove(q));
     }
 
+    public static void UnregisterSender(object sender)
+    {
+      senderIds.TryRemove(sender);
+      if (senderNames.ContainsKey(sender))
+        senderNames.Remove(sender);
+    }
+
     public static void UnregisterSenderName(object sender)
     {
       if (senderNames.ContainsKey(sender))
@@ -212,6 +232,88 @@ namespace ELogging
     {
       Logger.ProcessMessage(level, this.sender, message);
     }
+
+    public void LogMethodEnd(
+      LogLevel level = LogLevel.TRACE,
+      [CallerMemberName] string methodName = "injectedMemberName",
+      [CallerFilePath] string sourceFilePath = "injectedFilePath",
+      [CallerLineNumber] int sourceLineNumber = 0)
+    {
+      var fileNameOnly = System.IO.Path.GetFileName(sourceFilePath);
+      Log(level, $"{fileNameOnly}({sourceLineNumber}):{methodName}(...) end");
+    }
+
+    public void LogMethodStart(
+      object?[]? parameters = null,
+      LogLevel level = LogLevel.TRACE,
+      [CallerMemberName] string methodName = "injectedMemberName",
+      [CallerFilePath] string sourceFilePath = "injectedFilePath",
+      [CallerLineNumber] int sourceLineNumber = 0
+      )
+    {
+      var paramString = string.Join(",", parameters ?? Array.Empty<object>());
+      var fileNameOnly = System.IO.Path.GetFileName(sourceFilePath);
+      Log(level, $"{fileNameOnly}({sourceLineNumber}):{methodName}({paramString})");
+    }
+
+    public void LogException(
+      Exception ex,
+      LogLevel level = LogLevel.ERROR,
+      [CallerMemberName] string methodName = "injectedMemberName",
+      [CallerFilePath] string sourceFilePath = "injectedFilePath",
+      [CallerLineNumber] int sourceLineNumber = 0)
+    {
+      Exception? tmp = ex;
+      List<string> lst = new();
+      while (tmp != null)
+      {
+        lst.Add(tmp.Message);
+        lst.Add(" /(");
+        lst.Add(tmp.StackTrace ?? "");
+        lst.Add(")/ ");
+        tmp = tmp.InnerException;
+      }
+
+      var fileNameOnly = System.IO.Path.GetFileName(sourceFilePath);
+      Log(level, $"{fileNameOnly}({sourceLineNumber}):{methodName}(...) throws exception {tmp}");
+    }
+
+    public void LogObject(string? objectName, object data, LogLevel level = LogLevel.DEBUG)
+    {
+      List<string> tmp = new List<string>()
+        .Union(ExpandFields(data))
+        .Union(ExpandProperties(data))
+        .OrderBy(q => q)
+        .ToList();
+
+      string msg = objectName == null
+        ? $"{string.Join(",", tmp)}"
+        : $"{objectName} :{{ {string.Join(", ", tmp)} }}";
+
+      Log(level, msg);
+    }
+
+    public void LogObject(object data, LogLevel level = LogLevel.DEBUG)
+    {
+      LogObject(null, data, level);
+    }
+
+    private static List<string> ExpandProperties(object obj)
+    {
+      var ret = obj.GetType().GetProperties()
+        .Select(q => $"{q.Name}={q.GetValue(obj)}")
+        .ToList();
+      return ret;
+    }
+
+    private static List<string> ExpandFields(object obj)
+    {
+      var ret = obj.GetType().GetFields()
+        .Select(q => $"{q.Name}={q.GetValue(obj)}")
+        .ToList();
+      return ret;
+    }
+
     #endregion Public Methods
 
     #region Private Methods
@@ -251,13 +353,7 @@ namespace ELogging
       return ret.ToString();
     }
 
-    public static void UnregisterSender(object sender)
-    {
-      senderIds.TryRemove(sender);
-      if (senderNames.ContainsKey(sender))
-        senderNames.Remove(sender);
-    }
-
     #endregion Private Methods
+
   }
 }
