@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESystem.WPF", "ESystem.WPF\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ELogging", "ELogging\ELogging.csproj", "{417EBEEB-127E-410E-BD4A-D3D0319F1FF9}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EXmlLib", "EXmlLib\EXmlLib.csproj", "{7FFB6FD3-715D-40BF-A24E-9A6FC7D3EDFD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,20 +29,15 @@ Global
 		{417EBEEB-127E-410E-BD4A-D3D0319F1FF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{417EBEEB-127E-410E-BD4A-D3D0319F1FF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{417EBEEB-127E-410E-BD4A-D3D0319F1FF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FFB6FD3-715D-40BF-A24E-9A6FC7D3EDFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FFB6FD3-715D-40BF-A24E-9A6FC7D3EDFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FFB6FD3-715D-40BF-A24E-9A6FC7D3EDFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FFB6FD3-715D-40BF-A24E-9A6FC7D3EDFD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D497D30A-EBD8-45B8-B417-30EEB45C1950}
-	EndGlobalSection
-	GlobalSection(AutomaticVersions) = postSolution
-		UpdateAssemblyVersion = True
-		UpdateAssemblyFileVersion = False
-		UpdateAssemblyInfoVersion = False
-		AssemblyVersionSettings = IncrementOnDemand.IncrementOnDemandWithResetOnIncrease.IncrementWithResetOnIncrease.None
-		UpdatePackageVersion = False
-		AssemblyInfoVersionType = SettingsVersion
-		InheritWinAppVersionFrom = None
 	EndGlobalSection
 EndGlobal
