@@ -11,7 +11,7 @@ namespace ESystem.Asserting
   {
     public class Argument
     {
-      public static void IsNotNull(object? value, string? argumentName = null)
+      public static void IsNotNull([NotNull] object? value, string? argumentName = null)
       {
         if (argumentName == null)
           EAssert.IsNotNull(value, "Argument is null.");
@@ -27,7 +27,7 @@ namespace ESystem.Asserting
           EAssert.IsTrue(value, $"Argument '{argumentName}' condition check to true failed.");
       }
 
-      public static void IsNonEmptyString(string value, string? argumentName = null)
+      public static void IsNonEmptyString([NotNull] string value, string? argumentName = null)
       {
         if (argumentName == null)
           EAssert.IsNonEmptyString(value, "Argument condition check to true failed.");
@@ -36,7 +36,7 @@ namespace ESystem.Asserting
       }
     }
 
-    public static void IsNonEmptyString(string value, string message = "String is empty or null.")
+    public static void IsNonEmptyString([NotNull] string value, string message = "String is empty or null.")
     {
       if (string.IsNullOrEmpty(value))
         throw new EAssertException(message);
