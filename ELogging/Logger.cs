@@ -339,6 +339,8 @@ namespace ELogging
     private static string ResolveSenderName(object sender)
     {
       NameInfo ni =
+        (sender is string) ? new NameInfo((string)sender, false) :
+        (sender is Type) ? new NameInfo(UseFullTypeNames ? ((Type)sender).FullName! : ((Type) sender).Name, false) :
         (senderNames.ContainsKey(sender)) ? senderNames[sender] :
         (senderNames.ContainsKey(sender.GetType())) ? senderNames[sender.GetType()] :
         new NameInfo(UseFullTypeNames
