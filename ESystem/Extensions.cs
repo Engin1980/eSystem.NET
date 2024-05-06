@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using ESystem.Asserting;
+using System.ComponentModel;
 using System.Text;
 
 namespace ESystem
@@ -51,6 +52,27 @@ namespace ESystem
           ret.Add(item);
       }
 
+      return ret;
+    }
+
+    private static Random? rnd;
+    public static T GetRandom<T>(this List<T> lst)
+    {
+      EAssert.Argument.IsNotNull(lst, nameof(lst));
+      EAssert.Argument.IsTrue(lst.Count > 0, nameof(lst));
+
+      if (rnd == null) rnd = new Random();
+      int index = rnd.Next(0, lst.Count);
+      T ret = lst[index];
+      return ret;
+    }
+
+    public static T? GetRandomOrDefault<T>(this List<T> lst)
+    {
+      EAssert.Argument.IsNotNull(lst, nameof(lst));
+      if (lst.Count == 0) return default;
+
+      T ret = GetRandom(lst);
       return ret;
     }
 
