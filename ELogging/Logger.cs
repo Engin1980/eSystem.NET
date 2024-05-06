@@ -275,7 +275,8 @@ namespace ELogging
       }
 
       var fileNameOnly = System.IO.Path.GetFileName(sourceFilePath);
-      Log(level, $"{fileNameOnly}({sourceLineNumber}):{methodName}(...) throws exception {tmp}");
+      string msg = string.Join("\n", lst);
+      Log(level, $"{fileNameOnly}({sourceLineNumber}):{methodName}(...) throws exception {msg}");
     }
 
     public void LogObject(string? objectName, object data, LogLevel level = LogLevel.DEBUG)
