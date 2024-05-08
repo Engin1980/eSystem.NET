@@ -1,5 +1,6 @@
 ﻿using ESystem.Asserting;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace ESystem
@@ -112,5 +113,8 @@ namespace ESystem
       string ret = string.Join(delimiter, tmp);
       return ret;
     }
+
+    public static int Clip(this int value, int minimumInclusive, int maximumInclusive) => Math.Max(Math.Min(value, maximumInclusive), minimumInclusive);
+    public static double Clip(this double value, double minimumInclusive, double maximumInclusive) => Math.Max(Math.Min(value, maximumInclusive), minimumInclusive);
   }
 }
