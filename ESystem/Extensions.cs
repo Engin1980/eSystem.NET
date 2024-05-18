@@ -116,5 +116,26 @@ namespace ESystem
 
     public static int Clip(this int value, int minimumInclusive, int maximumInclusive) => Math.Max(Math.Min(value, maximumInclusive), minimumInclusive);
     public static double Clip(this double value, double minimumInclusive, double maximumInclusive) => Math.Max(Math.Min(value, maximumInclusive), minimumInclusive);
+
+    public static TValue? TryGet<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key) where TKey : notnull
+    {
+      TValue? ret;
+      if (dictionary.TryGetValue(key, out ret!) == false)
+      {
+        ret = default;
+      }
+      return ret;
+    }
+
+    public static TValue GetOrAdd<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueProducer) where TKey : notnull
+    {
+      TValue ret;
+      if (dictionary.TryGetValue(key, out ret!) == false)
+      {
+        ret = valueProducer();
+        dictionary[key] = ret;
+      }
+      return ret;
+    }
   }
 }
