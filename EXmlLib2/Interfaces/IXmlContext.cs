@@ -15,6 +15,8 @@ namespace EXmlLib2.Interfaces
     string DefaultTrueString { get; }
     string DefaultFalseString { get; }
 
+    IAttributeSerializer<T> GetAttributeSerializer<T>(T? value);
+    IAttributeSerializer GetAttributeSerializer(object? value);
     IElementSerializer<T> GetElementSerializer<T>();
     IElementSerializer GetElementSerializer(object? value);
     void SerializeToElement(object? value, XElement elm, IElementSerializer serializer);

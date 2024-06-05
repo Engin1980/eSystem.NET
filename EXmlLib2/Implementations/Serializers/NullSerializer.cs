@@ -13,7 +13,7 @@ namespace EXmlLib2.Implementations.Serializers
   {
     public bool AcceptsValue(object? value) => value == null;
 
-    public void Serialize(object? value, XElement element, IXmlContext ctx) => Serialize(value, ctx);
+    public void Serialize(object? value, XElement element, IXmlContext ctx) => element.Value = Serialize(value, ctx);
 
     public string Serialize(object? value, IXmlContext ctx)
     {

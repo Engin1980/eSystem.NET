@@ -12,7 +12,6 @@ namespace EXmlLib2.Implementations.Serializers
 {
   public class NumberSerializer : IElementSerializer, IAttributeSerializer
   {
-
     public bool AcceptsValue(object? value)
     {
       if (value == null) return false;
