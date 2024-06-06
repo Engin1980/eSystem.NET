@@ -15,6 +15,6 @@ namespace EXmlLib2.Interfaces
 
   public interface IAttributeDeserializer<T>
   {
-    public T Deserialize(string value, Type targetType, IXmlContext ctx);
+    public T Deserialize(string value, IXmlContext ctx);
   }
 }

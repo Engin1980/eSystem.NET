@@ -26,7 +26,7 @@ namespace EXmlLib2.Types
 
     public object? Deserialize(XElement element, Type targetType, IXmlContext ctx)
     {
-      T ret = inner.Deserialize(element, ctx);
+      T? ret = inner.Deserialize(element, ctx);
       return ret;
     }
   }

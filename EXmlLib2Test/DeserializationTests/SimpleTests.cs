@@ -32,39 +32,37 @@ namespace EXmlLib2Test.DeserializationTests
       Assert.That(act, Is.EqualTo(exp));
     }
 
-    //[Test]
-    //public void StringToElement()
-    //{
-    //  string value = "Liška";
+    [Test]
+    public void ElementToString()
+    {
+      string s = "<Root>Liška</Root>";
 
-    //  XElement root = new("Root");
-    //  exml.Serialize(value, root);
 
-    //  string exp = "<Root>Liška</Root>";
-    //  string act = root.ToString();
-    //  Assert.That(act, Is.EqualTo(exp));
-    //}
+      XElement root = XElement.Parse(s);
+      string? act = exml.Deserialize<string>(root);
+      string exp = "Liška";
+      Assert.That(act, Is.EqualTo(exp));
+    }
 
-    //[Test]
-    //public void ObjectToElement()
-    //{
-    //  SimpleClass c = new()
-    //  {
-    //    Double = 5,
-    //    DoubleAttribute = 8.4,
-    //    Int = -44,
-    //    NullDouble = null,
-    //    String = "str",
-    //    StringIgnored = "strIgnored",
-    //    StringOptional = "strOptional"
-    //  };
+    [Test]
+    public void ObjectToElement()
+    {
+      string s = "<Root DoubleAttribute=\"8.4\">\r\n  <Int>-44</Int>\r\n  <Double>5</Double>\r\n  <NullDouble />\r\n  <String>str</String>\r\n  <StringOptional>strOptional</StringOptional>\r\n</Root>";
 
-    //  XElement root = new XElement("Root");
-    //  exml.Serialize(c, root);
+      SimpleClass exp = new()
+      {
+        Double = 5,
+        DoubleAttribute = 8.4,
+        Int = -44,
+        NullDouble = null,
+        String = "str",
+        StringIgnored = "strIgnored",
+        StringOptional = "strOptional"
+      };
+      XElement root = XElement.Parse(s);
 
-    //  string exp = "<Root DoubleAttribute=\"8.4\">\r\n  <Int>-44</Int>\r\n  <Double>5</Double>\r\n  <NullDouble />\r\n  <String>str</String>\r\n  <StringOptional>strOptional</StringOptional>\r\n</Root>";
-    //  string act = root.ToString();
-    //  Assert.That(act, Is.EqualTo(exp));
-    //}
+      SimpleClass? act = (SimpleClass?)exml.Deserialize(root, typeof(SimpleClass));
+      Assert.That(act, Is.EqualTo(exp));
+    }
   }
 }

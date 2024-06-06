@@ -38,6 +38,9 @@ namespace EXmlLib2
       {
         ret.ctx.AddDeserializer((IElementDeserializer)new NumberDeserializer());
         ret.ctx.AddDeserializer((IAttributeDeserializer)new NumberDeserializer());
+
+        ret.ctx.AddDeserializer((IElementDeserializer)new NullableNumberDeserializer());
+        ret.ctx.AddDeserializer((IAttributeDeserializer)new NullableNumberDeserializer());
       }
       return ret;
     }
@@ -76,7 +79,8 @@ namespace EXmlLib2
       {
         IElementDeserializer deserializer = ctx.GetElementDeserializer(expectedType);
         ret = ctx.DeserializeFromElement(element, expectedType, deserializer);
-      } catch(Exception ex)
+      }
+      catch (Exception ex)
       {
         var eex = new EXmlException($"Failed to deserialize {expectedType.Name} to {element}.", ex);
         logger.LogException(eex);

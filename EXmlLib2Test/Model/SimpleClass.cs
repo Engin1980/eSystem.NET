@@ -32,5 +32,17 @@ namespace EXmlLib2Test.Model
 
       exml.InsertSerializer(0, tes);
     }
+
+    public override bool Equals(object? obj)
+    {
+      return obj is SimpleClass @class &&
+             Int == @class.Int &&
+             Double == @class.Double &&
+             DoubleAttribute == @class.DoubleAttribute &&
+             NullDouble == @class.NullDouble &&
+             String == @class.String &&
+             StringOptional == @class.StringOptional &&
+             StringIgnored == @class.StringIgnored;
+    }
   }
 }
