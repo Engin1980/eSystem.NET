@@ -18,6 +18,7 @@ namespace EXmlLib2Test.DeserializationTests
     {
       exml = EXml.CreateDefault();
       SimpleClass.AdjustEXml(this.exml);
+      PropertyPlayClass.AdjustEXml(this.exml);
     }
 
     [Test]
@@ -45,26 +46,43 @@ namespace EXmlLib2Test.DeserializationTests
     }
 
     [Test]
-    public void ElementToObject()
+    public void ElementToSimpleClass()
     {
-      string s = "<Root DoubleAttribute=\"8.4\">\r\n  <YesNoNullable>(# null #)</YesNoNullable>\r\n  <YesNo>No</YesNo>\r\n  <CustomBoolName>False</CustomBoolName>\r\n  <Int>-44</Int>\r\n  <Double>5</Double>\r\n  <NullDouble>(# null #)</NullDouble>\r\n  <String>str</String>\r\n  <StringOptional>strOptional</StringOptional>\r\n</Root>";
+      string s = "<Root>\r\n  <YesNoNull>(# null #)</YesNoNull>\r\n  <YesNo>No</YesNo>\r\n  <Int>1</Int>\r\n  <Double>123</Double>\r\n  <DoubleNull>(# null #)</DoubleNull>\r\n  <DoubleNan>NaN</DoubleNan>\r\n  <TrueFalse>True</TrueFalse>\r\n  <TrueFalseNull>(# null #)</TrueFalseNull>\r\n</Root>";
 
       SimpleClass exp = new()
       {
-        YesNoNullable = null,
-        YesNo=SimpleClass.YesNoEnum.No,
-        Double = 5,
-        DoubleAttribute = 8.4,
-        Int = -44,
-        NullDouble = null,
-        String = "str",
-        StringIgnored = null,
-        StringOptional = "strOptional"
+        YesNoNull = null,
+        YesNo = SimpleClass.YesNoEnum.No,
+        Int = 1,
+        Double = 123,
+        DoubleNan = double.NaN,
+        DoubleNull = null,
+        TrueFalse = true,
+        TrueFalseNull = null
       };
       XElement root = XElement.Parse(s);
 
       SimpleClass? act = (SimpleClass?)exml.Deserialize(root, typeof(SimpleClass));
-      Assert.That(act, Is.EqualTo(exp));
+      Utils.CompareProperties(exp, act);
+    }
+
+    [Test]
+    public void ElementToPropertyPlayClass()
+    {
+      string s = "<Root StringAttribute=\"attrib\">\r\n  <CustomStringName>stringRenamed</CustomStringName>\r\n  <String>string</String>\r\n  <StringIgnored>nenene</StringIgnored>\r\n  <StringOptional>dudlajda</StringOptional>\r\n</Root>";
+
+      PropertyPlayClass exp = new()
+      {
+        StringAttribute = "attrib",
+        StringRenamed = "stringRenamed",
+        String = "string",
+        StringOptional = "dudlajda",
+      };
+      XElement root = XElement.Parse(s);
+
+      PropertyPlayClass? act = exml.Deserialize<PropertyPlayClass>(root);
+      Utils.CompareProperties(exp, act);
     }
   }
 }

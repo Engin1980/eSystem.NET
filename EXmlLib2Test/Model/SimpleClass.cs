@@ -19,27 +19,18 @@ namespace EXmlLib2Test.Model
       No
     }
 
-    public YesNoEnum? YesNoNullable { get; set; } = YesNoEnum.Yes;
+    public YesNoEnum? YesNoNull { get; set; } = YesNoEnum.Yes;
     public YesNoEnum YesNo { get; set; }
-    public bool RenamedBool { get; set; }
     public int Int { get; set; }
     public double Double { get; set; }
-    public double DoubleAttribute { get; set; }
-    public double? NullDouble { get; set; }
-    public string String { get; set; } = string.Empty;
-    public string? StringOptional { get; set; } = null;
-    public string? StringIgnored { get; set; } = null;
+    public double? DoubleNull { get; set; } = double.MaxValue;
+    public double? DoubleNan { get; set; } = double.NaN;
+    public bool TrueFalse { get; set; }
+    public bool? TrueFalseNull { get; set; } = false;
+
     public static void AdjustEXml(EXml exml)
     {
-      XmlTypeInfo<SimpleClass> xti = new();
-      xti.ForProperty(q => q.StringOptional, q =>
-      {
-        q.Representation = EXmlLib2.Types.XmlRepresentation.Element;
-        q.Obligation = EXmlLib2.Types.XmlObligation.Optional;
-      })
-        .ForProperty(q => q.StringIgnored, q => q.Obligation = EXmlLib2.Types.XmlObligation.Ignored)
-        .ForProperty(q => q.DoubleAttribute, q => q.Representation = EXmlLib2.Types.XmlRepresentation.Attribute)
-        .ForProperty(q => q.RenamedBool, q => q.XmlName = "CustomBoolName");
+      var xti = XmlTypeInfo<SimpleClass>.Create();
 
       TypeElementSerializer<SimpleClass> tes = new(xti);
       exml.InsertSerializer(0, tes);
@@ -51,16 +42,14 @@ namespace EXmlLib2Test.Model
     public override bool Equals(object? obj)
     {
       return obj is SimpleClass @class &&
-        YesNoNullable == @class.YesNoNullable &&
-        YesNo == @class.YesNo &&
-        RenamedBool == @class.RenamedBool &&
-        Int == @class.Int &&
-        Double == @class.Double &&
-        DoubleAttribute == @class.DoubleAttribute &&
-        NullDouble == @class.NullDouble &&
-        String == @class.String &&
-        StringOptional == @class.StringOptional &&
-        StringIgnored == @class.StringIgnored;
+             YesNoNull == @class.YesNoNull &&
+             YesNo == @class.YesNo &&
+             Int == @class.Int &&
+             Double == @class.Double &&
+             DoubleNull == @class.DoubleNull &&
+             DoubleNan == @class.DoubleNan &&
+             TrueFalse == @class.TrueFalse &&
+             TrueFalseNull == @class.TrueFalseNull;
     }
   }
 }

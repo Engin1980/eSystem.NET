@@ -15,6 +15,7 @@ namespace EXmlLib2Test.SerializationTests
     {
       exml = EXml.CreateDefault();
       SimpleClass.AdjustEXml(this.exml);
+      PropertyPlayClass.AdjustEXml(this.exml);
     }
 
     [Test]
@@ -57,25 +58,43 @@ namespace EXmlLib2Test.SerializationTests
     }
 
     [Test]
-    public void ObjectToElement()
+    public void SimpleClassToElement()
     {
       SimpleClass c = new()
       {
-        YesNoNullable = null,
+        Double = 123,
+        DoubleNan = double.NaN,
+        DoubleNull = null,
+        Int = 1,
+        TrueFalse = true,
+        TrueFalseNull = null,
         YesNo = SimpleClass.YesNoEnum.No,
-        Double = 5,
-        DoubleAttribute = 8.4,
-        Int = -44,
-        NullDouble = null,
-        String = "str",
-        StringIgnored = "strIgnored",
-        StringOptional = "strOptional"
+        YesNoNull = null
       };
 
       XElement root = new XElement("Root");
       exml.Serialize(c, root);
 
-      string exp = "<Root DoubleAttribute=\"8.4\">\r\n  <YesNoNullable>(# null #)</YesNoNullable>\r\n  <YesNo>No</YesNo>\r\n  <CustomBoolName>False</CustomBoolName>\r\n  <Int>-44</Int>\r\n  <Double>5</Double>\r\n  <NullDouble>(# null #)</NullDouble>\r\n  <String>str</String>\r\n  <StringOptional>strOptional</StringOptional>\r\n</Root>";
+      string exp = "<Root>\r\n  <YesNoNull>(# null #)</YesNoNull>\r\n  <YesNo>No</YesNo>\r\n  <Int>1</Int>\r\n  <Double>123</Double>\r\n  <DoubleNull>(# null #)</DoubleNull>\r\n  <DoubleNan>NaN</DoubleNan>\r\n  <TrueFalse>True</TrueFalse>\r\n  <TrueFalseNull>(# null #)</TrueFalseNull>\r\n</Root>";
+      string act = root.ToString();
+      Assert.That(act, Is.EqualTo(exp));
+    }
+
+    [Test]
+    public void PropertyPlayClassToElement()
+    {
+      PropertyPlayClass c = new()
+      {
+        String = "string",
+        StringAttribute = "stringAttribute",
+        StringOptional = "stringOptional",
+        StringRenamed = "stringRenamed"
+      };
+
+      XElement root = new XElement("Root");
+      exml.Serialize(c, root);
+
+      string exp = "<Root StringAttribute=\"stringAttribute\">\r\n  <CustomStringName>stringRenamed</CustomStringName>\r\n  <String>string</String>\r\n  <StringOptional>stringOptional</StringOptional>\r\n  <StringOptionalTwo>OptionalTwo</StringOptionalTwo>\r\n</Root>";
       string act = root.ToString();
       Assert.That(act, Is.EqualTo(exp));
     }
