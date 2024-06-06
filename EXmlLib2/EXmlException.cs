@@ -13,9 +13,15 @@ namespace EXmlLib2
     {
     }
 
+
+
     public EXmlException(object sender, string message, Exception? innerException = null) : base(message, innerException)
     {
       this.Sender = sender;
+    }
+
+    public EXmlException(string? message) : base(message)
+    {
     }
   }
 }

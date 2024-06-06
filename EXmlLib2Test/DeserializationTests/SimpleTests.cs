@@ -45,18 +45,19 @@ namespace EXmlLib2Test.DeserializationTests
     }
 
     [Test]
-    public void ObjectToElement()
+    public void ElementToObject()
     {
-      string s = "<Root DoubleAttribute=\"8.4\">\r\n  <Int>-44</Int>\r\n  <Double>5</Double>\r\n  <NullDouble />\r\n  <String>str</String>\r\n  <StringOptional>strOptional</StringOptional>\r\n</Root>";
+      string s = "<Root DoubleAttribute=\"8.4\">\r\n  <YesNo>No</YesNo>\r\n  <CustomBoolName>False</CustomBoolName>\r\n  <Int>-44</Int>\r\n  <Double>5</Double>\r\n  <NullDouble>(# null #)</NullDouble>\r\n  <String>str</String>\r\n  <StringOptional>strOptional</StringOptional>\r\n</Root>";
 
       SimpleClass exp = new()
       {
+        YesNo=SimpleClass.YesNoEnum.No,
         Double = 5,
         DoubleAttribute = 8.4,
         Int = -44,
         NullDouble = null,
         String = "str",
-        StringIgnored = "strIgnored",
+        StringIgnored = null,
         StringOptional = "strOptional"
       };
       XElement root = XElement.Parse(s);

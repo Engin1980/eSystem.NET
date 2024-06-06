@@ -9,10 +9,28 @@ namespace EXmlLib2
 {
   public class EXml
   {
+    #region Private Fields
+
     private readonly EXmlContext ctx = new();
     private readonly Logger logger = Logger.Create(typeof(EXml), "EXml");
 
+    #endregion Private Fields
+
+    #region Public Properties
+
     public string DefaultNullString { get => ctx.DefaultNullString; set => ctx.DefaultNullString = value; }
+
+    #endregion Public Properties
+
+    #region Private Constructors
+
+    private EXml()
+    {
+    }
+
+    #endregion Private Constructors
+
+    #region Public Methods
 
     public static EXml CreateDefault(bool addDefaultSerializers = true, bool addDefaultDeserializers = true)
     {
@@ -33,6 +51,9 @@ namespace EXmlLib2
 
         ret.ctx.AddSerializer((IElementSerializer<char>)new CharSerializer());
         ret.ctx.AddSerializer((IAttributeSerializer<char>)new CharSerializer());
+
+        ret.ctx.AddSerializer((IElementSerializer)new EnumSerializer());
+        ret.ctx.AddSerializer((IAttributeSerializer)new EnumSerializer());
       }
       if (addDefaultDeserializers)
       {
@@ -49,39 +70,30 @@ namespace EXmlLib2
         ret.ctx.AddDeserializer((IAttributeDeserializer<char?>)new NullableCharDeserializer());
 
         ret.ctx.AddDeserializer((IElementDeserializer<bool>)new BoolDeserializer(true));
-        ret.ctx.AddDeserializer((IAttributeDeserializer<bool?>)new BoolDeserializer(true));
+        ret.ctx.AddDeserializer((IAttributeDeserializer<bool>)new BoolDeserializer(true));
 
-        ret.ctx.AddDeserializer((IElementDeserializer)new NullableBoolDeserializer(true));
-        ret.ctx.AddDeserializer((IAttributeDeserializer)new NullableBoolDeserializer(true));
+        ret.ctx.AddDeserializer((IElementDeserializer<bool?>)new NullableBoolDeserializer(true));
+        ret.ctx.AddDeserializer((IAttributeDeserializer<bool?>)new NullableBoolDeserializer(true));
 
         ret.ctx.AddDeserializer((IElementDeserializer<string?>)new StringDeserializer());
         ret.ctx.AddDeserializer((IAttributeDeserializer<string?>)new StringDeserializer());
+
+        ret.ctx.AddDeserializer((IElementDeserializer)new EnumDeserializer());
+        ret.ctx.AddDeserializer((IAttributeDeserializer)new EnumDeserializer());
       }
       return ret;
     }
+
     public static EXml CreateEmpty() => new();
 
-    private EXml()
+    public void AddSerializer(IElementSerializer serializer)
     {
+      this.ctx.AddSerializer(serializer);
     }
 
-    public void Serialize<T>(T? value, XElement element) => Serialize((object?)value, element);
-
-    public void Serialize(object? value, XElement element)
+    public void AddSerializer(IAttributeSerializer serializer)
     {
-      logger.Log(LogLevel.INFO, $"Serializing {value} to {element}");
-      try
-      {
-        IElementSerializer serializer = ctx.GetElementSerializer(value);
-        ctx.SerializeToElement(value, element, serializer);
-      }
-      catch (Exception ex)
-      {
-        var eex = new EXmlException($"Failed to serialize {value} to {element}.", ex);
-        logger.LogException(eex);
-        throw eex;
-      }
-      logger.Log(LogLevel.INFO, $"Serialized {value} to {element}.");
+      this.ctx.AddSerializer(serializer);
     }
 
     public T? Deserialize<T>(XElement element) => (T)Deserialize(element, typeof(T))!;
@@ -104,9 +116,15 @@ namespace EXmlLib2
       return ret;
     }
 
-    public void AddSerializer(IElementSerializer serializer)
+    public void InsertDeserializer<T>(int index, IElementDeserializer<T> deserializer)
     {
-      this.ctx.AddSerializer(serializer);
+      TypedElementDeserializerWrapper<T> w = new(deserializer);
+      this.InsertDeserializer(index, w);
+    }
+
+    public void InsertDeserializer(int index, IElementDeserializer deserializer)
+    {
+      this.ctx.InsertDeserializer(index, deserializer);
     }
 
     public void InsertSerializer<T>(int index, IElementSerializer<T> serializer)
@@ -120,14 +138,30 @@ namespace EXmlLib2
       this.ctx.InsertSerializer(index, serializer);
     }
 
-    public void AddSerializer(IAttributeSerializer serializer)
-    {
-      this.ctx.AddSerializer(serializer);
-    }
-
     public void InsertSerializer(int index, IAttributeSerializer serializer)
     {
       this.ctx.InsertSerializer(index, serializer);
     }
+
+    public void Serialize<T>(T? value, XElement element) => Serialize((object?)value, element);
+
+    public void Serialize(object? value, XElement element)
+    {
+      logger.Log(LogLevel.INFO, $"Serializing {value} to {element}");
+      try
+      {
+        IElementSerializer serializer = ctx.GetElementSerializer(value);
+        ctx.SerializeToElement(value, element, serializer);
+      }
+      catch (Exception ex)
+      {
+        var eex = new EXmlException($"Failed to serialize {value} to {element}.", ex);
+        logger.LogException(eex);
+        throw eex;
+      }
+      logger.Log(LogLevel.INFO, $"Serialized {value} to {element}.");
+    }
+
+    #endregion Public Methods
   }
 }

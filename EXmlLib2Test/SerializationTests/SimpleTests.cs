@@ -61,6 +61,7 @@ namespace EXmlLib2Test.SerializationTests
     {
       SimpleClass c = new()
       {
+        YesNo=SimpleClass.YesNoEnum.No,
         Double = 5,
         DoubleAttribute = 8.4,
         Int = -44,
@@ -73,7 +74,7 @@ namespace EXmlLib2Test.SerializationTests
       XElement root = new XElement("Root");
       exml.Serialize(c, root);
 
-      string exp = "<Root DoubleAttribute=\"8.4\">\r\n  <CustomBoolName>False</CustomBoolName>\r\n  <Int>-44</Int>\r\n  <Double>5</Double>\r\n  <NullDouble>(# null #)</NullDouble>\r\n  <String>str</String>\r\n  <StringOptional>strOptional</StringOptional>\r\n</Root>";
+      string exp = "<Root DoubleAttribute=\"8.4\">\r\n  <YesNo>No</YesNo>\r\n  <CustomBoolName>False</CustomBoolName>\r\n  <Int>-44</Int>\r\n  <Double>5</Double>\r\n  <NullDouble>(# null #)</NullDouble>\r\n  <String>str</String>\r\n  <StringOptional>strOptional</StringOptional>\r\n</Root>";
       string act = root.ToString();
       Assert.That(act, Is.EqualTo(exp));
     }

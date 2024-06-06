@@ -259,5 +259,53 @@ namespace EXmlLib2.Types
       logger.Log(LogLevel.INFO, $"Deserialized {targetType} from {element} using {deserializer} to {ret}.");
       return ret;
     }
+
+    public IAttributeDeserializer GetAttributeDeserializer(Type targetType)
+    {
+      IAttributeDeserializer ret;
+      try
+      {
+        ret = attributeDeserializers.First(q => q.AcceptsType(targetType));
+      }
+      catch (Exception ex)
+      {
+        EXmlException eex = new($"Failed to find attribute deserializer for type {targetType}.", ex);
+        logger.LogException(eex);
+        throw eex;
+      }
+      return ret;
+    }
+
+    public IAttributeDeserializer<T> GetAttributeDeserializer<T>()
+    {
+      IAttributeDeserializer<T> ret;
+      try
+      {
+        ret = (IAttributeDeserializer<T>)attributeDeserializers.First(q => q is IAttributeDeserializer<T>);
+      }
+      catch (Exception ex)
+      {
+        EXmlException eex = new($"Failed to find attribute deserializer for type {typeof(T).Name}.", ex);
+        logger.LogException(eex);
+        throw eex;
+      }
+      return ret;
+    }
+
+    public IElementDeserializer<T> GetElementDeserializer<T>()
+    {
+      IElementDeserializer<T> ret;
+      try
+      {
+        ret = (IElementDeserializer<T>)elementDeserializers.First(q => q is IElementDeserializer<T>);
+      }
+      catch (Exception ex)
+      {
+        EXmlException eex = new($"Failed to find element deserializer for type {typeof(T).Name}.", ex);
+        logger.LogException(eex);
+        throw eex;
+      }
+      return ret;
+    }
   }
 }

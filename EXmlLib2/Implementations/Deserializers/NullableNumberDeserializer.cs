@@ -15,12 +15,12 @@ namespace EXmlLib2.Implementations.Deserializers
 
     private static readonly TypeAndDeserializer[] parsers = new TypeAndDeserializer[]
     {
-      new(typeof(byte?), (s, c) => byte.Parse(s)),
-      new(typeof(short?), (s, c) => short.Parse(s)),
-      new(typeof(int?), (s, c) => int.Parse(s)),
-      new(typeof(long?), (s, c) => long.Parse(s)),
-      new(typeof(float?), (s, c) => float.Parse(s)),
-      new(typeof(double?), (s, c) => int.Parse(s))
+      new(typeof(byte?), (s, c) => byte.Parse(s,c)),
+      new(typeof(short?), (s, c) => short.Parse(s,c)),
+      new(typeof(int?), (s, c) => int.Parse(s, c)),
+      new(typeof(long?), (s, c) => long.Parse(s,c)),
+      new(typeof(float?), (s, c) => float.Parse(s,c)),
+      new(typeof(double?), (s, c) => int.Parse(s,c))
     };
 
     private static object? Parse(string s, Type type, IXmlContext ctx)

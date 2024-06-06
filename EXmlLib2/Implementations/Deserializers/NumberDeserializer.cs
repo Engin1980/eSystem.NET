@@ -14,20 +14,20 @@ namespace EXmlLib2.Implementations.Deserializers
   {
     private record TypeAndDeserializer(Type Type, Func<string, CultureInfo, object> parser);
 
-    private static TypeAndDeserializer[] parsers = new TypeAndDeserializer[]
+    private readonly static TypeAndDeserializer[] parsers = new TypeAndDeserializer[]
     {
-      new(typeof(byte), (s, c) => byte.Parse(s)),
-      new(typeof(short), (s, c) => short.Parse(s)),
-      new(typeof(int), (s, c) => int.Parse(s)),
-      new(typeof(long), (s, c) => long.Parse(s)),
-      new(typeof(float), (s, c) => float.Parse(s)),
-      new(typeof(double), (s, c) => int.Parse(s))
+      new(typeof(byte), (s, c) => byte.Parse(s,c)),
+      new(typeof(short), (s, c) => short.Parse(s,c)),
+      new(typeof(int), (s, c) => int.Parse(s,c)),
+      new(typeof(long), (s, c) => long.Parse(s,c)),
+      new(typeof(float), (s, c) => float.Parse(s,c)),
+      new(typeof(double), (s, c) => double.Parse(s,c))
     };
 
     private static object Parse(string s, Type type, IXmlContext ctx)
     {
       object ret;
-      CultureInfo cultureInfo = CultureInfo.InvariantCulture;
+      CultureInfo cultureInfo = ctx.DefaultCultureInfo;
       TypeAndDeserializer tmp = parsers.First(q => q.Type == type);
       ret = tmp.parser.Invoke(s, cultureInfo);
       return ret;

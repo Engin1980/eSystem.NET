@@ -4,8 +4,8 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>1.2.3.2</AssemblyVersion>
-    <FileVersion>1.2.3.2</FileVersion>
+    <AssemblyVersion>1.2.3.4</AssemblyVersion>
+    <FileVersion>1.2.3.4</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

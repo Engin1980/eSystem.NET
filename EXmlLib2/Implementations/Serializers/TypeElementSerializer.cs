@@ -17,26 +17,19 @@ namespace EXmlLib2.Implementations.Serializers
   public class TypeElementSerializer<T> : IElementSerializer<T> where T : notnull
   {
     private readonly Logger logger = Logger.Create(typeof(T));
-    private Dictionary<PropertyInfo, XmlPropertyInfo> PropertyInfos { get; } = new();
-    private static XmlPropertyInfo DefaultXmlPropertyInfo { get; } = new();
+    public XmlTypeInfo<T> Type { get; private set; }
 
-    public TypeElementSerializer<T> ForProperty<V>(Expression<Func<T, V>> expression, Action<XmlPropertyInfo> action)
+    public TypeElementSerializer()
     {
-      PropertyInfo propertyInfo = TypeElementSerializer<T>.ExtractPropertyInfoFromExpression(expression);
-      XmlPropertyInfo xpi = PropertyInfos.GetOrAdd(propertyInfo, () => new XmlPropertyInfo());
-      action(xpi);
-      return this;
+      this.Type = new();
     }
 
-    private static PropertyInfo ExtractPropertyInfoFromExpression<V>(Expression<Func<T, V>> expression)
+    public TypeElementSerializer(XmlTypeInfo<T> xmlTypeInfo)
     {
-      if (expression.Body is MemberExpression memberExpression && memberExpression.Member is PropertyInfo propertyInfo)
-      {
-        return propertyInfo;
-      }
-      else
-        throw new ArgumentException("The provided expression is not a valid property expression.");
+      EAssert.Argument.IsNotNull(xmlTypeInfo, nameof(xmlTypeInfo));
+      this.Type = xmlTypeInfo;
     }
+
 
     public void Serialize(T value, XElement element, IXmlContext ctx)
     {
@@ -64,7 +57,7 @@ namespace EXmlLib2.Implementations.Serializers
 
     private void SerializeProperty(PropertyInfo property, T value, XElement element, IXmlContext ctx)
     {
-      XmlPropertyInfo xpi = PropertyInfos.TryGet(property) ?? DefaultXmlPropertyInfo;
+      XmlPropertyInfo xpi = Type.PropertyInfos.TryGet(property) ?? XmlTypeInfo<T>.DefaultXmlPropertyInfo;
       if (xpi.Obligation == XmlObligation.Ignored)
         return;
       object? propertyValue = GetPropertyValue(property, value);

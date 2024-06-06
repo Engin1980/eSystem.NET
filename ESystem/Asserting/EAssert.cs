@@ -59,6 +59,12 @@ namespace ESystem.Asserting
       if (value != false)
         throw new EAssertException(message);
     }
+
+    public static void IsNull(object? value, string message = "Value is not null.")
+    {
+      if (value != null)
+        throw new EAssertException(message);
+    }
   }
 
 }
