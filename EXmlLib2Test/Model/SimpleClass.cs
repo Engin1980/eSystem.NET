@@ -19,6 +19,7 @@ namespace EXmlLib2Test.Model
       No
     }
 
+    public YesNoEnum? YesNoNullable { get; set; } = YesNoEnum.Yes;
     public YesNoEnum YesNo { get; set; }
     public bool RenamedBool { get; set; }
     public int Int { get; set; }
@@ -50,6 +51,7 @@ namespace EXmlLib2Test.Model
     public override bool Equals(object? obj)
     {
       return obj is SimpleClass @class &&
+        YesNoNullable == @class.YesNoNullable &&
         YesNo == @class.YesNo &&
         RenamedBool == @class.RenamedBool &&
         Int == @class.Int &&
