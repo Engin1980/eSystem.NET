@@ -13,11 +13,11 @@ namespace EXmlLib2.Implementations.Deserializers
     public string? Deserialize(XElement element, IXmlContext ctx)
     {
       string s = element.Value;
-      string? ret = Deserialize(s, typeof(string), ctx);
+      string? ret = Deserialize(s, ctx);
       return ret;
     }
 
-    public string? Deserialize(string value, Type targetType, IXmlContext ctx)
+    public string? Deserialize(string value, IXmlContext ctx)
     {
       string? ret;
       if (value == ctx.DefaultNullString)
@@ -26,5 +26,6 @@ namespace EXmlLib2.Implementations.Deserializers
         ret = value;
       return ret;
     }
+
   }
 }

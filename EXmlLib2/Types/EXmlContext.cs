@@ -52,6 +52,8 @@ namespace EXmlLib2.Types
 
     public void AddDeserializer(IElementDeserializer deserializer) => this.InsertDeserializer(0, deserializer);
 
+    public void AddDeserializer<T>(IElementDeserializer<T> deserializer) => this.InsertDeserializer(0, deserializer);
+
     public void InsertSerializer(int index, IElementSerializer serializer)
     {
       try
@@ -64,6 +66,12 @@ namespace EXmlLib2.Types
         logger.LogException(eex);
         throw eex;
       }
+    }
+
+    public void InsertDeserializer<T>(int index, IElementDeserializer<T> deserializer)
+    {
+      var w = new TypedElementDeserializerWrapper<T>(deserializer);
+      this.elementDeserializers.Insert(index, w);
     }
 
     public void InsertDeserializer(int index, IElementDeserializer deserializer)
@@ -83,6 +91,8 @@ namespace EXmlLib2.Types
     public void AddSerializer(IAttributeSerializer serializer) => this.InsertSerializer(0, serializer);
 
     public void AddDeserializer(IAttributeDeserializer deserializer) => this.InsertDeserializer(0, deserializer);
+
+    public void AddDeserializer<T>(IAttributeDeserializer<T> deserializer) => this.InsertDeserializer(0, deserializer);
 
     public void InsertSerializer(int index, IAttributeSerializer serializer)
     {
@@ -110,6 +120,12 @@ namespace EXmlLib2.Types
         logger.LogException(eex);
         throw eex;
       }
+    }
+
+    public void InsertDeserializer<T>(int index, IAttributeDeserializer<T> deserializer)
+    {
+      TypedAttributeDeserializerWrapper<T> w = new(deserializer);
+      InsertDeserializer(index, w);
     }
 
     public IElementSerializer<T> GetElementSerializer<T>()

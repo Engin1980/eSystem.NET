@@ -11,6 +11,7 @@ namespace EXmlLib2Test.Model
 {
   internal class SimpleClass
   {
+    public bool RenamedBool { get; set; }
     public int Int { get; set; }
     public double Double { get; set; }
     public double DoubleAttribute { get; set; }
@@ -28,14 +29,15 @@ namespace EXmlLib2Test.Model
             q.Obligation = EXmlLib2.Types.XmlObligation.Optional;
           })
         .ForProperty(q => q.StringIgnored, q => q.Obligation = EXmlLib2.Types.XmlObligation.Ignored)
-        .ForProperty(q => q.DoubleAttribute, q => q.Representation = EXmlLib2.Types.XmlRepresentation.Attribute);
-
+        .ForProperty(q => q.DoubleAttribute, q => q.Representation = EXmlLib2.Types.XmlRepresentation.Attribute)
+        .ForProperty(q => q.RenamedBool, q => q.XmlName = "CustomBoolName");
       exml.InsertSerializer(0, tes);
     }
 
     public override bool Equals(object? obj)
     {
       return obj is SimpleClass @class &&
+             RenamedBool == @class.RenamedBool &&
              Int == @class.Int &&
              Double == @class.Double &&
              DoubleAttribute == @class.DoubleAttribute &&

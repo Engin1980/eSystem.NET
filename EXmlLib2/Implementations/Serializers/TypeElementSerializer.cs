@@ -68,23 +68,24 @@ namespace EXmlLib2.Implementations.Serializers
       if (xpi.Obligation == XmlObligation.Ignored)
         return;
       object? propertyValue = GetPropertyValue(property, value);
+      string xmlName = xpi.XmlName ?? property.Name;
       if (xpi.Representation == null || xpi.Representation == XmlRepresentation.Element)
-        SerializePropertyAsElement(property, propertyValue, element, ctx);
+        SerializePropertyAsElement(xmlName, propertyValue, element, ctx);
       else
-        SerializePropertyAsAttribute(property, propertyValue, element, ctx);
+        SerializePropertyAsAttribute(xmlName, propertyValue, element, ctx);
     }
 
-    private void SerializePropertyAsAttribute(PropertyInfo property, object? value, XElement element, IXmlContext ctx)
+    private void SerializePropertyAsAttribute(string xmlName, object? value, XElement element, IXmlContext ctx)
     {
       IAttributeSerializer serializer = ctx.GetAttributeSerializer(value);
       string s = serializer.Serialize(value, ctx);
-      element.SetAttributeValue(XName.Get(property.Name), s);
+      element.SetAttributeValue(XName.Get(xmlName), s);
     }
 
-    private void SerializePropertyAsElement(PropertyInfo property, object? value, XElement element, IXmlContext ctx)
+    private void SerializePropertyAsElement(string xmlName, object? value, XElement element, IXmlContext ctx)
     {
       IElementSerializer serializer = ctx.GetElementSerializer(value);
-      XElement propertyElement = new(XName.Get(property.Name));
+      XElement propertyElement = new(XName.Get(xmlName));
       serializer.Serialize(value, propertyElement, ctx);
       element.Add(propertyElement);
     }

@@ -41,6 +41,21 @@ namespace EXmlLib2
 
         ret.ctx.AddDeserializer((IElementDeserializer)new NullableNumberDeserializer());
         ret.ctx.AddDeserializer((IAttributeDeserializer)new NullableNumberDeserializer());
+
+        ret.ctx.AddDeserializer((IElementDeserializer<char>)new CharDeserializer());
+        ret.ctx.AddDeserializer((IAttributeDeserializer<char>)new CharDeserializer());
+
+        ret.ctx.AddDeserializer((IElementDeserializer<char?>)new NullableCharDeserializer());
+        ret.ctx.AddDeserializer((IAttributeDeserializer<char?>)new NullableCharDeserializer());
+
+        ret.ctx.AddDeserializer((IElementDeserializer<bool>)new BoolDeserializer(true));
+        ret.ctx.AddDeserializer((IAttributeDeserializer<bool?>)new BoolDeserializer(true));
+
+        ret.ctx.AddDeserializer((IElementDeserializer)new NullableBoolDeserializer(true));
+        ret.ctx.AddDeserializer((IAttributeDeserializer)new NullableBoolDeserializer(true));
+
+        ret.ctx.AddDeserializer((IElementDeserializer<string?>)new StringDeserializer());
+        ret.ctx.AddDeserializer((IAttributeDeserializer<string?>)new StringDeserializer());
       }
       return ret;
     }
