@@ -1,4 +1,5 @@
 using EXmlLib2;
+using EXmlLib2.Implementations.Serializers;
 using EXmlLib2Test.Model;
 using System.Runtime.InteropServices;
 using System.Xml;
@@ -78,6 +79,15 @@ namespace EXmlLib2Test.SerializationTests
       string exp = "<Root>\r\n  <YesNoNull>(# null #)</YesNoNull>\r\n  <YesNo>No</YesNo>\r\n  <Int>1</Int>\r\n  <Double>123</Double>\r\n  <DoubleNull>(# null #)</DoubleNull>\r\n  <DoubleNan>NaN</DoubleNan>\r\n  <TrueFalse>True</TrueFalse>\r\n  <TrueFalseNull>(# null #)</TrueFalseNull>\r\n</Root>";
       string act = root.ToString();
       Assert.That(act, Is.EqualTo(exp));
+    }
+
+    [Test]
+    public void InheritedPropertyTest()
+    {
+      exml.AddSerializer(new TypeElementSerializer<InheritedPropertyTest>());
+
+      XElement root = new XElement("Root");
+      exml.Serialize(r
     }
 
     [Test]

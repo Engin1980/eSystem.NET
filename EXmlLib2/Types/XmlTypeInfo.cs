@@ -13,7 +13,7 @@ namespace EXmlLib2.Types
 {
   public class XmlTypeInfo<T>
   {
-    public static XmlTypeInfo<T> Create() => new XmlTypeInfo<T>();
+    public static XmlTypeInfo<T> Create() => new();
 
     internal Dictionary<PropertyInfo, XmlPropertyInfo> PropertyInfos { get; } = new();
     internal static XmlPropertyInfo DefaultXmlPropertyInfo { get; } = new();
