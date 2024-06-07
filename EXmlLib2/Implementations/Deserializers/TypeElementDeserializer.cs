@@ -151,7 +151,8 @@ namespace EXmlLib2.Implementations.Deserializers
       try
       {
         ret = Activator.CreateInstance<T>();
-      } catch (Exception ex)
+      }
+      catch (Exception ex)
       {
         var eex = new EXmlException("Failed to create an instance.", ex);
         logger.LogException(eex);
@@ -217,6 +218,12 @@ namespace EXmlLib2.Implementations.Deserializers
 
     private object? DeserializePropertyFromElement(XElement element, Type targetType, IXmlContext ctx)
     {
+      if (element.Attributes().FirstOrDefault(q => q.Name.Equals(XName.Get(ctx.TypeNameAttribute))) is XAttribute typeAttribute)
+      {
+        string typeName = typeAttribute.Value;
+        targetType = global::System.Type.GetType(typeName)
+          ?? throw new EXmlException($"Custom type is defined as {typeName}, but cannot be loaded.");
+      }
       IElementDeserializer deserializer = ctx.GetElementDeserializer(targetType);
       object? ret = deserializer.Deserialize(element, targetType, ctx);
       return ret;

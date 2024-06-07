@@ -85,9 +85,23 @@ namespace EXmlLib2Test.SerializationTests
     public void InheritedPropertyTest()
     {
       exml.AddSerializer(new TypeElementSerializer<InheritedPropertyTest>());
+      exml.AddSerializer(new TypeElementSerializer<PropertyParent>());
+      exml.AddSerializer(new TypeElementSerializer<PropertyChild>());
+
+      var obj = new InheritedPropertyTest()
+      {
+        ParentParent = new PropertyParent(),
+        ParentChild = new PropertyChild(),
+        PropertyParentNull = null
+      };
 
       XElement root = new XElement("Root");
-      exml.Serialize(r
+      exml.Serialize(obj, root);
+
+      string exp = "<Root>\r\n  <ParentParent>\r\n    <Int>22</Int>\r\n  </ParentParent>\r\n  <ParentChild __type=\"EXmlLib2Test.Model.PropertyChild, EXmlLib2Test\">\r\n    <OtherInt>33</OtherInt>\r\n    <Int>22</Int>\r\n  </ParentChild>\r\n  <PropertyParentNull>(# null #)</PropertyParentNull>\r\n</Root>";
+      string act = root.ToString();
+
+      Assert.That(act, Is.EqualTo(exp));
     }
 
     [Test]

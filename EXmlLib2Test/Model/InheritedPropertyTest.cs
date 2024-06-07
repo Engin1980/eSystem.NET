@@ -8,8 +8,8 @@ namespace EXmlLib2Test.Model
 {
   internal class InheritedPropertyTest
   {
-    public PropertyParent ParentA { get; set; } = null;
-    public PropertyParent ParentB { get; set; } = null;
+    public PropertyParent ParentParent { get; set; } = null;
+    public PropertyParent ParentChild { get; set; } = null;
     public PropertyParent PropertyParentNull { get; set; } = null;
   }
 

@@ -11,6 +11,12 @@ namespace EXmlLib2Test
   {
     internal static void CompareProperties<T>(T exp, T act)
     {
+      if ((exp == null && act != null) || (exp != null && act == null))
+        throw new AssertionException($"Expected value is {exp} but actual value is {act}");
+      if (exp != null && act != null && exp.GetType() != act.GetType())
+        throw new AssertionException($"Expected type is {exp.GetType()} but actual type is {act.GetType()}");
+      if (exp == null && act == null) return;
+
       var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance).ToList();
 
       properties.ForEach(prop =>

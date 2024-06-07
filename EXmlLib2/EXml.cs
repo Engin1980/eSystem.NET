@@ -89,9 +89,10 @@ namespace EXmlLib2
 
     public static EXml CreateEmpty() => new();
 
-    public void AddSerializer(IElementSerializer serializer)
+    public void AddSerializer<T>(IElementSerializer<T> serializer)
     {
-      this.ctx.AddSerializer(serializer);
+      var w = new TypedElementSerializerWrapper<T>(serializer);
+      this.ctx.AddSerializer(w);
     }
 
     public void AddSerializer(IAttributeSerializer serializer)
@@ -163,6 +164,16 @@ namespace EXmlLib2
         throw eex;
       }
       logger.Log(LogLevel.INFO, $"Serialized {value} to {element}.");
+    }
+
+    public void AddSerializer<T>(TypeElementSerializer<T> serializer) where T : notnull
+    {
+      this.ctx.AddSerializer(serializer);
+    }
+
+    public void AddDeserializer<T>(TypeElementDeserializer<T> typeElementDeserializer)
+    {
+      this.ctx.AddDeserializer(typeElementDeserializer);
     }
 
     #endregion Public Methods

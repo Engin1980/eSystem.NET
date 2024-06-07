@@ -63,23 +63,38 @@ namespace EXmlLib2.Implementations.Serializers
       object? propertyValue = GetPropertyValue(property, value);
       string xmlName = xpi.XmlName ?? property.Name;
       if (xpi.Representation == null || xpi.Representation == XmlRepresentation.Element)
-        SerializePropertyAsElement(xmlName, propertyValue, element, ctx);
+        SerializePropertyAsElement(xmlName, propertyValue, property.PropertyType, element, ctx);
       else
-        SerializePropertyAsAttribute(xmlName, propertyValue, element, ctx);
+        SerializePropertyAsAttribute(xmlName, propertyValue, property.PropertyType, element, ctx);
     }
 
-    private void SerializePropertyAsAttribute(string xmlName, object? value, XElement element, IXmlContext ctx)
+    private void SerializePropertyAsAttribute(string xmlName, object? value, Type propertyExpectedType, XElement element, IXmlContext ctx)
     {
       IAttributeSerializer serializer = ctx.GetAttributeSerializer(value);
       string s = serializer.Serialize(value, ctx);
       element.SetAttributeValue(XName.Get(xmlName), s);
+
+      if (value != null && value.GetType() != propertyExpectedType)
+        throw new EXmlException(
+          $"Unable to serialize inherited type into xml attribute. " +
+          $"expected type {propertyExpectedType}, actual type {value.GetType()}.");
     }
 
-    private void SerializePropertyAsElement(string xmlName, object? value, XElement element, IXmlContext ctx)
+    private void SerializePropertyAsElement(string xmlName, object? value, Type propertyExpectedType, XElement element, IXmlContext ctx)
     {
       IElementSerializer serializer = ctx.GetElementSerializer(value);
       XElement propertyElement = new(XName.Get(xmlName));
       serializer.Serialize(value, propertyElement, ctx);
+
+      if (value != null && value.GetType() != propertyExpectedType && value.GetType() != Nullable.GetUnderlyingType(propertyExpectedType))
+      {
+        string typeName = value.GetType().FullName!;
+        if (typeName.StartsWith("System.") == false)  // if not mscorlib type, assembly name is required
+          typeName += ", " + value.GetType().Assembly.GetName().Name;
+        propertyElement.SetAttributeValue(XName.Get(ctx.TypeNameAttribute), typeName);
+      }
+
+
       element.Add(propertyElement);
     }
 
