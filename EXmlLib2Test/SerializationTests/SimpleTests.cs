@@ -1,5 +1,7 @@
 using EXmlLib2;
+using EXmlLib2.Implementations.Deserializers;
 using EXmlLib2.Implementations.Serializers;
+using EXmlLib2.Types;
 using EXmlLib2Test.Model;
 using System.Runtime.InteropServices;
 using System.Xml;
@@ -82,7 +84,7 @@ namespace EXmlLib2Test.SerializationTests
     }
 
     [Test]
-    public void InheritedPropertyTest()
+    public void InheritedPropertyAsAttributeTest()
     {
       exml.AddSerializer(new TypeElementSerializer<InheritedPropertyTest>());
       exml.AddSerializer(new TypeElementSerializer<PropertyParent>());
@@ -99,6 +101,37 @@ namespace EXmlLib2Test.SerializationTests
       exml.Serialize(obj, root);
 
       string exp = "<Root>\r\n  <ParentParent>\r\n    <Int>22</Int>\r\n  </ParentParent>\r\n  <ParentChild __type=\"EXmlLib2Test.Model.PropertyChild, EXmlLib2Test\">\r\n    <OtherInt>33</OtherInt>\r\n    <Int>22</Int>\r\n  </ParentChild>\r\n  <PropertyParentNull>(# null #)</PropertyParentNull>\r\n</Root>";
+      string act = root.ToString();
+
+      Assert.That(act, Is.EqualTo(exp));
+    }
+
+    [Test]
+    public void InheritedPropertyAsDifferentNameElementTest()
+    {
+      EXml exml = EXml.CreateDefault();
+
+      XmlTypeInfo<InheritedPropertyTest> xti = new XmlTypeInfo<InheritedPropertyTest>()
+        .ForProperty(q => q.ParentChild, q =>
+        {
+          q.XmlNameByType[typeof(PropertyParent)] = nameof(PropertyParent);
+          q.XmlNameByType[typeof(PropertyChild)] = nameof(PropertyChild);
+        });
+      exml.AddSerializer(new TypeElementSerializer<InheritedPropertyTest>(xti));
+      exml.AddSerializer(new TypeElementSerializer<PropertyParent>());
+      exml.AddSerializer(new TypeElementSerializer<PropertyChild>());
+
+      var obj = new InheritedPropertyTest()
+      {
+        ParentParent = new PropertyParent(),
+        ParentChild = new PropertyChild(),
+        PropertyParentNull = null
+      };
+
+      XElement root = new XElement("Root");
+      exml.Serialize(obj, root);
+
+      string exp = "<Root>\r\n  <ParentParent>\r\n    <Int>22</Int>\r\n  </ParentParent>\r\n  <PropertyChild>\r\n    <OtherInt>33</OtherInt>\r\n    <Int>22</Int>\r\n  </PropertyChild>\r\n  <PropertyParentNull>(# null #)</PropertyParentNull>\r\n</Root>";
       string act = root.ToString();
 
       Assert.That(act, Is.EqualTo(exp));

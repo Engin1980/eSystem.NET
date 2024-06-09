@@ -10,6 +10,7 @@ namespace EXmlLib2.Types
   public class XmlPropertyInfo
   {
     public string? XmlName { get; set; }
+    public Dictionary<Type, string> XmlNameByType { get; } = new();
     public XmlRepresentation? Representation { get; set; } = null;
     public XmlObligation? Obligation { get; set; } = null;
     public IElementSerializer? CustomElementSerializer { get; set; } = null;
