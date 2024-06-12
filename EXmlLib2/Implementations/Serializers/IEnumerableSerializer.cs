@@ -31,6 +31,11 @@ namespace EXmlLib2.Implementations.Serializers
       SaveItemsToElement(items, itemType, element, ctx);
     }
 
+    private void SaveItemsToElement(IEnumerable<object> items, Type itemType, XElement element, IXmlContext ctx)
+    {
+      throw new NotImplementedException();
+    }
+
     private Type ExtractItemType(object? value)
     {
       EAssert.Argument.IsNotNull(value);
