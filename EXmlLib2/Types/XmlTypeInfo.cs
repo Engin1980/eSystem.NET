@@ -14,10 +14,8 @@ namespace EXmlLib2.Types
   public class XmlTypeInfo<T>
   {
     public static XmlTypeInfo<T> Create() => new();
-
     internal Dictionary<PropertyInfo, XmlPropertyInfo> PropertyInfos { get; } = new();
     internal static XmlPropertyInfo DefaultXmlPropertyInfo { get; } = new();
-
     internal Func<T>? Constructor { get; private set; }
     internal Func<Dictionary<PropertyInfo, object?>, T>? FactoryMethod { get; private set; }
 

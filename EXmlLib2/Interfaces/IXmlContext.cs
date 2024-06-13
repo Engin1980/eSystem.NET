@@ -14,8 +14,8 @@ namespace EXmlLib2.Interfaces
     string DefaultNullString { get; }
     string DefaultTrueString { get; }
     string DefaultFalseString { get; }
-
     string TypeNameAttribute { get; }
+    string? DefaultItemXmlName { get; }
 
     IAttributeDeserializer GetAttributeDeserializer(Type targetType);
     IAttributeDeserializer<T> GetAttributeDeserializer<T>();

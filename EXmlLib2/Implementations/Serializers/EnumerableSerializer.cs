@@ -1,5 +1,6 @@
 ﻿using ESystem.Asserting;
 using EXmlLib2.Interfaces;
+using EXmlLib2.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,8 +11,16 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Implementations.Serializers
 {
-  public class IEnumerableSerializer : IElementSerializer
+  public class EnumerableSerializer : IElementSerializer
   {
+    internal readonly XmlIterableInfo xii;
+
+    public EnumerableSerializer(XmlIterableInfo xmlIterableInfo)
+    {
+      EAssert.Argument.IsNotNull(xmlIterableInfo, nameof(xmlIterableInfo));
+      this.xii = xmlIterableInfo;
+    }
+
     public bool AcceptsValue(object? value)
     {
       if (value == null) return false;
@@ -25,7 +34,9 @@ namespace EXmlLib2.Implementations.Serializers
 
     public void Serialize(object? value, XElement element, IXmlContext ctx)
     {
+      EAssert.Argument.IsNotNull(value, nameof(value));
       EAssert.Argument.IsTrue(AcceptsValue(value));
+
       Type itemType = ExtractItemType(value);
       IEnumerable<object> items = ExtractItems(value);
       SaveItemsToElement(items, itemType, element, ctx);
@@ -33,7 +44,51 @@ namespace EXmlLib2.Implementations.Serializers
 
     private void SaveItemsToElement(IEnumerable<object> items, Type itemType, XElement element, IXmlContext ctx)
     {
-      throw new NotImplementedException();
+      foreach (object item in items)
+      {
+        XElement itemElement = SerializeItem(item, itemType, ctx);
+        element.Add(itemElement);
+      }
+    }
+
+    private XElement SerializeItem(object item, Type itemType, IXmlContext ctx)
+    {
+      IElementSerializer serializer = ctx.GetElementSerializer(item);
+      XmlNameAndStoreFlag xnsf = GetItemElementName(item?.GetType(), itemType, ctx);
+      XElement ret = new XElement(XName.Get(xnsf.XmlName));
+      ctx.SerializeToElement(item, ret, serializer);
+      if (xnsf.ForceStoreType)
+        AddTypeInfoAttribute(ret, item!.GetType(), ctx);
+      return ret;
+    }
+
+    private void AddTypeInfoAttribute(XElement element, Type type, IXmlContext ctx)
+    {
+      string typeName = type.FullName!;
+      if (typeName.StartsWith("System.") == false)  // if not mscorlib type, assembly name is required
+        typeName += ", " + type.Assembly.GetName().Name;
+      element.SetAttributeValue(XName.Get(ctx.TypeNameAttribute), typeName);
+    }
+
+    private record XmlNameAndStoreFlag(string XmlName, bool ForceStoreType);
+    private XmlNameAndStoreFlag GetItemElementName(Type? itemTypeOrNull, Type expectedType, IXmlContext ctx)
+    {
+      string? xmlName;
+      bool storeType;
+      if (itemTypeOrNull == null || itemTypeOrNull.GetType() == expectedType)
+        xmlName = this.xii.XmlItemName.Get(null);
+      else
+        xmlName = this.xii.XmlItemName.Get(itemTypeOrNull.GetType());
+      if (xmlName == null)
+      {
+        storeType = itemTypeOrNull != null;
+        xmlName = ctx.DefaultItemXmlName;
+      }
+      else
+        storeType = false;
+
+      EAssert.IsNotNull(xmlName);
+      return new XmlNameAndStoreFlag(xmlName, storeType);
     }
 
     private Type ExtractItemType(object? value)
@@ -61,7 +116,7 @@ namespace EXmlLib2.Implementations.Serializers
       return ret;
     }
 
-    private IEnumerable<object> ExtractItems(object? value)
+    private IEnumerable<object> ExtractItems(object value)
     {
       IEnumerable<object> items;
       if (value.GetType().IsArray)
