@@ -155,5 +155,22 @@ namespace EXmlLib2Test.SerializationTests
       string act = root.ToString();
       Assert.That(act, Is.EqualTo(exp));
     }
+
+    [Test]
+    public void PropertyEnumeratesToElement()
+    {
+      SimpleListBox obj = new();
+      obj.Numbers = new List<int> { 1, 2, 3 };
+      obj.Texts = new List<string> { "a", "b", "c" };
+
+      EXml exml = EXml.CreateDefault();
+      XElement root = new XElement(XName.Get("root"));
+      exml.Serialize(obj, root);
+
+      string exp = "";
+      string act = root.ToString();
+
+      Assert.That(act, Is.EqualTo(exp));
+    }
   }
 }

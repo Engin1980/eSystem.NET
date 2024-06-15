@@ -15,6 +15,11 @@ namespace EXmlLib2.Implementations.Serializers
   {
     internal readonly XmlIterableInfo xii;
 
+    public EnumerableSerializer()
+    {
+      this.xii = new XmlIterableInfo();
+    }
+
     public EnumerableSerializer(XmlIterableInfo xmlIterableInfo)
     {
       EAssert.Argument.IsNotNull(xmlIterableInfo, nameof(xmlIterableInfo));

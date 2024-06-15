@@ -51,6 +51,13 @@ namespace EXmlLib2.Types
     private string _TypeNameAttribute = "__type";
     public string TypeNameAttribute { get => _TypeNameAttribute; set => _TypeNameAttribute = value ?? throw new ArgumentNullException(); }
 
+    private string _DefaultItemXmlName = "item";
+    public string? DefaultItemXmlName
+    {
+      get => _DefaultItemXmlName;
+      set => _DefaultItemXmlName = value ?? throw new ArgumentNullException();
+    }
+
     public void AddSerializer(IElementSerializer serializer) => this.InsertSerializer(0, serializer);
 
     public void AddDeserializer(IElementDeserializer deserializer) => this.InsertDeserializer(0, deserializer);

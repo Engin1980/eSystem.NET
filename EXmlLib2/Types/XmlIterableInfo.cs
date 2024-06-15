@@ -8,7 +8,7 @@ namespace EXmlLib2.Types
 {
   public class XmlIterableInfo
   {
-    public TypeStringDict XmlItemName { get; } = new();
+    internal TypeStringDict XmlItemName { get; } = new();
 
     public XmlIterableInfo WithItemXmlName(string name)
     {
