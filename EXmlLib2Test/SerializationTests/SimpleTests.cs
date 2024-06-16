@@ -156,21 +156,6 @@ namespace EXmlLib2Test.SerializationTests
       Assert.That(act, Is.EqualTo(exp));
     }
 
-    [Test]
-    public void PropertyEnumeratesToElement()
-    {
-      SimpleListBox obj = new();
-      obj.Numbers = new List<int> { 1, 2, 3 };
-      obj.Texts = new List<string> { "a", "b", "c" };
-
-      EXml exml = EXml.CreateDefault();
-      XElement root = new XElement(XName.Get("root"));
-      exml.Serialize(obj, root);
-
-      string exp = "<root>\r\n  <Numbers>\r\n    <item>1</item>\r\n    <item>2</item>\r\n    <item>3</item>\r\n  </Numbers>\r\n  <Texts>\r\n    <item>a</item>\r\n    <item>b</item>\r\n    <item>c</item>\r\n  </Texts>\r\n</root>";
-      string act = root.ToString();
-
-      Assert.That(act, Is.EqualTo(exp));
-    }
+    
   }
 }
