@@ -131,7 +131,7 @@ namespace EXmlLib2Test.SerializationTests
       XElement root = new XElement("Root");
       exml.Serialize(obj, root);
 
-      string exp = "<Root>\r\n  <ParentParent>\r\n    <Int>22</Int>\r\n  </ParentParent>\r\n  <PropertyChild>\r\n    <OtherInt>33</OtherInt>\r\n    <Int>22</Int>\r\n  </PropertyChild>\r\n  <PropertyParentNull>(# null #)</PropertyParentNull>\r\n</Root>";
+      string exp = "<Root>\r\n  <ParentParent>\r\n    <Int>22</Int>\r\n  </ParentParent>\r\n  <ParentChild __type=\"EXmlLib2Test.Model.PropertyChild, EXmlLib2Test\">\r\n    <OtherInt>33</OtherInt>\r\n    <Int>22</Int>\r\n  </ParentChild>\r\n  <PropertyParentNull>(# null #)</PropertyParentNull>\r\n</Root>";
       string act = root.ToString();
 
       Assert.That(act, Is.EqualTo(exp));

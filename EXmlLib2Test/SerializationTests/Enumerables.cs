@@ -12,6 +12,42 @@ namespace EXmlLib2Test.SerializationTests
   internal class EnumerablesTests
   {
     [Test]
+    public void Array()
+    {
+      int[] obj = 
+      {
+        1,2,3
+      };
+
+      EXml exml = EXml.CreateDefault();
+      XElement root = new XElement(XName.Get("root"));
+      exml.Serialize(obj, root);
+
+      string exp = "<root>\r\n  <item>1</item>\r\n  <item>2</item>\r\n  <item>3</item>\r\n</root>";
+      string act = root.ToString();
+
+      Assert.That(act, Is.EqualTo(exp));
+    }
+
+    [Test]
+    public void List()
+    {
+      List<int> obj = new List<int>()
+      {
+        1,2,3
+      };
+
+      EXml exml = EXml.CreateDefault();
+      XElement root = new XElement(XName.Get("root"));
+      exml.Serialize(obj, root);
+
+      string exp = "<root>\r\n  <item>1</item>\r\n  <item>2</item>\r\n  <item>3</item>\r\n</root>";
+      string act = root.ToString();
+
+      Assert.That(act, Is.EqualTo(exp));
+    }
+
+    [Test]
     public void PropertyEnumerates()
     {
       SimpleListBox obj = new();
