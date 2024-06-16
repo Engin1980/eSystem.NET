@@ -6,6 +6,7 @@ using EXmlLib2.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,25 +14,24 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Implementations.Serializers
 {
-  public class TypeElementSerializer : IElementSerializer
+  public class TypeElementSerializer<T> : IElementSerializer<T> where T : notnull
   {
-    private readonly Logger logger;
-    public XmlTypeInfo Type { get; private set; }
+    private readonly Logger logger = Logger.Create(typeof(T));
+    public XmlTypeInfo<T> Type { get; private set; }
 
-    public TypeElementSerializer() : this(new()) { }
-
-    public TypeElementSerializer(XmlTypeInfo type)
+    public TypeElementSerializer()
     {
-      this.logger = Logger.Create(this);
-      Type = type;
+      this.Type = new();
     }
 
-    public virtual bool AcceptsValue(object? value)
+    public TypeElementSerializer(XmlTypeInfo<T> xmlTypeInfo)
     {
-      return value !=null;
+      EAssert.Argument.IsNotNull(xmlTypeInfo, nameof(xmlTypeInfo));
+      this.Type = xmlTypeInfo;
     }
 
-    public void Serialize(object? value, XElement element, IXmlContext ctx)
+
+    public void Serialize(T value, XElement element, IXmlContext ctx)
     {
       EAssert.Argument.IsNotNull(value, nameof(value));
       try
@@ -46,7 +46,7 @@ namespace EXmlLib2.Implementations.Serializers
       }
     }
 
-    private void SerializeProperties(object value, XElement element, IXmlContext ctx)
+    private void SerializeProperties(T value, XElement element, IXmlContext ctx)
     {
       var properties = value.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
       foreach (var property in properties)
@@ -55,9 +55,9 @@ namespace EXmlLib2.Implementations.Serializers
       }
     }
 
-    private void SerializeProperty(PropertyInfo property, object value, XElement element, IXmlContext ctx)
+    private void SerializeProperty(PropertyInfo property, T value, XElement element, IXmlContext ctx)
     {
-      XmlPropertyInfo xpi = Type.PropertyInfos.TryGet(property) ?? XmlTypeInfo.DefaultXmlPropertyInfo;
+      XmlPropertyInfo xpi = Type.PropertyInfos.TryGet(property) ?? XmlTypeInfo<T>.DefaultXmlPropertyInfo;
       if (xpi.Obligation == XmlObligation.Ignored)
         return;
       object? propertyValue = GetPropertyValue(property, value);
@@ -107,7 +107,7 @@ namespace EXmlLib2.Implementations.Serializers
       element.Add(propertyElement);
     }
 
-    private object? GetPropertyValue(PropertyInfo property, object value)
+    private object? GetPropertyValue(PropertyInfo property, T? value)
     {
       try
       {

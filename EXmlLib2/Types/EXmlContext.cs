@@ -58,11 +58,11 @@ namespace EXmlLib2.Types
       set => _DefaultItemXmlName = value ?? throw new ArgumentNullException();
     }
 
-    public void AddSerializer(IElementSerializer serializer) => this.InsertSerializer(0, serializer);
+    public void AddSerializer(IElementSerializer serializer) => this.InsertSerializer(elementSerializers.Count, serializer);
 
-    public void AddDeserializer(IElementDeserializer deserializer) => this.InsertDeserializer(0, deserializer);
+    public void AddDeserializer(IElementDeserializer deserializer) => this.InsertDeserializer(elementDeserializers.Count, deserializer);
 
-    public void AddDeserializer<T>(IElementDeserializer<T> deserializer) => this.InsertDeserializer(0, deserializer);
+    public void AddDeserializer<T>(IElementDeserializer<T> deserializer) => this.InsertDeserializer(elementDeserializers.Count, deserializer);
 
     public void InsertSerializer(int index, IElementSerializer serializer)
     {
@@ -98,11 +98,11 @@ namespace EXmlLib2.Types
       }
     }
 
-    public void AddSerializer(IAttributeSerializer serializer) => this.InsertSerializer(0, serializer);
+    public void AddSerializer(IAttributeSerializer serializer) => this.InsertSerializer(attributeSerializers.Count, serializer);
 
-    public void AddDeserializer(IAttributeDeserializer deserializer) => this.InsertDeserializer(0, deserializer);
+    public void AddDeserializer(IAttributeDeserializer deserializer) => this.InsertDeserializer(attributeDeserializers.Count, deserializer);
 
-    public void AddDeserializer<T>(IAttributeDeserializer<T> deserializer) => this.InsertDeserializer(0, deserializer);
+    public void AddDeserializer<T>(IAttributeDeserializer<T> deserializer) => this.InsertDeserializer(attributeDeserializers.Count, deserializer);
 
     public void InsertSerializer(int index, IAttributeSerializer serializer)
     {

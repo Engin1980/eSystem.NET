@@ -32,7 +32,7 @@ namespace EXmlLib2.Implementations.Serializers
       Type type = value.GetType();
       if (type.IsArray)
         return true;
-      if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+      if (type.IsGenericType && type.IsAssignableTo(typeof(System.Collections.IEnumerable)))
         return true;
       return false;
     }
@@ -86,7 +86,7 @@ namespace EXmlLib2.Implementations.Serializers
         xmlName = this.xii.XmlItemName.Get(itemTypeOrNull.GetType());
       if (xmlName == null)
       {
-        storeType = itemTypeOrNull != null;
+        storeType = itemTypeOrNull != null && itemTypeOrNull != expectedType;
         xmlName = ctx.DefaultItemXmlName;
       }
       else

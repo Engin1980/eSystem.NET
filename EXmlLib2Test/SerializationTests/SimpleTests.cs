@@ -167,7 +167,7 @@ namespace EXmlLib2Test.SerializationTests
       XElement root = new XElement(XName.Get("root"));
       exml.Serialize(obj, root);
 
-      string exp = "";
+      string exp = "<root>\r\n  <Numbers>\r\n    <item>1</item>\r\n    <item>2</item>\r\n    <item>3</item>\r\n  </Numbers>\r\n  <Texts>\r\n    <item>a</item>\r\n    <item>b</item>\r\n    <item>c</item>\r\n  </Texts>\r\n</root>";
       string act = root.ToString();
 
       Assert.That(act, Is.EqualTo(exp));

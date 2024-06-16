@@ -55,8 +55,8 @@ namespace EXmlLib2
         ret.ctx.AddSerializer((IElementSerializer)new EnumSerializer());
         ret.ctx.AddSerializer((IAttributeSerializer)new EnumSerializer());
 
-        ret.ctx.AddSerializer(new TypeElementSerializer<object>());
         ret.ctx.AddSerializer(new EnumerableSerializer());
+        ret.ctx.AddSerializer(new TypeElementSerializer());
       }
       if (addDefaultDeserializers)
       {
