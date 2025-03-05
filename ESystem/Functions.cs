@@ -13,8 +13,8 @@ namespace ESystem
     {
       public static void TryOr(Action tryAction, Action<Exception> errorAction)
       {
-        EAssert.Argument.IsNotNull(tryAction);
-        EAssert.Argument.IsNotNull(errorAction);
+        EAssert.Argument.IsNotNull(tryAction, nameof(tryAction));
+        EAssert.Argument.IsNotNull(errorAction, nameof(errorAction));
 
         try
         {
@@ -28,8 +28,8 @@ namespace ESystem
 
       public static T TryOr<T>(Func<T> tryFunction, Func<Exception, T> errorAction)
       {
-        EAssert.Argument.IsNotNull(tryFunction);
-        EAssert.Argument.IsNotNull(errorAction);
+        EAssert.Argument.IsNotNull(tryFunction, nameof(tryFunction));
+        EAssert.Argument.IsNotNull(errorAction, nameof(errorAction));
         T ret;
         try
         {

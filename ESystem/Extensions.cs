@@ -60,7 +60,7 @@ namespace ESystem
     public static T GetRandom<T>(this List<T> lst)
     {
       EAssert.Argument.IsNotNull(lst, nameof(lst));
-      EAssert.Argument.IsTrue(lst.Count > 0, nameof(lst));
+      EAssert.Argument.IsTrue(lst.Count > 0, nameof(lst), "List must be non-empty.");
 
       if (rnd == null) rnd = new Random();
       int index = rnd.Next(0, lst.Count);
