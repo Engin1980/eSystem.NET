@@ -19,21 +19,7 @@ namespace ELogging
     }
 
     public LogRule(string pattern, string logLevel)
-      : this(pattern, ConvertStringToEnum(logLevel)) { }
-
-    private static LogLevel ConvertStringToEnum(string logLevel)
-    {
-      LogLevel ret;
-      try
-      {
-        ret = (LogLevel)Enum.Parse(typeof(LogLevel), logLevel.ToUpper());
-      }
-      catch
-      {
-        throw new ArgumentException($"Failed to convert '{logLevel}' to known LogLevel.");
-      }
-      return ret;
-    }
+      : this(pattern, LogUtils.ConvertStringToLogLevel(logLevel)) { }    
 
     internal bool IsAcceptingLogLevel(LogLevel level)
     {

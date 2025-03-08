@@ -18,6 +18,9 @@ namespace ESystem.Miscelaneous
 
     public ICollection<BType> Bs => dctB.Keys;
 
+    public bool TryGetValue(BType key, out AType? value) => dctB.TryGetValue(key, out value);
+    public bool TryGetValue(AType key, out BType? value) => dctA.TryGetValue(key, out value);
+
     public HashSet<KeyValuePair<AType, BType>> ToHashSet() => dctA.ToHashSet();
 
     public int Count => dctA.Count;
@@ -56,8 +59,8 @@ namespace ESystem.Miscelaneous
       dctB.Clear();
     }
 
-    public bool ContainsA(AType a) => dctA.ContainsKey(a);
-    public bool ContainsB(BType b) => dctB.ContainsKey(b);
+    public bool ContainsKey(AType a) => dctA.ContainsKey(a);
+    public bool ContainsKey(BType b) => dctB.ContainsKey(b);
 
     public IEnumerator<KeyValuePair<AType, BType>> GetEnumerator() => dctA.GetEnumerator();
 
