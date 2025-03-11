@@ -4,12 +4,11 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>1.5.1.0</AssemblyVersion>
-    <FileVersion>1.5.1.0</FileVersion>
+    <AssemblyVersion>1.6.0.0</AssemblyVersion>
+    <FileVersion>1.6.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ELogging\ELogging.csproj" />
     <ProjectReference Include="..\ESystem\ESystem.csproj" />
   </ItemGroup>
 

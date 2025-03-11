@@ -1,4 +1,4 @@
-﻿using ELogging;
+﻿using ESystem.Logging;
 using EXmlLib.Attributes;
 using EXmlLib.Factories;
 using EXmlLib.Interfaces;
