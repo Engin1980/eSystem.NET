@@ -25,7 +25,7 @@ namespace EXmlLib
 
     public T Deserialize(XDocument doc)
     {
-      T ret = this.Deserialize(doc.Root);
+      T ret = this.Deserialize(doc.Root!);
       return ret;
     }
 
