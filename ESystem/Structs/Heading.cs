@@ -90,5 +90,4 @@ namespace ESystem.Structs
     }
 
   }
-
 }
