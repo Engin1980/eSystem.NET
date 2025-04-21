@@ -1,4 +1,4 @@
-﻿<Window x:Class="ESystem.WPF.Windows.InputBox"
+﻿<Window x:Class="ESystem.WPF.Windows.EnumInputBox"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ESystem.WPF.Windows"
         xmlns:cvt="clr-namespace:ESystem.WPF.Converters"
         mc:Ignorable="d"
-        Title="{Binding Title}" Height="150" Width="800" SizeToContent="Height">
+        Title="{Binding Title}" Height="250" Width="800" SizeToContent="Height">
   <Window.Resources>
     <cvt:BoolToVisibilityCollapsedConverter x:Key="BoolToVisibilityCollapsedConverter" />
   </Window.Resources>
@@ -20,9 +20,9 @@
       <Label x:Name="lblTitle" Content="{Binding Prompt}" DockPanel.Dock="Top" Margin="8" Padding="8" />
     </DockPanel>
     <StackPanel>
-      <TextBox x:Name="txtInput" Text="{Binding Input, UpdateSourceTrigger=PropertyChanged}" Margin="8" Padding="8" />
-      <TextBlock x:Name="lblError" Margin="8 0 0 0" Foreground="Red" 
-           Visibility="{Binding IsInvalid, Converter={StaticResource BoolToVisibilityCollapsedConverter}}" />
+      <ComboBox x:Name="cmbInput" Margin="8" Padding="8"
+              ItemsSource="{Binding Options}"
+              SelectedItem="{Binding Input}"/>
     </StackPanel>
   </DockPanel>
 </Window>
