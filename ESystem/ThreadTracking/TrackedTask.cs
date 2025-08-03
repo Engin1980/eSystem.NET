@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 
 namespace ESystem.ThreadTracking;
 
-
-
 public class TrackedTask
 {
   private readonly static List<TrackedTask> inner = new();
