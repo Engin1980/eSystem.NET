@@ -18,7 +18,12 @@ namespace ESystem.Asserting
 
       public static void IsTrue(bool value, string argumentName, string violationDescription)
       {
-        EAssert.IsTrue(value, $"Argument '{argumentName}' condition check to true failed. Volation: {violationDescription}");
+        IsTrue(value, argumentName, () => violationDescription);
+      }
+
+      public static void IsTrue(bool value, string argumentName, Func<string> violationDescription)
+      {
+        EAssert.IsTrue(value, $"Argument '{argumentName}' condition check to true failed. Volation: {violationDescription()}");
       }
 
       public static void IsNonEmptyString([NotNull] string value, string argumentName)
@@ -27,28 +32,47 @@ namespace ESystem.Asserting
       }
     }
 
-    public static void IsNonEmptyString([NotNull] string value, string message = "String is empty or null.")
+    public static void IsNonEmptyString([NotNull] string value, Func<string> messageProvider)
     {
       if (string.IsNullOrEmpty(value))
-        throw new EAssertException(message);
+        throw new EAssertException(messageProvider.Invoke());
+    }
+
+    public static void IsNonEmptyString([NotNull] string value, string message = "String is empty or null.")
+    {
+      IsNonEmptyString(value, () => message);
+    }
+
+    public static void IsNotNull([NotNull] object? value, Func<string> messageProvider)
+    {
+      if (value == null)
+        throw new EAssertException(messageProvider());
     }
 
     public static void IsNotNull([NotNull] object? value, string message = "Value is null.")
     {
-      if (value == null)
-        throw new EAssertException(message);
+      IsNotNull(value, () => message);
+    }
+
+    public static void IsTrue(bool value, Func<string> messageProvider)
+    {
+      if (value != true)
+        throw new EAssertException(messageProvider());
     }
 
     public static void IsTrue(bool value, string message = "Value must be true.")
     {
-      if (value != true)
-        throw new EAssertException(message);
+      IsTrue(value, () => message);
+    }
+
+    public static void IsFalse(bool value, Func<string> messageProvider)
+    {
+      IsTrue(!value, messageProvider);
     }
 
     public static void IsFalse(bool value, string message = "Value must be false.")
     {
-      if (value != false)
-        throw new EAssertException(message);
+      IsTrue(!value, message);
     }
   }
 
