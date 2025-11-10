@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ESystem.Asserting;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -14,19 +15,46 @@ namespace ESystem.WPF.KeyHooking;
 public readonly struct KeyChord
 {
 
+  /// <summary>
+  /// Provides formatting and parsing helpers for <see cref="KeyChord"/>.
+  /// Serialized form used by this helper is: "&lt;ModifierKeys&gt;|&lt;Key1&gt;+&lt;Key2&gt;+...".
+  /// Example: "Control|A+B".
+  /// </summary>
   public static class Serializer
   {
+    /// <summary>
+    /// Separator used between keys in the serialized keys part.
+    /// </summary>
     public const string Separator = "+";
+
+    /// <summary>
+    /// Separator used between the modifiers part and the keys part.
+    /// </summary>
     public const string ModifierSeparator = "|";
+
+    /// <summary>
+    /// Formats the supplied <see cref="KeyChord"/> into a compact serialized string.
+    /// </summary>
+    /// <param name="chord">The chord to format.</param>
+    /// <returns>A string in the format "&lt;ModifierKeys&gt;|&lt;Key1&gt;+&lt;Key2&gt;+...".</returns>
     public static string Format(KeyChord chord)
     {
+      EAssert.Argument.IsNotNull(chord, nameof(chord));
       var modifiersPart = chord.Modifiers.ToString();
       var keysPart = string.Join(Separator, chord.Keys);
       return $"{modifiersPart}{ModifierSeparator}{keysPart}";
     }
-    public static KeyChord Parse(string serialized)
+
+    /// <summary>
+    /// Parses a chord string produced by <see cref="Format"/> back into a <see cref="KeyChord"/>.
+    /// </summary>
+    /// <param name="text">The serialized chord string.</param>
+    /// <returns>The parsed <see cref="KeyChord"/> instance.</returns>
+    /// <exception cref="FormatException">Thrown when the input string is not in the expected format or cannot be parsed.</exception>
+    public static KeyChord Parse(string text)
     {
-      var parts = serialized.Split(ModifierSeparator);
+      EAssert.Argument.IsNonEmptyString(text, nameof(text));
+      var parts = text.Split(ModifierSeparator);
       if (parts.Length != 2)
         throw new FormatException("Invalid serialized KeyChord format.");
       try
@@ -38,7 +66,7 @@ public readonly struct KeyChord
       }
       catch (Exception ex)
       {
-        throw new FormatException($"Failed to parse KeyChord from serialized string '{serialized}'.", ex);
+        throw new FormatException($"Failed to parse KeyChord from serialized string '{text}'.", ex);
       }
     }
   }
