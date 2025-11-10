@@ -231,6 +231,14 @@ namespace ESystem.Logging
       Logger.ProcessMessage(level, this.sender, message);
     }
 
+    public void Trace(string message) => Log(LogLevel.TRACE, message);
+    public void Debug(string message) => Log(LogLevel.DEBUG, message);
+    public void Info(string message) => Log(LogLevel.INFO, message);
+    public void Warning(string message) => Log(LogLevel.WARNING, message);
+    public void Error(string message) => Log(LogLevel.ERROR, message);
+    public void Critical(string message) => Log(LogLevel.CRITICAL, message);
+    public void Always(string message) => Log(LogLevel.ALWAYS, message);
+
     public void LogMethodEnd(
       LogLevel level = LogLevel.TRACE,
       [CallerMemberName] string methodName = "injectedMemberName",
