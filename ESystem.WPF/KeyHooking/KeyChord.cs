@@ -13,6 +13,36 @@ namespace ESystem.WPF.KeyHooking;
 /// </summary>
 public readonly struct KeyChord
 {
+
+  public static class Serializer
+  {
+    public const string Separator = "+";
+    public const string ModifierSeparator = "|";
+    public static string Format(KeyChord chord)
+    {
+      var modifiersPart = chord.Modifiers.ToString();
+      var keysPart = string.Join(Separator, chord.Keys);
+      return $"{modifiersPart}{ModifierSeparator}{keysPart}";
+    }
+    public static KeyChord Parse(string serialized)
+    {
+      var parts = serialized.Split(ModifierSeparator);
+      if (parts.Length != 2)
+        throw new FormatException("Invalid serialized KeyChord format.");
+      try
+      {
+        var modifiers = (ModifierKeys)Enum.Parse(typeof(ModifierKeys), parts[0]);
+        var keyStrings = parts[1].Split(Separator);
+        var keys = keyStrings.Select(ks => (Key)Enum.Parse(typeof(Key), ks)).ToList();
+        return new KeyChord(keys, modifiers);
+      }
+      catch (Exception ex)
+      {
+        throw new FormatException($"Failed to parse KeyChord from serialized string '{serialized}'.", ex);
+      }
+    }
+  }
+
   /// <summary>
   /// The sequence of keys that make up the chord.
   /// </summary>

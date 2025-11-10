@@ -12,6 +12,30 @@ namespace ESystem.WPF.KeyHooking
   /// </summary>
   public readonly struct KeyShortcut
   {
+    public static class Serializer
+    {
+      public const string Separator = "+";
+      public static string Format(KeyShortcut shortcut)
+      {
+        return $"{shortcut.Modifiers}{Separator}{shortcut.Key}";
+      }
+      public static KeyShortcut Parse(string serialized)
+      {
+        var parts = serialized.Split(Separator);
+        if (parts.Length != 2)
+          throw new FormatException("Invalid serialized KeyShortcut format.");
+        try
+        {
+          var modifiers = (ModifierKeys)Enum.Parse(typeof(ModifierKeys), parts[0]);
+          var key = (Key)Enum.Parse(typeof(Key), parts[1]);
+          return new KeyShortcut { Key = key, Modifiers = modifiers };
+        }
+        catch (Exception ex)
+        {
+          throw new FormatException($"Failed to parse KeyShortcut from serialized string '{serialized}'.", ex);
+        }
+      }
+    }
     /// <summary>
     /// The main key of the shortcut (e.g. <see cref="Key.A"/>).
     /// </summary>
