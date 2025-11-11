@@ -61,7 +61,7 @@ namespace ESystem.WPF.KeyHooking
       }
 
       string ret = string.Join(options.KeysSeparator, strings);
-      if (strings.Count > 0 && options.KeysBrackets != null)
+      if (strings.Count > 1 && options.KeysBrackets != null)
         ret = $"{options.KeysBrackets.Value.Item1}{ret}{options.KeysBrackets.Value.Item2}";
       return ret;
     }
@@ -81,7 +81,7 @@ namespace ESystem.WPF.KeyHooking
         parts.Add("Win");
 
       string ret = string.Join(options.ModifierSeparator, parts);
-      if (parts.Count > 0 && options.ModifierBrackets != null)
+      if (parts.Count > 1 && options.ModifierBrackets != null)
         ret = $"{options.ModifierBrackets.Value.Item1}{ret}{options.ModifierBrackets.Value.Item2}";
       return ret;
     }
@@ -152,23 +152,18 @@ namespace ESystem.WPF.KeyHooking
       foreach (string mod in pts)
       {
         string modTrimmed = mod.Trim();
-        if (options.ModifierMapping.TryGetValue("Control", out var ctrlAliases) && ctrlAliases.Contains(modTrimmed, StringComparer.OrdinalIgnoreCase))
+
+        bool found = false;
+        foreach (var kvp in options.ModifierMapping)
         {
-          modifiers |= ModifierKeys.Control;
+          if (kvp.Value.Contains(modTrimmed, StringComparer.OrdinalIgnoreCase))
+          {
+            modifiers |= kvp.Key;
+            found = true;
+          }
         }
-        else if (options.ModifierMapping.TryGetValue("Alt", out var altAliases) && altAliases.Contains(modTrimmed, StringComparer.OrdinalIgnoreCase))
-        {
-          modifiers |= ModifierKeys.Alt;
-        }
-        else if (options.ModifierMapping.TryGetValue("Shift", out var shiftAliases) && shiftAliases.Contains(modTrimmed, StringComparer.OrdinalIgnoreCase))
-        {
-          modifiers |= ModifierKeys.Shift;
-        }
-        else if (options.ModifierMapping.TryGetValue("Windows", out var winAliases) && winAliases.Contains(modTrimmed, StringComparer.OrdinalIgnoreCase))
-        {
-          modifiers |= ModifierKeys.Windows;
-        }
-        else
+
+        if (!found)
         {
           throw new FormatException($"Failed to parse modifier '{modTrimmed}'.");
         }

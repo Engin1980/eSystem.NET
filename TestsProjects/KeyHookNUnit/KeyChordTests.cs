@@ -45,6 +45,7 @@ namespace KeyHookNUnit
         [Key.A, Key.B], 
         ModifierKeys.Control|ModifierKeys.Alt|ModifierKeys.Windows), "Ctrl|Alt|Win+A,B"}
     };
+
     [Test, TestCaseSource(nameof(FormatCases))]
     public void Format(KeyChord ksIn, string expectedString)
     {
@@ -52,6 +53,7 @@ namespace KeyHookNUnit
       Assert.That(s, Is.EqualTo(expectedString));
     }
 
+    [Test, TestCaseSource(nameof(FormatCases))]
     public void Parse(KeyChord expectedKs, string inputString)
     {
       KeyChord ksOut = KeyChord.Parse(inputString);
@@ -59,12 +61,14 @@ namespace KeyHookNUnit
       Assert.That(ksOut.Modifiers, Is.EqualTo(expectedKs.Modifiers));
     }
 
+    [Test, TestCaseSource(nameof(FormatCases))]
     public void FormatBracketed(KeyChord ksIn, string expectedString)
     {
       string s = ksIn.Format(bracketedFormatOptions);
       Assert.That(s, Is.EqualTo(expectedString));
     }
 
+    [Test, TestCaseSource(nameof(FormatCases))]
     public void ParseBracketed(KeyChord expectedKs, string inputString)
     {
       KeyChord ksOut = KeyChord.Parse(inputString, bracketedFormatOptions);

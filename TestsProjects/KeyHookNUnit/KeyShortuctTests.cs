@@ -17,8 +17,19 @@ namespace KeyHookNUnit
       Assert.That(s, Is.EqualTo(expectedString));
     }
 
+    [Test, TestCaseSource(nameof(FormatCases))]
     public void KeyShortcutParse(KeyShortcut expectedKs, string inputString)
     {
+      KeyShortcut ksOut = KeyShortcut.Parse(inputString);
+      Assert.That(ksOut.Key, Is.EqualTo(expectedKs.Key));
+      Assert.That(ksOut.Modifiers, Is.EqualTo(expectedKs.Modifiers));
+    }
+
+    [Test]
+    public void KeyShortcutParseCustom()
+    {
+      KeyShortcut expectedKs = new KeyShortcut(System.Windows.Input.Key.PageUp, System.Windows.Input.ModifierKeys.Control|System.Windows.Input.ModifierKeys.Alt); 
+      string inputString = "Ctrl|Alt+PageUp";
       KeyShortcut ksOut = KeyShortcut.Parse(inputString);
       Assert.That(ksOut.Key, Is.EqualTo(expectedKs.Key));
       Assert.That(ksOut.Modifiers, Is.EqualTo(expectedKs.Modifiers));
