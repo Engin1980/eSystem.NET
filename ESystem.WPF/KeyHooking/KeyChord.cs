@@ -15,60 +15,36 @@ namespace ESystem.WPF.KeyHooking;
 public readonly struct KeyChord
 {
 
-  /// <summary>
-  /// Provides formatting and parsing helpers for <see cref="KeyChord"/>.
-  /// Serialized form used by this helper is: "&lt;ModifierKeys&gt;|&lt;Key1&gt;+&lt;Key2&gt;+...".
-  /// Example: "Control|A+B".
-  /// </summary>
-  public static class Serializer
+  public static KeyChord Parse(string str) => Parse(str, (FormatOptions?)null);
+  public static KeyChord Parse(string str, FormatOptions? options = null)
   {
-    /// <summary>
-    /// Separator used between keys in the serialized keys part.
-    /// </summary>
-    public const string Separator = "+";
+    var chord = FormatParseUtils.ParseKeyChord(str, options);
+    return chord;
+  }
 
-    /// <summary>
-    /// Separator used between the modifiers part and the keys part.
-    /// </summary>
-    public const string ModifierSeparator = "|";
+  public static KeyChord Parse(string str, Action<FormatOptions>? options = null)
+  {
+    var chord = FormatParseUtils.ParseKeyChord(str, options);
+    return chord;
+  }
 
-    /// <summary>
-    /// Formats the supplied <see cref="KeyChord"/> into a compact serialized string.
-    /// </summary>
-    /// <param name="chord">The chord to format.</param>
-    /// <returns>A string in the format "&lt;ModifierKeys&gt;|&lt;Key1&gt;+&lt;Key2&gt;+...".</returns>
-    public static string Format(KeyChord chord)
-    {
-      EAssert.Argument.IsNotNull(chord, nameof(chord));
-      var modifiersPart = chord.Modifiers.ToString();
-      var keysPart = string.Join(Separator, chord.Keys);
-      return $"{modifiersPart}{ModifierSeparator}{keysPart}";
-    }
+  public static bool TryParse(string str, out KeyChord chord, FormatOptions? options = null)
+  {
+    return FormatParseUtils.TryParseKeyChord(str, out chord, options);
+  }
+  public static bool TryParse(string str, out KeyChord chord, Action<FormatOptions>? options = null)
+  {
+    return FormatParseUtils.TryParseKeyChord(str, out chord, options);
+  }
 
-    /// <summary>
-    /// Parses a chord string produced by <see cref="Format"/> back into a <see cref="KeyChord"/>.
-    /// </summary>
-    /// <param name="text">The serialized chord string.</param>
-    /// <returns>The parsed <see cref="KeyChord"/> instance.</returns>
-    /// <exception cref="FormatException">Thrown when the input string is not in the expected format or cannot be parsed.</exception>
-    public static KeyChord Parse(string text)
-    {
-      EAssert.Argument.IsNonEmptyString(text, nameof(text));
-      var parts = text.Split(ModifierSeparator);
-      if (parts.Length != 2)
-        throw new FormatException("Invalid serialized KeyChord format.");
-      try
-      {
-        var modifiers = (ModifierKeys)Enum.Parse(typeof(ModifierKeys), parts[0]);
-        var keyStrings = parts[1].Split(Separator);
-        var keys = keyStrings.Select(ks => (Key)Enum.Parse(typeof(Key), ks)).ToList();
-        return new KeyChord(keys, modifiers);
-      }
-      catch (Exception ex)
-      {
-        throw new FormatException($"Failed to parse KeyChord from serialized string '{text}'.", ex);
-      }
-    }
+  public string Format() => this.Format((FormatOptions?)null);
+  public string Format(FormatOptions? options = null)
+  {
+    return FormatParseUtils.Format(this, options);
+  }
+  public string Format(Action<FormatOptions>? options = null)
+  {
+    return FormatParseUtils.Format(this, options);
   }
 
   /// <summary>
@@ -140,6 +116,7 @@ public readonly struct KeyChord
   /// <returns>A human-readable string representing the chord.</returns>
   public override string ToString()
   {
+    //TODo unifie this with FormatParse approach
     var keysStr = Keys == null ? string.Empty : string.Join(" + ", Keys);
     return $"[{Modifiers}] + {keysStr}";
   }

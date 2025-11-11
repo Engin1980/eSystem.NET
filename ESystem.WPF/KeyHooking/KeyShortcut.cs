@@ -13,52 +13,42 @@ namespace ESystem.WPF.KeyHooking
   /// </summary>
   public readonly struct KeyShortcut
   {
-    /// <summary>
-    /// Helper methods for formatting and parsing <see cref="KeyShortcut"/> instances to/from a compact string.
-    /// Format used: "&lt;Modifiers&gt;+&lt;Key&gt;" where Modifiers is the <see cref="ModifierKeys"/> enum name.
-    /// Example: "Control+A" (or "None+A" when no modifiers are present).
-    /// </summary>
-    public static class Serializer
+    public static KeyShortcut Parse(string str) => Parse(str, (FormatOptions?)null);
+    public static KeyShortcut Parse(string str, FormatOptions? options = null)
     {
-      /// <summary>
-      /// Separator used between modifiers and key in the serialized form.
-      /// </summary>
-      public const string Separator = "+";
+      var chord = FormatParseUtils.ParseKeyShortcut(str, options);
+      return chord;
+    }
 
-      /// <summary>
-      /// Formats the given <see cref="KeyShortcut"/> into a compact string suitable for saving to text files or config.
-      /// </summary>
-      /// <param name="shortcut">The shortcut instance to format.</param>
-      /// <returns>A string in the format "&lt;Modifiers&gt;+&lt;Key&gt;".</returns>
-      public static string Format(KeyShortcut shortcut)
-      {
-        EAssert.Argument.IsNotNull(shortcut, nameof(shortcut));
-        return $"{shortcut.Modifiers}{Separator}{shortcut.Key}";
-      }
+    public static KeyShortcut Parse(string str, Action<FormatOptions>? options = null)
+    {
+      var chord = FormatParseUtils.ParseKeyShortcut(str, options);
+      return chord;
+    }
 
-      /// <summary>
-      /// Parses a string produced by <see cref="Format"/> back into a <see cref="KeyShortcut"/>.
-      /// </summary>
-      /// <param name="text">The serialized string to parse.</param>
-      /// <returns>The parsed <see cref="KeyShortcut"/>.</returns>
-      /// <exception cref="FormatException">Thrown when the string is not in the expected format or values cannot be parsed.</exception>
-      public static KeyShortcut Parse(string text)
-      {
-        EAssert.Argument.IsNonEmptyString(text, nameof(text));
-        var parts = text.Split(Separator);
-        if (parts.Length != 2)
-          throw new FormatException("Invalid serialized KeyShortcut format.");
-        try
-        {
-          var modifiers = (ModifierKeys)Enum.Parse(typeof(ModifierKeys), parts[0]);
-          var key = (Key)Enum.Parse(typeof(Key), parts[1]);
-          return new KeyShortcut { Key = key, Modifiers = modifiers };
-        }
-        catch (Exception ex)
-        {
-          throw new FormatException($"Failed to parse KeyShortcut from serialized string '{text}'.", ex);
-        }
-      }
+    public static bool TryParse(string str, out KeyShortcut chord, FormatOptions? options = null)
+    {
+      return FormatParseUtils.TryParseKeyShortcut(str, out chord, options);
+    }
+    public static bool TryParse(string str, out KeyShortcut chord, Action<FormatOptions>? options = null)
+    {
+      return FormatParseUtils.TryParseKeyShortcut(str, out chord, options);
+    }
+
+    public string Format() => this.Format((FormatOptions?)null);
+    public string Format(FormatOptions? options = null)
+    {
+      return FormatParseUtils.Format(this, options);
+    }
+    public string Format(Action<FormatOptions>? options = null)
+    {
+      return FormatParseUtils.Format(this, options);
+    }
+
+    public KeyShortcut(Key key, ModifierKeys modifiers = ModifierKeys.None)
+    {
+      Key = key;
+      Modifiers = modifiers;
     }
 
     /// <summary>
