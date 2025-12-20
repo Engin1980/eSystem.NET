@@ -30,7 +30,7 @@ namespace EXmlLib2.Implementations.Deserializers
 
     public object? Deserialize(string value, Type targetType, IXmlContext ctx)
     {
-      EAssert.Argument.IsTrue(targetType.IsEnum);
+      EAssert.Argument.IsTrue(targetType.IsEnum, nameof(targetType), "targetType.IsEnum cannot be null");
       object ret;
       try
       {

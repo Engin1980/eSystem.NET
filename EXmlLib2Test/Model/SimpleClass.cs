@@ -51,5 +51,10 @@ namespace EXmlLib2Test.Model
              TrueFalse == @class.TrueFalse &&
              TrueFalseNull == @class.TrueFalseNull;
     }
+
+    public override int GetHashCode()
+    {
+      return base.GetHashCode();
+    }
   }
 }

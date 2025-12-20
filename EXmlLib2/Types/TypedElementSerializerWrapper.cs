@@ -23,7 +23,10 @@ namespace EXmlLib2.Types
 
     public void Serialize(object? value, XElement element, IXmlContext ctx)
     {
-      EAssert.Argument.IsTrue(value != null && value.GetType() == typeof(T), "Value type does not match serializer type.");
+      EAssert.Argument.IsTrue(
+        value != null && value.GetType() == typeof(T), 
+        nameof(value),
+        $"Value type ({value?.GetType()?.Name ?? "null"}) does not match attribute serializer type ({typeof(T).Name})");
       T typedValue = (T)value!;
       inner.Serialize(typedValue, element, ctx);
     }

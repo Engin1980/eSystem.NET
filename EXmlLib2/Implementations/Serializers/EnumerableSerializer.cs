@@ -40,7 +40,7 @@ namespace EXmlLib2.Implementations.Serializers
     public void Serialize(object? value, XElement element, IXmlContext ctx)
     {
       EAssert.Argument.IsNotNull(value, nameof(value));
-      EAssert.Argument.IsTrue(AcceptsValue(value));
+      EAssert.Argument.IsTrue(AcceptsValue(value), nameof(value), $"This serializer {this.GetType().Name} does not accept provided value of type {value.GetType().Name}.");
 
       Type itemType = ExtractItemType(value);
       IEnumerable<object> items = ExtractItems(value);
@@ -98,7 +98,7 @@ namespace EXmlLib2.Implementations.Serializers
 
     private Type ExtractItemType(object? value)
     {
-      EAssert.Argument.IsNotNull(value);
+      EAssert.Argument.IsNotNull(value, nameof(value));
       Type ret;
       if (value.GetType().IsArray)
         ret = value.GetType().GetElementType()!;

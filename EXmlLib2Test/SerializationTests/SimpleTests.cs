@@ -94,7 +94,7 @@ namespace EXmlLib2Test.SerializationTests
       {
         ParentParent = new PropertyParent(),
         ParentChild = new PropertyChild(),
-        PropertyParentNull = null
+        PropertyParentNull = null!
       };
 
       XElement root = new XElement("Root");
@@ -125,7 +125,7 @@ namespace EXmlLib2Test.SerializationTests
       {
         ParentParent = new PropertyParent(),
         ParentChild = new PropertyChild(),
-        PropertyParentNull = null
+        PropertyParentNull = null!
       };
 
       XElement root = new XElement("Root");

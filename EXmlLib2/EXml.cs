@@ -1,5 +1,5 @@
 ﻿using System.Xml.Linq;
-using ELogging;
+using ESystem.Logging;
 using EXmlLib2.Implementations.Deserializers;
 using EXmlLib2.Implementations.Serializers;
 using EXmlLib2.Interfaces;

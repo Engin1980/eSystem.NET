@@ -15,7 +15,7 @@ namespace EXmlLib2.Types
 
     public TypedElementDeserializerWrapper(IElementDeserializer<T> inner)
     {
-      EAssert.Argument.IsNotNull(inner);
+      EAssert.Argument.IsNotNull(inner, nameof(inner));
       this.inner = inner;
     }
 

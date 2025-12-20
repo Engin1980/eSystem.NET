@@ -22,6 +22,6 @@ namespace EXmlLib2Test.Model
 
   internal class InheriteListBox
   {
-    public List<A> Values { get; set; }
+    public List<A> Values { get; set; } = null!;
   }
 }

@@ -45,5 +45,10 @@ namespace EXmlLib2Test.Model
              StringOptional == @class.StringOptional &&
              StringIgnored == @class.StringIgnored;
     }
+
+    public override int GetHashCode()
+    {
+      return base.GetHashCode();
+    }
   }
 }

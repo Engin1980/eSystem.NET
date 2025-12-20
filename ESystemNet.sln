@@ -20,6 +20,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyHookNUnit", "TestsProjects\KeyHookNUnit\KeyHookNUnit.csproj", "{18E31DFC-C50B-4134-8C32-CE20EED49217}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EXmlLib2", "EXmlLib2\EXmlLib2.csproj", "{D5F0CB76-0F19-7F6D-A804-A3D9267ED082}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EXmlLib2Test", "EXmlLib2Test\EXmlLib2Test.csproj", "{7EC19CA2-4BA0-DCC5-8C0E-5D01B9631B72}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +50,14 @@ Global
 		{18E31DFC-C50B-4134-8C32-CE20EED49217}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{18E31DFC-C50B-4134-8C32-CE20EED49217}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{18E31DFC-C50B-4134-8C32-CE20EED49217}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5F0CB76-0F19-7F6D-A804-A3D9267ED082}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5F0CB76-0F19-7F6D-A804-A3D9267ED082}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5F0CB76-0F19-7F6D-A804-A3D9267ED082}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5F0CB76-0F19-7F6D-A804-A3D9267ED082}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7EC19CA2-4BA0-DCC5-8C0E-5D01B9631B72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EC19CA2-4BA0-DCC5-8C0E-5D01B9631B72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EC19CA2-4BA0-DCC5-8C0E-5D01B9631B72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EC19CA2-4BA0-DCC5-8C0E-5D01B9631B72}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

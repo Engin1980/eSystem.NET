@@ -1,4 +1,4 @@
-﻿using ELogging;
+﻿using ESystem.Logging;
 using ESystem.Asserting;
 using EXmlLib2.Implementations.Serializers;
 using EXmlLib2.Interfaces;

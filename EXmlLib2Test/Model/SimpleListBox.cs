@@ -8,7 +8,7 @@ namespace EXmlLib2Test.Model
 {
   public class SimpleListBox
   {
-        public List<int> Numbers { get; set; }
-        public List<string> Texts { get; set; }
-    }
+    public List<int> Numbers { get; set; } = null!;
+    public List<string> Texts { get; set; } = null!;
+  }
 }

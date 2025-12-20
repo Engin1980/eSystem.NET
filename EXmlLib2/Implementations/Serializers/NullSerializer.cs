@@ -2,6 +2,7 @@
 using EXmlLib2.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,7 +18,7 @@ namespace EXmlLib2.Implementations.Serializers
 
     public string Serialize(object? value, IXmlContext ctx)
     {
-      EAssert.Argument.IsTrue(value == null, "Null value expected.");
+      EAssert.Argument.IsTrue(value == null, nameof(value), "Null value expected only.");
       return ctx.DefaultNullString;
     }
   }
