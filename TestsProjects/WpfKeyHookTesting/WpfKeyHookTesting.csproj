@@ -1,15 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
-    <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
     <AssemblyVersion>1.13.0.0</AssemblyVersion>
     <FileVersion>1.13.0.0</FileVersion>
     <Version>$(AssemblyVersion)</Version>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ESystem\ESystem.csproj" />
+    <ProjectReference Include="..\..\ESystem.WPF\ESystem.WPF.csproj" />
+    <ProjectReference Include="..\..\ESystem\ESystem.csproj" />
   </ItemGroup>
 </Project>

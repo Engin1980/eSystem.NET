@@ -28,7 +28,7 @@ namespace ESystem.Miscelaneous
 
     public Some(T value)
     {
-      EAssert.Argument.IsNotNull(value);
+      EAssert.Argument.IsNotNull(value, nameof(value));
       this.Content = value;
     }
 

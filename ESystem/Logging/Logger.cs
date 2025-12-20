@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ELogging
+namespace ESystem.Logging
 {
   public class Logger
   {
@@ -151,6 +151,7 @@ namespace ELogging
       var ret = Create(sender);
       return ret;
     }
+
     public static string GetSenderName(object sender)
     {
       string ret = ResolveSenderName(sender);
@@ -185,24 +186,19 @@ namespace ELogging
 
     public static void RegisterSenderName(object sender, string customSenderName, bool addObjectId = false)
     {
+      EAssert.Argument.IsNotNull(sender, nameof(sender));
       EAssert.Argument.IsNonEmptyString(customSenderName, nameof(customSenderName));
       senderNames[sender] = new(customSenderName, addObjectId);
     }
 
     public static void UnregisterLogAction(object owner)
     {
-      actions
-        .Where(q => owner.Equals(q.Owner))
-        .ToList()
-        .ForEach(q => actions.Remove(q));
+      actions.RemoveAll(q => owner.Equals(q.Owner));
     }
 
     public static void UnregisterLogAction(int id)
     {
-      actions
-        .Where(q => q.Id == id)
-        .ToList()
-        .ForEach(q => actions.Remove(q));
+      actions.RemoveAll(q => q.Id == id);
     }
 
     public static void UnregisterSender(object sender)
@@ -224,14 +220,24 @@ namespace ELogging
         senderNames.Remove(typeof(T));
     }
 
+    [Obsolete("Use 'Log(...)' method instead.")]
     public void Invoke(LogLevel level, string message)
     {
       this.Log(level, message);
     }
+
     public void Log(LogLevel level, string message)
     {
       Logger.ProcessMessage(level, this.sender, message);
     }
+
+    public void Trace(string message) => Log(LogLevel.TRACE, message);
+    public void Debug(string message) => Log(LogLevel.DEBUG, message);
+    public void Info(string message) => Log(LogLevel.INFO, message);
+    public void Warning(string message) => Log(LogLevel.WARNING, message);
+    public void Error(string message) => Log(LogLevel.ERROR, message);
+    public void Critical(string message) => Log(LogLevel.CRITICAL, message);
+    public void Always(string message) => Log(LogLevel.ALWAYS, message);
 
     public void LogMethodEnd(
       LogLevel level = LogLevel.TRACE,
@@ -341,7 +347,7 @@ namespace ELogging
     {
       NameInfo ni =
         (sender is string) ? new NameInfo((string)sender, false) :
-        (sender is Type) ? new NameInfo(UseFullTypeNames ? ((Type)sender).FullName! : ((Type) sender).Name, false) :
+        (sender is Type) ? new NameInfo(UseFullTypeNames ? ((Type)sender).FullName! : ((Type)sender).Name, false) :
         (senderNames.ContainsKey(sender)) ? senderNames[sender] :
         (senderNames.ContainsKey(sender.GetType())) ? senderNames[sender.GetType()] :
         new NameInfo(UseFullTypeNames

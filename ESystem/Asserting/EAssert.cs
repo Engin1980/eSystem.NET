@@ -11,53 +11,68 @@ namespace ESystem.Asserting
   {
     public class Argument
     {
-      public static void IsNotNull([NotNull] object? value, string? argumentName = null)
+      public static void IsNotNull([NotNull] object? value, string argumentName)
       {
-        if (argumentName == null)
-          EAssert.IsNotNull(value, "Argument is null.");
-        else
-          EAssert.IsNotNull(value, $"Argument '{argumentName}' is null.");
+        EAssert.IsNotNull(value, $"Argument '{argumentName}' is null.");
       }
 
-      public static void IsTrue(bool value, string? argumentName = null)
+      public static void IsTrue(bool value, string argumentName, string violationDescription)
       {
-        if (argumentName == null)
-          EAssert.IsTrue(value, "Argument condition check to true failed.");
-        else
-          EAssert.IsTrue(value, $"Argument '{argumentName}' condition check to true failed.");
+        IsTrue(value, argumentName, () => violationDescription);
       }
 
-      public static void IsNonEmptyString([NotNull] string value, string? argumentName = null)
+      public static void IsTrue(bool value, string argumentName, Func<string> violationDescription)
       {
-        if (argumentName == null)
-          EAssert.IsNonEmptyString(value, "Argument condition check to true failed.");
-        else
-          EAssert.IsNonEmptyString(value, $"Argument '{argumentName}' condition check to true failed.");
+        EAssert.IsTrue(value, $"Argument '{argumentName}' condition check to true failed. Volation: {violationDescription()}");
       }
+
+      public static void IsNonEmptyString([NotNull] string value, string argumentName)
+      {
+        EAssert.IsNonEmptyString(value, $"Argument '{argumentName}' is null or empty.");
+      }
+    }
+
+    public static void IsNonEmptyString([NotNull] string value, Func<string> messageProvider)
+    {
+      if (string.IsNullOrEmpty(value))
+        throw new EAssertException(messageProvider.Invoke());
     }
 
     public static void IsNonEmptyString([NotNull] string value, string message = "String is empty or null.")
     {
-      if (string.IsNullOrEmpty(value))
-        throw new EAssertException(message);
+      IsNonEmptyString(value, () => message);
+    }
+
+    public static void IsNotNull([NotNull] object? value, Func<string> messageProvider)
+    {
+      if (value == null)
+        throw new EAssertException(messageProvider());
     }
 
     public static void IsNotNull([NotNull] object? value, string message = "Value is null.")
     {
-      if (value == null)
-        throw new EAssertException(message);
+      IsNotNull(value, () => message);
+    }
+
+    public static void IsTrue(bool value, Func<string> messageProvider)
+    {
+      if (value != true)
+        throw new EAssertException(messageProvider());
     }
 
     public static void IsTrue(bool value, string message = "Value must be true.")
     {
-      if (value != true)
-        throw new EAssertException(message);
+      IsTrue(value, () => message);
+    }
+
+    public static void IsFalse(bool value, Func<string> messageProvider)
+    {
+      IsTrue(!value, messageProvider);
     }
 
     public static void IsFalse(bool value, string message = "Value must be false.")
     {
-      if (value != false)
-        throw new EAssertException(message);
+      IsTrue(!value, message);
     }
 
     public static void IsNull(object? value, string message = "Value is not null.")

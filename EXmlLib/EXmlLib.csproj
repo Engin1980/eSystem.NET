@@ -1,16 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyVersion>1.2.3.5</AssemblyVersion>
     <FileVersion>1.2.3.5</FileVersion>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\ELogging\ELogging.csproj" />
     <ProjectReference Include="..\ESystem\ESystem.csproj" />
   </ItemGroup>
-
 </Project>
