@@ -14,7 +14,13 @@ namespace EXmlLib2.Interfaces
     string DefaultNullString { get; }
     string DefaultTrueString { get; }
     string DefaultFalseString { get; }
+    /// <summary>
+    /// Name of attribute where the original data type is stored
+    /// </summary>
     string TypeNameAttribute { get; }
+    /// <summary>
+    /// Name of element used to store items of an enumerable when no specific name is provided
+    /// </summary>
     string? DefaultItemXmlName { get; }
 
     IAttributeDeserializer GetAttributeDeserializer(Type targetType);
