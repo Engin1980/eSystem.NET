@@ -55,6 +55,9 @@ namespace EXmlLib2
         ret.ctx.AddSerializer((IElementSerializer)new EnumSerializer());
         ret.ctx.AddSerializer((IAttributeSerializer)new EnumSerializer());
 
+        ret.ctx.AddSerializer((IElementSerializer<DateTime>)new DateTimeSerializer());
+        ret.ctx.AddSerializer((IAttributeSerializer<DateTime>)new DateTimeSerializer());
+
         ret.ctx.AddSerializer(new EnumerableSerializer());
         ret.ctx.AddSerializer(new TypeElementSerializer());
       }
@@ -86,6 +89,9 @@ namespace EXmlLib2
 
         ret.ctx.AddDeserializer((IElementDeserializer)new NullableDeserializer());
         ret.ctx.AddDeserializer((IAttributeDeserializer)new NullableDeserializer());
+
+        ret.ctx.AddDeserializer((IElementDeserializer<DateTime>)new DateTimeDeserializer());
+        ret.ctx.AddDeserializer((IAttributeDeserializer<DateTime>)new DateTimeDeserializer());
       }
       return ret;
     }
