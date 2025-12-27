@@ -1,4 +1,5 @@
-﻿using EXmlLib2.Interfaces;
+﻿using EXmlLib2.Abstractions;
+using EXmlLib2.Abstractions.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace EXmlLib2.Implementations.Deserializers
       else
       {
         Type type = Nullable.GetUnderlyingType(targetType) ?? throw new EXmlException("Unexpected non-nullable type.");
-        IElementDeserializer deserializer = ctx.GetElementDeserializer(type);
+        IElementDeserializer deserializer = ctx.ElementDeserializers.GetByType(type);
         ret = deserializer.Deserialize(element, type, ctx);
       }
       return ret;
@@ -34,7 +35,7 @@ namespace EXmlLib2.Implementations.Deserializers
       else
       {
         Type type = Nullable.GetUnderlyingType(targetType) ?? throw new EXmlException("Unexpected non-nullable type.");
-        IAttributeDeserializer deserializer = ctx.GetAttributeDeserializer(type);
+        IAttributeDeserializer deserializer = ctx.AttributeDeserializers.GetByType(type);
         ret = deserializer.Deserialize(value, type, ctx);
       }
       return ret;

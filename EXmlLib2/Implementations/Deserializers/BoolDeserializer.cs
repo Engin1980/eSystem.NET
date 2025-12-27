@@ -1,4 +1,5 @@
-﻿using EXmlLib2.Interfaces;
+﻿using EXmlLib2.Abstractions;
+using EXmlLib2.Abstractions.Abstracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Implementations.Deserializers
 {
-  public class BoolDeserializer : IAttributeDeserializer<bool>, IElementDeserializer<bool>
+  public class BoolDeserializer : TypedDeserializer<bool>
   {
     public bool UseAlsoDefaultParseMethod { get; private set; }
 
@@ -17,7 +18,7 @@ namespace EXmlLib2.Implementations.Deserializers
       UseAlsoDefaultParseMethod = useAlsoDefaultParseMethod;
     }
 
-    public bool Deserialize(string value, IXmlContext ctx)
+    public override bool Deserialize(string value, IXmlContext ctx)
     {
       bool ret;
       if (value == ctx.DefaultTrueString)
@@ -29,7 +30,7 @@ namespace EXmlLib2.Implementations.Deserializers
       return ret;
     }
 
-    public bool Deserialize(XElement element, IXmlContext ctx)
+    public override bool Deserialize(XElement element, IXmlContext ctx)
     {
       return this.Deserialize(element.Value, ctx);
     }

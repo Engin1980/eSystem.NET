@@ -1,4 +1,5 @@
-﻿using EXmlLib2.Interfaces;
+﻿using EXmlLib2.Abstractions;
+using EXmlLib2.Abstractions.Abstracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,16 +9,16 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Implementations.Deserializers
 {
-  public class StringDeserializer : IElementDeserializer<string?>, IAttributeDeserializer<string?>
+  public class StringDeserializer : TypedDeserializer<string?>
   {
-    public string? Deserialize(XElement element, IXmlContext ctx)
+    public override string? Deserialize(XElement element, IXmlContext ctx)
     {
       string s = element.Value;
       string? ret = Deserialize(s, ctx);
       return ret;
     }
 
-    public string? Deserialize(string value, IXmlContext ctx)
+    public override string? Deserialize(string value, IXmlContext ctx)
     {
       string? ret;
       if (value == ctx.DefaultNullString)

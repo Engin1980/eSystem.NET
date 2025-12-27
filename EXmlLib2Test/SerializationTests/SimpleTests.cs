@@ -86,9 +86,9 @@ namespace EXmlLib2Test.SerializationTests
     [Test]
     public void InheritedPropertyAsAttributeTest()
     {
-      exml.AddSerializer(new TypeElementSerializer<InheritedPropertyTest>());
-      exml.AddSerializer(new TypeElementSerializer<PropertyParent>());
-      exml.AddSerializer(new TypeElementSerializer<PropertyChild>());
+      exml.ElementSerializers.Push(new TypeElementSerializer<InheritedPropertyTest>());
+      exml.ElementSerializers.Push(new TypeElementSerializer<PropertyParent>());
+      exml.ElementSerializers.Push(new TypeElementSerializer<PropertyChild>());
 
       var obj = new InheritedPropertyTest()
       {
@@ -112,14 +112,14 @@ namespace EXmlLib2Test.SerializationTests
       EXml exml = EXml.CreateDefault();
 
       XmlTypeInfo<InheritedPropertyTest> xti = new XmlTypeInfo<InheritedPropertyTest>()
-        .ForProperty(q => q.ParentChild, q =>
+        .WithXmlPropertyInfo(q => q.ParentChild, q =>
         {
           q.XmlNameByType[typeof(PropertyParent)] = nameof(PropertyParent);
           q.XmlNameByType[typeof(PropertyChild)] = nameof(PropertyChild);
         });
-      exml.AddSerializer(new TypeElementSerializer<InheritedPropertyTest>(xti));
-      exml.AddSerializer(new TypeElementSerializer<PropertyParent>());
-      exml.AddSerializer(new TypeElementSerializer<PropertyChild>());
+      exml.ElementSerializers.Push(new TypeElementSerializer<InheritedPropertyTest>(xti));
+      exml.ElementSerializers.Push(new TypeElementSerializer<PropertyParent>());
+      exml.ElementSerializers.Push(new TypeElementSerializer<PropertyChild>());
 
       var obj = new InheritedPropertyTest()
       {

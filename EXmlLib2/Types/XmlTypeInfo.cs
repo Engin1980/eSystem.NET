@@ -15,11 +15,11 @@ namespace EXmlLib2.Types
   {
     public static XmlTypeInfo<T> Create() => new();
     internal Dictionary<PropertyInfo, XmlPropertyInfo> PropertyInfos { get; } = new();
-    internal static XmlPropertyInfo DefaultXmlPropertyInfo { get; } = new();
+    public XmlPropertyInfo DefaultXmlPropertyInfo { get; } = new();
     internal Func<T>? Constructor { get; private set; }
     internal Func<Dictionary<PropertyInfo, object?>, T>? FactoryMethod { get; private set; }
 
-    public XmlTypeInfo<T> ForProperty<V>(Expression<Func<T, V>> expression, Action<XmlPropertyInfo> action)
+    public XmlTypeInfo<T> WithXmlPropertyInfo<V>(Expression<Func<T, V>> expression, Action<XmlPropertyInfo> action)
     {
       PropertyInfo propertyInfo = XmlTypeInfo<T>.ExtractPropertyInfoFromExpression(expression);
       XmlPropertyInfo xpi = PropertyInfos.GetOrAdd(propertyInfo, () => new XmlPropertyInfo());
@@ -54,41 +54,41 @@ namespace EXmlLib2.Types
     }
   }
 
-  public class XmlTypeInfo
-  {
-    public static XmlTypeInfo Create() => new();
-    internal Dictionary<PropertyInfo, XmlPropertyInfo> PropertyInfos { get; } = new();
-    internal static XmlPropertyInfo DefaultXmlPropertyInfo { get; } = new();
-    internal Func<object>? Constructor { get; private set; }
-    internal Func<Dictionary<PropertyInfo, object?>, object>? FactoryMethod { get; private set; }
+  //public class XmlTypeInfo
+  //{
+  //  public static XmlTypeInfo Create() => new();
+  //  internal Dictionary<PropertyInfo, XmlPropertyInfo> PropertyInfos { get; } = new();
+  //  internal static XmlPropertyInfo DefaultXmlPropertyInfo { get; } = new();
+  //  internal Func<object>? Constructor { get; private set; }
+  //  internal Func<Dictionary<PropertyInfo, object?>, object>? FactoryMethod { get; private set; }
 
-    public XmlTypeInfo ForProperty(PropertyInfo propertyInfo, Action<XmlPropertyInfo> action)
-    {
-      XmlPropertyInfo xpi = PropertyInfos.GetOrAdd(propertyInfo, () => new XmlPropertyInfo());
-      action(xpi);
-      return this;
-    }
+  //  public XmlTypeInfo ForProperty(PropertyInfo propertyInfo, Action<XmlPropertyInfo> action)
+  //  {
+  //    XmlPropertyInfo xpi = PropertyInfos.GetOrAdd(propertyInfo, () => new XmlPropertyInfo());
+  //    action(xpi);
+  //    return this;
+  //  }
 
-    public XmlTypeInfo ForProperty<T,V>(Expression<Func<T, V>> expression, Action<XmlPropertyInfo> action)
-    {
-      PropertyInfo propertyInfo = XmlTypeInfo<T>.ExtractPropertyInfoFromExpression(expression);
-      return ForProperty(propertyInfo, action);
-    }
+  //  public XmlTypeInfo ForProperty<T,V>(Expression<Func<T, V>> expression, Action<XmlPropertyInfo> action)
+  //  {
+  //    PropertyInfo propertyInfo = XmlTypeInfo<T>.ExtractPropertyInfoFromExpression(expression);
+  //    return ForProperty(propertyInfo, action);
+  //  }
 
-    public XmlTypeInfo WithFactoryMethod(Func<Dictionary<PropertyInfo, object?>, object> factoryMethod)
-    {
-      EAssert.Argument.IsNotNull(factoryMethod, nameof(factoryMethod));
-      EAssert.IsNull(this.Constructor, $"Unable to set {nameof(FactoryMethod)} if {nameof(Constructor)} is not null.");
-      this.FactoryMethod = factoryMethod;
-      return this;
-    }
+  //  public XmlTypeInfo WithFactoryMethod(Func<Dictionary<PropertyInfo, object?>, object> factoryMethod)
+  //  {
+  //    EAssert.Argument.IsNotNull(factoryMethod, nameof(factoryMethod));
+  //    EAssert.IsNull(this.Constructor, $"Unable to set {nameof(FactoryMethod)} if {nameof(Constructor)} is not null.");
+  //    this.FactoryMethod = factoryMethod;
+  //    return this;
+  //  }
 
-    public XmlTypeInfo WithConstructor(Func<object> constructor)
-    {
-      EAssert.Argument.IsNotNull(constructor, nameof(constructor));
-      EAssert.IsNull(this.FactoryMethod, $"Unable to set {nameof(Constructor)} if {nameof(FactoryMethod)} is not null.");
-      this.Constructor = constructor;
-      return this;
-    }
-  }
+  //  public XmlTypeInfo WithConstructor(Func<object> constructor)
+  //  {
+  //    EAssert.Argument.IsNotNull(constructor, nameof(constructor));
+  //    EAssert.IsNull(this.FactoryMethod, $"Unable to set {nameof(Constructor)} if {nameof(FactoryMethod)} is not null.");
+  //    this.Constructor = constructor;
+  //    return this;
+  //  }
+  //}
 }

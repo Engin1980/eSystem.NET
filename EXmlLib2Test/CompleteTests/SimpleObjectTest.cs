@@ -1,4 +1,7 @@
 ﻿using ESystem.Logging;
+using EXmlLib2.Implementations.Deserializers;
+using EXmlLib2.Implementations.Serializers;
+using EXmlLib2.Types;
 using FluentAssertions;
 using NUnit.Framework.Constraints;
 using System;
@@ -31,7 +34,7 @@ namespace EXmlLib2Test.CompleteTests
     }
 
     [Test]
-    public void SimpleClassTest()
+    public void SimpleClassToElementsTest()
     {
       SimpleClass source = new SimpleClass()
       {
@@ -41,6 +44,33 @@ namespace EXmlLib2Test.CompleteTests
       };
 
       var exml = EXmlLib2.EXml.CreateDefault();
+      exml.ElementSerializers.Push(new TypeElementSerializer<SimpleClass>());
+      exml.ElementDeserializers.Push(new TypeElementDeserializer<SimpleClass>());
+
+      XElement root = new XElement("Root");
+      exml.Serialize(source, root);
+
+      SimpleClass? dest = exml.Deserialize<SimpleClass>(root);
+
+      source.Should().BeEquivalentTo(dest);
+    }
+
+    [Test]
+    public void SimpleClassToAttributesTest()
+    {
+      SimpleClass source = new SimpleClass()
+      {
+        CreatedAt = DateTime.Now,
+        Id = 11,
+        Name = "Test Object"
+      };
+
+      var exml = EXmlLib2.EXml.CreateDefault();
+      var xti = new XmlTypeInfo<SimpleClass>();
+      xti.DefaultXmlPropertyInfo.Representation = XmlRepresentation.Attribute;
+      exml.ElementSerializers.Push(new TypeElementSerializer<SimpleClass>(xti));
+      exml.ElementDeserializers.Push(new TypeElementDeserializer<SimpleClass>(xti));
+
       XElement root = new XElement("Root");
       exml.Serialize(source, root);
 

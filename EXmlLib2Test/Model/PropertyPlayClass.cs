@@ -23,17 +23,17 @@ namespace EXmlLib2Test.Model
     public static void AdjustEXml(EXml exml)
     {
       var xti = XmlTypeInfo<PropertyPlayClass>.Create()
-        .ForProperty(q => q.StringOptional, q => q.Obligation = XmlObligation.Optional)
-        .ForProperty(q => q.StringOptionalTwo, q => q.Obligation = XmlObligation.Optional)
-        .ForProperty(q => q.StringIgnored, q => q.Obligation = XmlObligation.Ignored)
-        .ForProperty(q => q.StringRenamed, q => q.XmlName = "CustomStringName")
-        .ForProperty(q => q.StringAttribute, q => q.Representation = XmlRepresentation.Attribute);
+        .WithXmlPropertyInfo(q => q.StringOptional, q => q.Obligation = XmlObligation.Optional)
+        .WithXmlPropertyInfo(q => q.StringOptionalTwo, q => q.Obligation = XmlObligation.Optional)
+        .WithXmlPropertyInfo(q => q.StringIgnored, q => q.Obligation = XmlObligation.Ignored)
+        .WithXmlPropertyInfo(q => q.StringRenamed, q => q.XmlName = "CustomStringName")
+        .WithXmlPropertyInfo(q => q.StringAttribute, q => q.Representation = XmlRepresentation.Attribute);
 
       TypeElementSerializer<PropertyPlayClass> tes = new(xti);
-      exml.InsertSerializer(0, tes);
+      exml.ElementSerializers.Push(tes);
 
       TypeElementDeserializer<PropertyPlayClass> tds = new(xti);
-      exml.InsertDeserializer(0, tds);
+      exml.ElementDeserializers.Push(tds);
     }
 
     public override bool Equals(object? obj)

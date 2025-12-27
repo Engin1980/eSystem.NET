@@ -1,4 +1,5 @@
-﻿using EXmlLib2.Interfaces;
+﻿using EXmlLib2.Abstractions;
+using EXmlLib2.Abstractions.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace EXmlLib2.Implementations.Serializers
 {
   public class EnumSerializer : IAttributeSerializer, IElementSerializer
   {
-    public bool AcceptsValue(object? value) => value != null && value.GetType().IsEnum;
+    public bool AcceptsType(Type type) => type.IsEnum;
 
     public void Serialize(object? value, XElement element, IXmlContext ctx)
     {

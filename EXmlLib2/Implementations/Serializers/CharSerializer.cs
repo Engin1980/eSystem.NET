@@ -1,4 +1,5 @@
-﻿using EXmlLib2.Interfaces;
+﻿using EXmlLib2.Abstractions;
+using EXmlLib2.Abstractions.Abstracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +9,9 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Implementations.Serializers
 {
-  public class CharSerializer : IElementSerializer<char>, IAttributeSerializer<char>
+  public class CharSerializer : TypedSerializer<char>
   {
-    public string Serialize(char value, IXmlContext ctx) => value.ToString();
-    public void Serialize(char value, XElement element, IXmlContext ctx) => element.Value = Serialize(value, ctx);
+    protected override string Serialize(char value, IXmlContext ctx) => value.ToString();
+    protected override void Serialize(char value, XElement element, IXmlContext ctx) => element.Value = Serialize(value, ctx);
   }
 }

@@ -1,7 +1,7 @@
 ﻿using ESystem.Logging;
 using ESystem;
 using ESystem.Asserting;
-using EXmlLib2.Interfaces;
+using EXmlLib2.Abstractions;
 using EXmlLib2.Types;
 using System;
 using System.Collections.Generic;
@@ -12,61 +12,63 @@ using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using EXmlLib2.Abstractions.Interfaces;
+using EXmlLib2.Abstractions.Abstracts;
 
 namespace EXmlLib2.Implementations.Deserializers
 {
-  public class TypeElementDeserializer<T> : IElementDeserializer<T>
+  public class TypeElementDeserializer<T> : TypedElementDeserializer<T>
   {
     private readonly Logger logger = Logger.Create(typeof(T));
-    public XmlTypeInfo<T> Type { get; private set; }
+    public XmlTypeInfo<T> XmlTypeInfo { get; private set; }
 
     public TypeElementDeserializer()
     {
-      this.Type = new();
+      this.XmlTypeInfo = new();
     }
 
     public TypeElementDeserializer(XmlTypeInfo<T> xmlTypeInfo)
     {
       EAssert.Argument.IsNotNull(xmlTypeInfo, nameof(xmlTypeInfo));
-      this.Type = xmlTypeInfo;
+      this.XmlTypeInfo = xmlTypeInfo;
     }
 
-    public T? Deserialize(XElement element, IXmlContext ctx)
+    protected virtual PropertyInfo[] GetProperties()
+    {
+      PropertyInfo[] ret = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+      return ret;
+    }
+
+    public override T Deserialize(XElement element, IXmlContext ctx)
     {
       Dictionary<PropertyInfo, object?> propertyValues;
       T? ret;
       EAssert.Argument.IsNotNull(element, nameof(element));
 
-      if (element.Value == ctx.DefaultNullString)
-      {
-        object? o = null;
-        ret = (T?)o; // to avoid warning/error
-      }
-      else
-      {
-        try
-        {
-          propertyValues = DeserializeProperties(element, ctx);
-        }
-        catch (Exception ex)
-        {
-          var eex = new EXmlException($"Failed to deserialize {typeof(T)} from element {element} - failed to read properties.", ex);
-          this.logger.LogException(eex);
-          throw eex;
-        }
+      EAssert.IsFalse(element.Value == ctx.DefaultNullString, $"Element value cannot be '{ctx.DefaultNullString}' (that is 'null') for deserialization of type {typeof(T)}.");
 
-        try
-        {
-          ret = CreateAndFillObject(propertyValues);
-        }
-        catch (Exception ex)
-        {
-          var eex = new EXmlException($"Failed to deserialize {typeof(T)} from element {element} - failed to create & fill the instance.", ex);
-          this.logger.LogException(eex);
-          throw eex;
-        }
+      var props = GetProperties();
+      try
+      {
+        propertyValues = DeserializeProperties(props, element, ctx);
+      }
+      catch (Exception ex)
+      {
+        var eex = new EXmlException($"Failed to deserialize {typeof(T)} from element {element} - failed to read properties.", ex);
+        this.logger.LogException(eex);
+        throw eex;
       }
 
+      try
+      {
+        ret = CreateAndFillObject(propertyValues);
+      }
+      catch (Exception ex)
+      {
+        var eex = new EXmlException($"Failed to deserialize {typeof(T)} from element {element} - failed to create & fill the instance.", ex);
+        this.logger.LogException(eex);
+        throw eex;
+      }
       return ret;
     }
 
@@ -74,11 +76,11 @@ namespace EXmlLib2.Implementations.Deserializers
     {
       T ret;
 
-      if (Type.FactoryMethod != null)
+      if (XmlTypeInfo.FactoryMethod != null)
       {
         try
         {
-          ret = Type.FactoryMethod.Invoke(propertyValues);
+          ret = XmlTypeInfo.FactoryMethod.Invoke(propertyValues);
         }
         catch (Exception ex)
         {
@@ -89,11 +91,11 @@ namespace EXmlLib2.Implementations.Deserializers
       }
       else
       {
-        if (Type.Constructor != null)
+        if (XmlTypeInfo.Constructor != null)
         {
           try
           {
-            ret = Type.Constructor.Invoke();
+            ret = XmlTypeInfo.Constructor.Invoke();
           }
           catch (Exception ex)
           {
@@ -161,11 +163,10 @@ namespace EXmlLib2.Implementations.Deserializers
       return ret;
     }
 
-    private Dictionary<PropertyInfo, object?> DeserializeProperties(XElement element, IXmlContext ctx)
+    private Dictionary<PropertyInfo, object?> DeserializeProperties(PropertyInfo[] properties, XElement element, IXmlContext ctx)
     {
       Dictionary<PropertyInfo, object?> ret = new();
 
-      var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
       foreach (var property in properties)
       {
         object? propertyValue = DeserializeProperty(property, element, ctx);
@@ -180,13 +181,13 @@ namespace EXmlLib2.Implementations.Deserializers
     private object? DeserializeProperty(PropertyInfo property, XElement element, IXmlContext ctx)
     {
       object? ret;
-      XmlPropertyInfo xpi = Type.PropertyInfos.TryGet(property) ?? XmlTypeInfo<T>.DefaultXmlPropertyInfo;
+      XmlPropertyInfo xpi = XmlTypeInfo.PropertyInfos.TryGet(property) ?? this.XmlTypeInfo.DefaultXmlPropertyInfo;
       if (xpi.Obligation == XmlObligation.Ignored)
         ret = IGNORED_PROPERTY;
       else
       {
         string xmlName = xpi.XmlName ?? property.Name;
-        object? propertySource = ResolvePropertySource(element, xmlName);
+        object? propertySource = ResolvePropertySource(element, xpi.Representation, xmlName);
         if (propertySource == null)
         {
           if (xpi.Obligation == XmlObligation.Mandatory)
@@ -211,7 +212,7 @@ namespace EXmlLib2.Implementations.Deserializers
 
     private object? DeserializePropertyFromAttribute(XAttribute attribute, Type targetType, IXmlContext ctx)
     {
-      IAttributeDeserializer deserializer = ctx.GetAttributeDeserializer(targetType);
+      IAttributeDeserializer deserializer = ctx.AttributeDeserializers.GetByType(targetType);
       object? ret = deserializer.Deserialize(attribute.Value, targetType, ctx);
       return ret;
     }
@@ -224,16 +225,25 @@ namespace EXmlLib2.Implementations.Deserializers
         targetType = global::System.Type.GetType(typeName)
           ?? throw new EXmlException($"Custom type is defined as {typeName}, but cannot be loaded.");
       }
-      IElementDeserializer deserializer = ctx.GetElementDeserializer(targetType);
+      IElementDeserializer deserializer = ctx.ElementDeserializers.GetByType(targetType);
       object? ret = deserializer.Deserialize(element, targetType, ctx);
       return ret;
     }
 
-    private object? ResolvePropertySource(XElement element, string xmlName)
+    private object? ResolvePropertySource(XElement element, XmlRepresentation? representation, string xmlName)
     {
-      object? ret = element.Attributes().FirstOrDefault(q => q.Name == xmlName);
-      if (ret == null)
-        ret = element.Elements().FirstOrDefault(q => q.Name == xmlName);
+      object? ret;
+      XAttribute? findInAttributes() => element.Attributes().FirstOrDefault(q => q.Name == xmlName);
+      XElement? findInElements() => element.Elements().FirstOrDefault(q => q.Name == xmlName);
+      if (representation == XmlRepresentation.Attribute)
+        ret = findInAttributes();
+      else if (representation == XmlRepresentation.Element)
+        ret = findInElements();
+      else
+      {
+        ret = findInAttributes();
+        ret ??= findInElements();
+      }
       return ret;
     }
   }

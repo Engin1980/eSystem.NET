@@ -1,5 +1,6 @@
 ﻿using ESystem.Asserting;
-using EXmlLib2.Interfaces;
+using EXmlLib2.Abstractions;
+using EXmlLib2.Abstractions.Interfaces;
 using EXmlLib2.Types;
 using System;
 using System.Collections.Generic;
@@ -26,10 +27,8 @@ namespace EXmlLib2.Implementations.Serializers
       this.xii = xmlIterableInfo;
     }
 
-    public bool AcceptsValue(object? value)
+    public bool AcceptsType(Type type)
     {
-      if (value == null) return false;
-      Type type = value.GetType();
       if (type.IsArray)
         return true;
       if (type.IsGenericType && type.IsAssignableTo(typeof(System.Collections.IEnumerable)))
@@ -40,7 +39,10 @@ namespace EXmlLib2.Implementations.Serializers
     public void Serialize(object? value, XElement element, IXmlContext ctx)
     {
       EAssert.Argument.IsNotNull(value, nameof(value));
-      EAssert.Argument.IsTrue(AcceptsValue(value), nameof(value), $"This serializer {this.GetType().Name} does not accept provided value of type {value.GetType().Name}.");
+      EAssert.Argument.IsTrue(
+        value == null || AcceptsType(value.GetType()),
+        nameof(value),
+        $"This serializer {this.GetType().Name} does not accept provided value of type {value?.GetType()?.Name ?? "null"}.");
 
       Type itemType = ExtractItemType(value);
       IEnumerable<object> items = ExtractItems(value);
@@ -58,7 +60,7 @@ namespace EXmlLib2.Implementations.Serializers
 
     private XElement SerializeItem(object item, Type itemType, IXmlContext ctx)
     {
-      IElementSerializer serializer = ctx.GetElementSerializer(item);
+      IElementSerializer serializer = ctx.ElementSerializers.GetByType(item.GetType());
       XmlNameAndStoreFlag xnsf = GetItemElementName(item?.GetType(), itemType, ctx);
       XElement ret = new XElement(XName.Get(xnsf.XmlName));
       ctx.SerializeToElement(item, ret, serializer);

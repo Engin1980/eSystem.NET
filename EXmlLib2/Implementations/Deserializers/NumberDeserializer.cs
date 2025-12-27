@@ -1,4 +1,5 @@
-﻿using EXmlLib2.Interfaces;
+﻿using EXmlLib2.Abstractions;
+using EXmlLib2.Abstractions.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -14,15 +15,16 @@ namespace EXmlLib2.Implementations.Deserializers
   {
     private record TypeAndDeserializer(Type Type, Func<string, CultureInfo, object> parser);
 
-    private readonly static TypeAndDeserializer[] parsers = new TypeAndDeserializer[]
-    {
+    private readonly static TypeAndDeserializer[] parsers =
+    [
       new(typeof(byte), (s, c) => byte.Parse(s,c)),
       new(typeof(short), (s, c) => short.Parse(s,c)),
       new(typeof(int), (s, c) => int.Parse(s,c)),
       new(typeof(long), (s, c) => long.Parse(s,c)),
       new(typeof(float), (s, c) => float.Parse(s,c)),
       new(typeof(double), (s, c) => double.Parse(s,c))
-    };
+      //TODO missing decimal?
+    ];
 
     private static object Parse(string s, Type type, IXmlContext ctx)
     {

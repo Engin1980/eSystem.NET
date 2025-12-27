@@ -1,4 +1,5 @@
-﻿using EXmlLib2.Interfaces;
+﻿using EXmlLib2.Abstractions;
+using EXmlLib2.Abstractions.Abstracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,12 +9,12 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Implementations.Serializers
 {
-  public class DateTimeSerializer : IAttributeSerializer<DateTime>, IElementSerializer<DateTime>
+  public class DateTimeSerializer : TypedSerializer<DateTime>
   {
-    public string Serialize(DateTime value, IXmlContext ctx)
+    protected override string Serialize(DateTime value, IXmlContext ctx)
       => ConvertToString(value);
 
-    public void Serialize(DateTime value, XElement element, IXmlContext ctx)
+    protected override void Serialize(DateTime value, XElement element, IXmlContext ctx)
       => element.Value = ConvertToString(value);
 
     private string ConvertToString(DateTime value)

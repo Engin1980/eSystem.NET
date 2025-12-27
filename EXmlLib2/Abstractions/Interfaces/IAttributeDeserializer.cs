@@ -5,16 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace EXmlLib2.Interfaces
+namespace EXmlLib2.Abstractions.Interfaces
 {
-  public interface IAttributeDeserializer
+  public interface IAttributeDeserializer : ISelectableByType
   {
-    public bool AcceptsType(Type type);
     public object? Deserialize(string value, Type targetType, IXmlContext ctx);
-  }
-
-  public interface IAttributeDeserializer<T>
-  {
-    public T Deserialize(string value, IXmlContext ctx);
   }
 }

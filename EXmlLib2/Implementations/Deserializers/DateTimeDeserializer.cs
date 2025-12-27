@@ -1,4 +1,5 @@
-﻿using EXmlLib2.Interfaces;
+﻿using EXmlLib2.Abstractions;
+using EXmlLib2.Abstractions.Abstracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,14 +9,14 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Implementations.Deserializers
 {
-  public class DateTimeDeserializer : IAttributeDeserializer<DateTime>, IElementDeserializer<DateTime>
+  public class DateTimeDeserializer : TypedDeserializer<DateTime>
   {
-    public DateTime Deserialize(string value, IXmlContext ctx)
+    public override DateTime Deserialize(string value, IXmlContext ctx)
     {
       return ConvertFromString(value);
     }
 
-    public DateTime Deserialize(XElement element, IXmlContext ctx)
+    public override DateTime Deserialize(XElement element, IXmlContext ctx)
     {
       return ConvertFromString(element.Value);
     }

@@ -92,9 +92,9 @@ namespace EXmlLib2Test.DeserializationTests
     [Test]
     public void InheritedPropertyAsAttributeTypeTest()
     {
-      exml.AddDeserializer(new TypeElementDeserializer<InheritedPropertyTest>());
-      exml.AddDeserializer(new TypeElementDeserializer<PropertyParent>());
-      exml.AddDeserializer(new TypeElementDeserializer<PropertyChild>());
+      exml.ElementDeserializers.Push(new TypeElementDeserializer<InheritedPropertyTest>());
+      exml.ElementDeserializers.Push(new TypeElementDeserializer<PropertyParent>());
+      exml.ElementDeserializers.Push(new TypeElementDeserializer<PropertyChild>());
 
       string s = "<Root>\r\n  <ParentParent>\r\n    <Int>22</Int>\r\n  </ParentParent>\r\n  <ParentChild __type=\"EXmlLib2Test.Model.PropertyChild, EXmlLib2Test\">\r\n    <OtherInt>33</OtherInt>\r\n    <Int>22</Int>\r\n  </ParentChild>\r\n  <PropertyParentNull>(# null #)</PropertyParentNull>\r\n</Root>";
       XElement root = XElement.Parse(s);
@@ -119,14 +119,14 @@ namespace EXmlLib2Test.DeserializationTests
       EXml exml = EXml.CreateDefault();
 
       XmlTypeInfo<InheritedPropertyTest> xti = new XmlTypeInfo<InheritedPropertyTest>()
-        .ForProperty(q => q.ParentChild, q =>
+        .WithXmlPropertyInfo(q => q.ParentChild, q =>
         {
           q.XmlNameByType[typeof(PropertyParent)] = nameof(PropertyParent);
           q.XmlNameByType[typeof(PropertyChild)] = nameof(PropertyChild);
         });
-      exml.AddDeserializer(new TypeElementDeserializer<InheritedPropertyTest>(xti));
-      exml.AddDeserializer(new TypeElementDeserializer<PropertyParent>());
-      exml.AddDeserializer(new TypeElementDeserializer<PropertyChild>());
+      exml.ElementDeserializers.Push(new TypeElementDeserializer<InheritedPropertyTest>(xti));
+      exml.ElementDeserializers.Push(new TypeElementDeserializer<PropertyParent>());
+      exml.ElementDeserializers.Push(new TypeElementDeserializer<PropertyChild>());
 
       string s = "<Root>\r\n  <ParentParent>\r\n    <Int>22</Int>\r\n  </ParentParent>\r\n  <ParentChild __type=\"EXmlLib2Test.Model.PropertyChild, EXmlLib2Test\">\r\n    <OtherInt>33</OtherInt>\r\n    <Int>22</Int>\r\n  </ParentChild>\r\n  <PropertyParentNull>(# null #)</PropertyParentNull>\r\n</Root>";
       XElement root = XElement.Parse(s);
