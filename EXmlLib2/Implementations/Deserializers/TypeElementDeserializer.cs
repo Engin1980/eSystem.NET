@@ -19,6 +19,14 @@ namespace EXmlLib2.Implementations.Deserializers
 {
   public class TypeElementDeserializer<T> : TypedElementDeserializer<T>
   {
+    enum TypeKind
+    {
+      Class,
+      Struct,
+      RecordClass,
+      RecordStruct
+    }
+
     private readonly Logger logger = Logger.Create(typeof(T));
     public XmlTypeInfo<T> XmlTypeInfo { get; private set; }
 
@@ -41,7 +49,7 @@ namespace EXmlLib2.Implementations.Deserializers
 
     public override T Deserialize(XElement element, IXmlContext ctx)
     {
-      Dictionary<PropertyInfo, object?> propertyValues;
+      PropertyValuesDictionary<T> propertyValues;
       T? ret;
       EAssert.Argument.IsNotNull(element, nameof(element));
 
@@ -72,53 +80,166 @@ namespace EXmlLib2.Implementations.Deserializers
       return ret;
     }
 
-    private T CreateAndFillObject(Dictionary<PropertyInfo, object?> propertyValues)
+    private T CreateAndFillObject(PropertyValuesDictionary<T> propertyValues)
     {
       T ret;
 
       if (XmlTypeInfo.FactoryMethod != null)
       {
+        ret = CreateUsingFactoryMethod(propertyValues);
+      }
+      else
+      {
+        TypeKind typeKind = GetTypeKind<T>();
+        ret = typeKind switch
+        {
+          TypeKind.RecordClass => CreateAndInitStructOrRecord(true, propertyValues),
+          TypeKind.RecordStruct => CreateAndInitStructOrRecord(true, propertyValues),
+          TypeKind.Struct => CreateAndInitStructOrRecord(false, propertyValues),
+          TypeKind.Class => CreateAndInitClass(propertyValues),
+          _ => throw new ESystem.Exceptions.UnexpectedEnumValueException(typeKind)
+        };
+      }
+      return ret;
+    }
+
+    private T CreateAndInitStructOrRecord(bool isForRecords, Dictionary<PropertyInfo, object?> propertyValues)
+    {
+      var type = typeof(T);
+      if (!isForRecords)
+        EAssert.IsTrue(type.IsValueType, $"Generic type T must be struct (provided '{typeof(T)}').");
+
+      var ctors = type.GetConstructors();
+      EAssert.IsTrue(ctors.Length > 0, $"Generic type '{typeof(T)}' must have public constructor.");
+
+      // here we are looking for .ctor with best match of parameters against properties
+      ConstructorInfo? bestCtor = null;
+      object?[]? bestArgs = null;
+      int bestScore = -1;
+
+      foreach (var ctor in ctors)
+      {
+        var parameters = ctor.GetParameters();
+        var args = new object?[parameters.Length];
+        int score = 0;
+        bool usable = true;
+
+        for (int i = 0; i < parameters.Length; i++)
+        {
+          var param = parameters[i];
+          var prop = propertyValues.Keys.FirstOrDefault(p => string.Equals(p.Name, param.Name, StringComparison.OrdinalIgnoreCase));
+
+          if (prop != null)
+          {
+            var value = propertyValues[prop];
+
+            if (value != null && !param.ParameterType.IsInstanceOfType(value))
+            {
+              try
+              {
+                value = Convert.ChangeType(value, param.ParameterType);
+              }
+              catch
+              {
+                usable = false;
+                break;
+              }
+            }
+
+            args[i] = value;
+            score++;
+          }
+          else if (param.HasDefaultValue)
+            args[i] = param.DefaultValue;
+          else if (param.IsOptional)
+            args[i] = Type.Missing;
+          else
+          {
+            usable = false;
+            break;
+          }
+        }
+
+        if (!usable) continue;
+
+        if (score > bestScore)
+        {
+          bestScore = score;
+          bestCtor = ctor;
+          bestArgs = args;
+        }
+      }
+
+      if (bestCtor == null || bestArgs == null)
+        throw new InvalidOperationException($"No available constructor found to create an instance of {typeof(T)}.");
+
+      T ret = (T)bestCtor.Invoke(bestArgs);
+      return ret;
+    }
+
+    private T CreateAndInitClass(Dictionary<PropertyInfo, object?> propertyValues)
+    {
+      T ret;
+      if (XmlTypeInfo.Constructor != null)
+      {
         try
         {
-          ret = XmlTypeInfo.FactoryMethod.Invoke(propertyValues);
+          ret = XmlTypeInfo.Constructor.Invoke();
         }
         catch (Exception ex)
         {
-          var eex = new EXmlException($"Failed to create an instance of {typeof(T)} using custom {nameof(XmlTypeInfo<T>.FactoryMethod)}.", ex);
+          var eex = new EXmlException($"Failed to create an instance of {typeof(T)} using custom {nameof(XmlTypeInfo<T>.Constructor)}.", ex);
           logger.LogException(eex);
           throw eex;
         }
       }
       else
       {
-        if (XmlTypeInfo.Constructor != null)
+        try
         {
-          try
-          {
-            ret = XmlTypeInfo.Constructor.Invoke();
-          }
-          catch (Exception ex)
-          {
-            var eex = new EXmlException($"Failed to create an instance of {typeof(T)} using custom {nameof(XmlTypeInfo<T>.Constructor)}.", ex);
-            logger.LogException(eex);
-            throw eex;
-          }
+          ret = CreateInstanceUsingDefaultConstructor();
         }
-        else
+        catch (Exception ex)
         {
-          try
-          {
-            ret = CreateInstanceUsingDefaultConstructor();
-          }
-          catch (Exception ex)
-          {
-            var eex = new EXmlException($"Failed to create an instance of {typeof(T)} using default implementation.", ex);
-            logger.LogException(eex);
-            throw eex;
-          }
+          var eex = new EXmlException($"Failed to create an instance of {typeof(T)} using default implementation.", ex);
+          logger.LogException(eex);
+          throw eex;
         }
-        FillObject(ret, propertyValues);
       }
+      FillObject(ret, propertyValues);
+      return ret;
+    }
+
+    static TypeKind GetTypeKind<T>()
+    {
+      var type = typeof(T);
+
+      bool isRecord =
+          type.GetProperty(
+              "EqualityContract",
+              BindingFlags.Instance | BindingFlags.NonPublic
+          ) != null;
+
+      if (isRecord)
+        return type.IsValueType ? TypeKind.RecordStruct : TypeKind.RecordClass;
+
+      return type.IsValueType ? TypeKind.Struct : TypeKind.Class;
+    }
+    private T CreateUsingFactoryMethod(PropertyValuesDictionary<T> propertyValues)
+    {
+      EAssert.IsNotNull(XmlTypeInfo.FactoryMethod);
+      T ret;
+      try
+      {
+        ret = XmlTypeInfo.FactoryMethod.Invoke(propertyValues);
+      }
+      catch (Exception ex)
+      {
+        var eex = new EXmlException($"Failed to create an instance of {typeof(T)} using custom {nameof(XmlTypeInfo<T>.FactoryMethod)}.", ex);
+        logger.LogException(eex);
+        throw eex;
+      }
+
       return ret;
     }
 
@@ -163,9 +284,9 @@ namespace EXmlLib2.Implementations.Deserializers
       return ret;
     }
 
-    private Dictionary<PropertyInfo, object?> DeserializeProperties(PropertyInfo[] properties, XElement element, IXmlContext ctx)
+    private PropertyValuesDictionary<T> DeserializeProperties(PropertyInfo[] properties, XElement element, IXmlContext ctx)
     {
-      Dictionary<PropertyInfo, object?> ret = new();
+      PropertyValuesDictionary<T> ret = [];
 
       foreach (var property in properties)
       {
