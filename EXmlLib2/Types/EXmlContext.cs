@@ -20,9 +20,9 @@ namespace EXmlLib2.Types
     private readonly Logger logger = Logger.Create(typeof(EXmlContext), "EXml+Ctx");
     public SerializerDeserializerRegistry<IElementSerializer> ElementSerializers { get; private init; } = new();
     public SerializerDeserializerRegistry<IAttributeSerializer> AttributeSerializers { get; private init; } = new();
-    public SerializerDeserializerRegistry<IElementDeserializer> ElementDeserializers { get; private init; }= new();
+    public SerializerDeserializerRegistry<IElementDeserializer> ElementDeserializers { get; private init; } = new();
     public SerializerDeserializerRegistry<IAttributeDeserializer> AttributeDeserializers { get; private init; } = new();
-    public XmlPropertyInfo DefaultXmlPropertyInfo { get; private init; } = new ();
+    public XmlPropertyInfo DefaultXmlPropertyInfo { get; private init; } = new();
 
     private CultureInfo _DefaultCultureInfo = CultureInfo.GetCultureInfo("en-US");
     public CultureInfo DefaultCultureInfo
@@ -70,7 +70,6 @@ namespace EXmlLib2.Types
       logger.Log(LogLevel.INFO, $"Serializing {value} to {element} using {serializer}.");
       try
       {
-        EAssert.IsTrue(value == null || serializer.AcceptsType(value.GetType()));
         serializer.Serialize(value, element, this);
       }
       catch (Exception ex)
@@ -103,5 +102,20 @@ namespace EXmlLib2.Types
       return ret;
     }
 
+    private readonly Dictionary<string, object> dataStore = [];
+    public void SetData<T>(string key, T data) => dataStore[key] = data!;
+    public T? GetData<T>(string key) => (T?)dataStore[key];
+    public T GetOrSetData<T>(string key, Func<T> newDataProvider)
+    {
+      T ret;
+      if (dataStore.TryGetValue(key, out object? tmp))
+        ret = (T)tmp!;
+      else 
+      {
+        ret = newDataProvider();
+        dataStore[key] = ret!;
+      }
+      return ret;
+    }
   }
 }

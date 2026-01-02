@@ -79,6 +79,7 @@ internal class NumberTest
 
     var exml = EXmlLib2.EXml.CreateDefault();
     XElement root = new XElement("Root");
+
     exml.Serialize(source, root);
 
     double? dest = exml.Deserialize<double?>(root);

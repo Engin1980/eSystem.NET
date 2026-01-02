@@ -51,8 +51,8 @@ namespace EXmlLib2
         ret.ctx.ElementSerializers.Push(new NumberSerializer());
         ret.ctx.AttributeSerializers.Push(new NumberSerializer());
 
-        ret.ctx.ElementSerializers.Push(new StringSerializer());
-        ret.ctx.AttributeSerializers.Push(new StringSerializer());
+        ret.ctx.ElementSerializers.Push(new StringSerializer().AsNullableElementWrapper());
+        ret.ctx.AttributeSerializers.Push(new StringSerializer().AsNullableAttributeWrapper());
 
         ret.ctx.ElementSerializers.Push(new BoolSerializer());
         ret.ctx.AttributeSerializers.Push(new BoolSerializer());

@@ -13,7 +13,17 @@ namespace EXmlLib2.Implementations.Serializers
   internal class NullableSerializer : IAttributeSerializer, IElementSerializer
   {
     private static Type? GetUnderlyingType(Type type) => Nullable.GetUnderlyingType(type);
-    private static object GetInnerValue(object value) => Convert.ChangeType(value, GetUnderlyingType(value.GetType()) ?? throw new ESystem.Exceptions.UnexpectedNullException()) ?? throw new ESystem.Exceptions.UnexpectedNullException();
+    private static object GetInnerValue(object value)
+    {
+      object ret;
+      var underType = GetUnderlyingType(value.GetType());
+      if (underType != null)
+        ret = Convert.ChangeType(value, GetUnderlyingType(value.GetType()) ?? throw new ESystem.Exceptions.UnexpectedNullException()) ?? throw new ESystem.Exceptions.UnexpectedNullException();
+      else
+        ret = value;
+      return ret;
+    }
+      
     public bool AcceptsType(Type type) => GetUnderlyingType(type) != null;
 
     public void Serialize(object? value, XElement element, IXmlContext ctx)
