@@ -32,10 +32,10 @@ namespace EXmlLib2Test.Model
     {
       var xti = XmlTypeInfo<SimpleClass>.Create();
 
-      TypeElementSerializer<SimpleClass> tes = new(xti);
+      SpecificTypeElementSerializer<SimpleClass> tes = new(xti);
       exml.ElementSerializers.Push(tes);
 
-      TypeElementDeserializer<SimpleClass> tds = new(xti);
+      SpecificTypeElementDeserializer<SimpleClass> tds = new(xti);
       exml.ElementDeserializers.Push(tds);
     }
 

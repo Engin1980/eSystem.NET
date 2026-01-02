@@ -3,7 +3,7 @@ using EXmlLib2.Abstractions;
 using EXmlLib2.Abstractions.Interfaces;
 using System.Xml.Linq;
 
-namespace EXmlLib2.Abstractions.Wrappers;
+namespace EXmlLib2.Implementations.Wrappers;
 
 public class NullableObjectElementDeserializerWrapper : IElementDeserializer
 {

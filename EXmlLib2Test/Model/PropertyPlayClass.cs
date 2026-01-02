@@ -29,10 +29,10 @@ namespace EXmlLib2Test.Model
         .WithXmlPropertyInfo(q => q.StringRenamed, q => q.XmlName = "CustomStringName")
         .WithXmlPropertyInfo(q => q.StringAttribute, q => q.Representation = XmlRepresentation.Attribute);
 
-      TypeElementSerializer<PropertyPlayClass> tes = new(xti);
+      SpecificTypeElementSerializer<PropertyPlayClass> tes = new(xti);
       exml.ElementSerializers.Push(tes);
 
-      TypeElementDeserializer<PropertyPlayClass> tds = new(xti);
+      SpecificTypeElementDeserializer<PropertyPlayClass> tds = new(xti);
       exml.ElementDeserializers.Push(tds);
     }
 

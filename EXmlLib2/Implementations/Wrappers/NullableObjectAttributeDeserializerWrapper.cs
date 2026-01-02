@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EXmlLib2.Abstractions.Wrappers;
+namespace EXmlLib2.Implementations.Wrappers;
 
 public class NullableObjectAttributeDeserializerWrapper : IAttributeDeserializer
 {

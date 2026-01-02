@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EXmlLib2.Abstractions.Abstracts;
 using EXmlLib2.Abstractions.Interfaces;
-using EXmlLib2.Abstractions.Wrappers;
+using EXmlLib2.Implementations.Deserializers;
+using EXmlLib2.Implementations.Serializers;
+using EXmlLib2.Implementations.Wrappers;
 
 namespace EXmlLib2
 {
-  internal static class Extensions
+  public static class Extensions
   {
     public static NullableObjectElementSerializerWrapper AsNullableElementWrapper(this IElementSerializer serializer)
     {

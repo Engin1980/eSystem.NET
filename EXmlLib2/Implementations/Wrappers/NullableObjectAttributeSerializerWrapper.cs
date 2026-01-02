@@ -2,7 +2,7 @@
 using EXmlLib2.Abstractions;
 using EXmlLib2.Abstractions.Interfaces;
 
-namespace EXmlLib2.Abstractions.Wrappers;
+namespace EXmlLib2.Implementations.Wrappers;
 
 public class NullableObjectAttributeSerializerWrapper : IAttributeSerializer
 {

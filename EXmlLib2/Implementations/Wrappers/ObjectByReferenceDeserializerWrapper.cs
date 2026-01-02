@@ -1,4 +1,5 @@
 ﻿using ESystem.Asserting;
+using EXmlLib2.Abstractions;
 using EXmlLib2.Abstractions.Abstracts;
 using EXmlLib2.Abstractions.Interfaces;
 using System;
@@ -8,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace EXmlLib2.Abstractions.Wrappers;
+namespace EXmlLib2.Implementations.Wrappers;
 
 public class ObjectByReferenceDeserializerWrapper<T> : TypedElementDeserializer<T>
 {
@@ -20,7 +21,7 @@ public class ObjectByReferenceDeserializerWrapper<T> : TypedElementDeserializer<
   public ObjectByReferenceDeserializerWrapper(TypedElementDeserializer<T> innerSerializer)
   {
     EAssert.Argument.IsNotNull(innerSerializer, nameof(innerSerializer));
-    this.innerDeserializer = innerSerializer;
+    innerDeserializer = innerSerializer;
   }
 
   public override T Deserialize(XElement element, IXmlContext ctx)
@@ -44,7 +45,7 @@ public class ObjectByReferenceDeserializerWrapper<T> : TypedElementDeserializer<
     else
     {
       attr = element.Attribute(OBJECT_ID_ATTRIBUTE);
-      ret = this.innerDeserializer.Deserialize(element, ctx);
+      ret = innerDeserializer.Deserialize(element, ctx);
       if (attr != null)
       {
         EAssert.IsNotNull(ret, "Deserialized object cannot be null.");

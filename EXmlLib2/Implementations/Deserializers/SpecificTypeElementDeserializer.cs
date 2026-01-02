@@ -14,10 +14,11 @@ using System.Xml;
 using System.Xml.Linq;
 using EXmlLib2.Abstractions.Interfaces;
 using EXmlLib2.Abstractions.Abstracts;
+using EXmlLib2.Implementations.Serializers;
 
 namespace EXmlLib2.Implementations.Deserializers
 {
-  public class TypeElementDeserializer<T> : TypedElementDeserializer<T>
+  public class SpecificTypeElementDeserializer<T> : TypedElementDeserializer<T>
   {
     enum TypeKind
     {
@@ -26,16 +27,18 @@ namespace EXmlLib2.Implementations.Deserializers
       RecordClass,
       RecordStruct
     }
+    public const string TYPE_NAME_ATTRIBUTE = SpecificTypeElementSerializer<T>.TYPE_NAME_ATTRIBUTE;
 
     private readonly Logger logger = Logger.Create(typeof(T));
     public XmlTypeInfo<T> XmlTypeInfo { get; private set; }
 
-    public TypeElementDeserializer()
-    {
-      this.XmlTypeInfo = new();
-    }
+    public SpecificTypeElementDeserializer() : this(new XmlTypeInfo<T>(), DerivedTypesBehavior.ExactTypeOnly) { }
 
-    public TypeElementDeserializer(XmlTypeInfo<T> xmlTypeInfo)
+    public SpecificTypeElementDeserializer(XmlTypeInfo<T> xmlTypeInfo) : this(xmlTypeInfo, DerivedTypesBehavior.ExactTypeOnly) { }
+
+    public SpecificTypeElementDeserializer(DerivedTypesBehavior derivedTypesBehavior) : this(new XmlTypeInfo<T>(), derivedTypesBehavior) { }
+
+    public SpecificTypeElementDeserializer(XmlTypeInfo<T> xmlTypeInfo, DerivedTypesBehavior derivedTypesBehavior) : base(derivedTypesBehavior)
     {
       EAssert.Argument.IsNotNull(xmlTypeInfo, nameof(xmlTypeInfo));
       this.XmlTypeInfo = xmlTypeInfo;
@@ -67,9 +70,11 @@ namespace EXmlLib2.Implementations.Deserializers
         throw eex;
       }
 
+      Type instanceType = EvaluateInstanceType(element);
+
       try
       {
-        ret = CreateAndFillObject(propertyValues);
+        ret = CreateAndFillObject(instanceType, propertyValues);
       }
       catch (Exception ex)
       {
@@ -80,7 +85,42 @@ namespace EXmlLib2.Implementations.Deserializers
       return ret;
     }
 
-    private T CreateAndFillObject(PropertyValuesDictionary<T> propertyValues)
+    private static Type EvaluateInstanceType(XElement element)
+    {
+      Type ret;
+
+      XAttribute? typeAttribute = element.Attribute(XName.Get(TYPE_NAME_ATTRIBUTE));
+      if (typeAttribute != null)
+      {
+        ret = ResolveType(typeAttribute.Value)
+          ?? throw new EXmlException($"Custom type is defined as '{typeAttribute.Value}', but cannot be loaded.");
+      }
+      else
+        ret = typeof(T);
+
+      return ret;
+    }
+
+    private static Type? ResolveType(string typeName)
+    {
+      // direct type load
+      var type = Type.GetType(typeName, throwOnError: false);
+      if (type != null)
+        return type;
+
+      // searching in loaded/referenced assemblies
+      foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+      {
+        type = asm.GetType(typeName, throwOnError: false);
+        if (type != null)
+          return type;
+      }
+
+      return null;
+    }
+
+
+    private T CreateAndFillObject(Type instanceType, PropertyValuesDictionary<T> propertyValues)
     {
       T ret;
 
@@ -90,22 +130,22 @@ namespace EXmlLib2.Implementations.Deserializers
       }
       else
       {
-        TypeKind typeKind = GetTypeKind<T>();
+        TypeKind typeKind = GetTypeKind(instanceType);
         ret = typeKind switch
         {
-          TypeKind.RecordClass => CreateAndInitStructOrRecord(true, propertyValues),
-          TypeKind.RecordStruct => CreateAndInitStructOrRecord(true, propertyValues),
-          TypeKind.Struct => CreateAndInitStructOrRecord(false, propertyValues),
-          TypeKind.Class => CreateAndInitClass(propertyValues),
+          TypeKind.RecordClass => CreateAndInitStructOrRecord(instanceType, true, propertyValues),
+          TypeKind.RecordStruct => CreateAndInitStructOrRecord(instanceType, true, propertyValues),
+          TypeKind.Struct => CreateAndInitStructOrRecord(instanceType, false, propertyValues),
+          TypeKind.Class => CreateAndInitClass(instanceType, propertyValues),
           _ => throw new ESystem.Exceptions.UnexpectedEnumValueException(typeKind)
         };
       }
       return ret;
     }
 
-    private T CreateAndInitStructOrRecord(bool isForRecords, Dictionary<PropertyInfo, object?> propertyValues)
+    private T CreateAndInitStructOrRecord(Type instanceType, bool isForRecords, Dictionary<PropertyInfo, object?> propertyValues)
     {
-      var type = typeof(T);
+      var type = instanceType;
       if (!isForRecords)
         EAssert.IsTrue(type.IsValueType, $"Generic type T must be struct (provided '{typeof(T)}').");
 
@@ -177,7 +217,7 @@ namespace EXmlLib2.Implementations.Deserializers
       return ret;
     }
 
-    private T CreateAndInitClass(Dictionary<PropertyInfo, object?> propertyValues)
+    private T CreateAndInitClass(Type instanceType, Dictionary<PropertyInfo, object?> propertyValues)
     {
       T ret;
       if (XmlTypeInfo.Constructor != null)
@@ -197,7 +237,7 @@ namespace EXmlLib2.Implementations.Deserializers
       {
         try
         {
-          ret = CreateInstanceUsingDefaultConstructor();
+          ret = CreateInstanceUsingDefaultConstructor(instanceType);
         }
         catch (Exception ex)
         {
@@ -210,10 +250,8 @@ namespace EXmlLib2.Implementations.Deserializers
       return ret;
     }
 
-    static TypeKind GetTypeKind<T>()
+    static TypeKind GetTypeKind(Type type)
     {
-      var type = typeof(T);
-
       bool isRecord =
           type.GetProperty(
               "EqualityContract",
@@ -265,15 +303,15 @@ namespace EXmlLib2.Implementations.Deserializers
       }
     }
 
-    private T CreateInstanceUsingDefaultConstructor()
+    private T CreateInstanceUsingDefaultConstructor(Type instanceType)
     {
+      object? tmp;
       T ret;
-      //TODO remove if not used
-      //ConstructorInfo ci;
-      //ci = typeof(T).GetConstructor(Array.Empty<Type>()) ?? throw new EXmlException($"Failed to find public parameter-less constructor for type {typeof(T)}.");
       try
       {
-        ret = Activator.CreateInstance<T>();
+        tmp = Activator.CreateInstance(instanceType);
+        EAssert.IsNotNull(tmp, $"Failed to create an instance of type {instanceType} using default constructor -- returned null.");
+        ret = (T)tmp;
       }
       catch (Exception ex)
       {

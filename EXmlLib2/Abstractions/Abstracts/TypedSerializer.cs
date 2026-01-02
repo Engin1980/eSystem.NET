@@ -3,11 +3,12 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Abstractions.Abstracts
 {
-  public abstract class TypedSerializer<T> : IElementSerializer, IAttributeSerializer
+  public abstract class TypedSerializer<T>(DerivedTypesBehavior derivedTypesBehavior = DerivedTypesBehavior.ExactTypeOnly) :
+    TypedBase<T>(derivedTypesBehavior), IElementSerializer, IAttributeSerializer
   {
-    public bool AcceptsType(Type type) => type == typeof(T);
     public void Serialize(object? value, XElement element, IXmlContext ctx)
     {
+      CheckTypeSanity(value?.GetType());
       T typedValue = ConvertToTypedObject(value);
       Serialize(typedValue, element, ctx);
     }

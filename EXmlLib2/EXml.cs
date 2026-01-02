@@ -132,7 +132,7 @@ namespace EXmlLib2
       EAssert.Argument.IsTrue(
         value == null || expectedType.IsAssignableFrom(value.GetType()), 
         nameof(value), 
-        $"Value type ({value?.GetType().Name ?? "null"}) does not match expected type ({expectedType.Name})");
+        $"Value type '{value?.GetType().Name ?? "null"}' does not match expected type '{expectedType.Name}'.");
 
       logger.Log(LogLevel.INFO, $"Serializing {value} to {element}");
       try

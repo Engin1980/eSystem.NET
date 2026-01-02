@@ -2,11 +2,12 @@
 
 namespace EXmlLib2.Abstractions.Abstracts
 {
-  public abstract class TypedAttributeDeserializer<T> : IAttributeDeserializer
+  public abstract class TypedAttributeDeserializer<T>(DerivedTypesBehavior derivedTypesBehavior = DerivedTypesBehavior.ExactTypeOnly) :
+    TypedBase<T>(derivedTypesBehavior), IAttributeDeserializer
   {
-    public bool AcceptsType(Type type) => typeof(T) == type;
     public object? Deserialize(string value, Type targetType, IXmlContext ctx)
     {
+      CheckTypeSanity(targetType);
       T tmp = Deserialize(value, ctx);
       return tmp;
     }

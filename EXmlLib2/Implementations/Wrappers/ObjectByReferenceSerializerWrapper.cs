@@ -1,4 +1,5 @@
 ﻿using ESystem.Asserting;
+using EXmlLib2.Abstractions;
 using EXmlLib2.Abstractions.Abstracts;
 using EXmlLib2.Abstractions.Interfaces;
 using System;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 
 
-namespace EXmlLib2.Abstractions.Wrappers
+namespace EXmlLib2.Implementations.Wrappers
 {
   public class ObjectByReferenceSerializerWrapper<T> : TypedElementSerializer<T>
   {
@@ -34,7 +35,7 @@ namespace EXmlLib2.Abstractions.Wrappers
         element.SetAttributeValue(REFERENCE_ID_ATTRIBUTE, id);
       else
       {
-        this.innerSerializer.Serialize(value, element, ctx);
+        innerSerializer.Serialize(value, element, ctx);
         id = references.Count > 0 ? references.Values.Max() + 1 : 1;
         references[value] = id;
         element.SetAttributeValue(OBJECT_ID_ATTRIBUTE, id);

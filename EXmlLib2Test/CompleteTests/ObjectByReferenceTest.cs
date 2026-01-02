@@ -1,7 +1,7 @@
 ﻿using EXmlLib2;
-using EXmlLib2.Abstractions.Wrappers;
 using EXmlLib2.Implementations.Deserializers;
 using EXmlLib2.Implementations.Serializers;
+using EXmlLib2.Implementations.Wrappers;
 using FluentAssertions;
 using System;
 using System.Collections.Generic;
@@ -48,8 +48,8 @@ internal class ObjectByReferenceTest
     {
       EXml xml = EXml.CreateDefault();
 
-      ObjectByReferenceSerializerWrapper<Location> locationSerializer = new(new TypeElementSerializer<Location>());
-      ObjectByReferenceSerializerWrapper<Item> itemSerializer = new(new TypeElementSerializer<Item>());
+      ObjectByReferenceSerializerWrapper<Location> locationSerializer = new(new SpecificTypeElementSerializer<Location>());
+      ObjectByReferenceSerializerWrapper<Item> itemSerializer = new(new SpecificTypeElementSerializer<Item>());
       xml.ElementSerializers.Push(locationSerializer);
       xml.ElementSerializers.Push(itemSerializer);
 
@@ -59,8 +59,8 @@ internal class ObjectByReferenceTest
     {
       EXml xml = EXml.CreateDefault();
 
-      ObjectByReferenceDeserializerWrapper<Location> locationDeserializer = new(new TypeElementDeserializer<Location>());
-      ObjectByReferenceDeserializerWrapper<Item> itemDeserializer = new(new TypeElementDeserializer<Item>());
+      ObjectByReferenceDeserializerWrapper<Location> locationDeserializer = new(new SpecificTypeElementDeserializer<Location>());
+      ObjectByReferenceDeserializerWrapper<Item> itemDeserializer = new(new SpecificTypeElementDeserializer<Item>());
       xml.ElementDeserializers.Push(locationDeserializer);
       xml.ElementDeserializers.Push(itemDeserializer);
 
@@ -83,8 +83,8 @@ internal class ObjectByReferenceTest
     {
       EXml xml = EXml.CreateDefault();
 
-      ObjectByReferenceSerializerWrapper<Location> locationSerializer = new(new TypeElementSerializer<Location>());
-      ObjectByReferenceSerializerWrapper<Item> itemSerializer = new(new TypeElementSerializer<Item>());
+      ObjectByReferenceSerializerWrapper<Location> locationSerializer = new(new SpecificTypeElementSerializer<Location>());
+      ObjectByReferenceSerializerWrapper<Item> itemSerializer = new(new SpecificTypeElementSerializer<Item>());
       xml.ElementSerializers.Push(locationSerializer);
       xml.ElementSerializers.Push(itemSerializer);
 
@@ -94,8 +94,8 @@ internal class ObjectByReferenceTest
     {
       EXml xml = EXml.CreateDefault();
 
-      ObjectByReferenceDeserializerWrapper<Location> locationDeserializer = new(new TypeElementDeserializer<Location>());
-      ObjectByReferenceDeserializerWrapper<Item> itemDeserializer = new(new TypeElementDeserializer<Item>());
+      ObjectByReferenceDeserializerWrapper<Location> locationDeserializer = new(new SpecificTypeElementDeserializer<Location>());
+      ObjectByReferenceDeserializerWrapper<Item> itemDeserializer = new(new SpecificTypeElementDeserializer<Item>());
       xml.ElementDeserializers.Push(locationDeserializer);
       xml.ElementDeserializers.Push(itemDeserializer);
 

@@ -1,7 +1,9 @@
-﻿using ESystem.Logging;
-using ESystem;
+﻿using ESystem;
 using ESystem.Asserting;
+using ESystem.Logging;
 using EXmlLib2.Abstractions;
+using EXmlLib2.Abstractions.Abstracts;
+using EXmlLib2.Abstractions.Interfaces;
 using EXmlLib2.Types;
 using System;
 using System.Collections.Generic;
@@ -11,22 +13,22 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using EXmlLib2.Abstractions.Interfaces;
-using EXmlLib2.Abstractions.Abstracts;
 
 namespace EXmlLib2.Implementations.Serializers;
 
-public class TypeElementSerializer<T> : TypedElementSerializer<T> where T : notnull
+public class SpecificTypeElementSerializer<T> : TypedElementSerializer<T>
 {
+  public const string TYPE_NAME_ATTRIBUTE = "__instanceType";
   private readonly Logger logger = Logger.Create(typeof(T));
   public XmlTypeInfo<T> XmlTypeInfo { get; private set; }
 
-  public TypeElementSerializer()
-  {
-    this.XmlTypeInfo = new();
-  }
+  public SpecificTypeElementSerializer() : this(new XmlTypeInfo<T>(), DerivedTypesBehavior.ExactTypeOnly) { }
 
-  public TypeElementSerializer(XmlTypeInfo<T> xmlTypeInfo)
+  public SpecificTypeElementSerializer(XmlTypeInfo<T> xmlTypeInfo) : this(xmlTypeInfo, DerivedTypesBehavior.ExactTypeOnly) { }
+
+  public SpecificTypeElementSerializer(DerivedTypesBehavior derivedTypesBehavior) : this(new XmlTypeInfo<T>(), derivedTypesBehavior) { }
+
+  public SpecificTypeElementSerializer(XmlTypeInfo<T> xmlTypeInfo, DerivedTypesBehavior derivedTypesBehavior) : base(derivedTypesBehavior)
   {
     EAssert.Argument.IsNotNull(xmlTypeInfo, nameof(xmlTypeInfo));
     this.XmlTypeInfo = xmlTypeInfo;
@@ -38,12 +40,24 @@ public class TypeElementSerializer<T> : TypedElementSerializer<T> where T : notn
     try
     {
       SerializeProperties(value, element, ctx);
+      StoreValueTypeIfRequired(value, element);
     }
     catch (Exception ex)
     {
       var eex = new EXmlException($"Failed to serialize {value} to element {element}.", ex);
       this.logger.LogException(eex);
       throw eex;
+    }
+  }
+
+  private void StoreValueTypeIfRequired(T value, XElement element)
+  {
+    if (value!.GetType() != typeof(T))
+    {
+      string typeName = value.GetType().FullName!;
+      if (typeName.StartsWith("System.") == false)  // if not mscorlib type, assembly name is required
+        typeName += ", " + value.GetType().Assembly.GetName().Name;
+      element.SetAttributeValue(XName.Get(TYPE_NAME_ATTRIBUTE), typeName);
     }
   }
 

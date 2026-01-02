@@ -2,13 +2,12 @@
 
 namespace EXmlLib2.Abstractions.Abstracts
 {
-  public abstract class TypedAttributeSerializer<T> : IAttributeSerializer
+  public abstract class TypedAttributeSerializer<T>(DerivedTypesBehavior derivedTypesBehavior = DerivedTypesBehavior.ExactTypeOnly) :
+    TypedBase<T>(derivedTypesBehavior), IAttributeSerializer
   {
-    public bool AcceptsType(Type type) => type == typeof(T);
     public string Serialize(object? value, IXmlContext ctx)
     {
-      if (value == null || value.GetType() != typeof(T))
-        throw new ArgumentException($"Value type ({value?.GetType()?.Name ?? "null"}) does not match attribute serializer type ({typeof(T).Name}).", nameof(value));
+      CheckTypeSanity(value?.GetType());
       T typedValue = (T)value!;
       return Serialize(typedValue, ctx);
     }

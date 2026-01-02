@@ -70,8 +70,8 @@ namespace EXmlLib2Test.CompleteTests
       };
 
       var exml = EXmlLib2.EXml.CreateDefault();
-      exml.ElementSerializers.Push(new TypeElementSerializer<SimpleClass>());
-      exml.ElementDeserializers.Push(new TypeElementDeserializer<SimpleClass>());
+      exml.ElementSerializers.Push(new SpecificTypeElementSerializer<SimpleClass>());
+      exml.ElementDeserializers.Push(new SpecificTypeElementDeserializer<SimpleClass>());
 
       XElement root = new XElement("Root");
       exml.Serialize(source, root);
@@ -92,8 +92,8 @@ namespace EXmlLib2Test.CompleteTests
       };
 
       var exml = EXmlLib2.EXml.CreateDefault();
-      exml.ElementSerializers.Push(new TypeElementSerializer<SimpleStructWithCtor>());
-      exml.ElementDeserializers.Push(new TypeElementDeserializer<SimpleStructWithCtor>());
+      exml.ElementSerializers.Push(new SpecificTypeElementSerializer<SimpleStructWithCtor>());
+      exml.ElementDeserializers.Push(new SpecificTypeElementDeserializer<SimpleStructWithCtor>());
 
       XElement root = new XElement("Root");
       exml.Serialize(source, root);
@@ -125,8 +125,8 @@ namespace EXmlLib2Test.CompleteTests
       });
 
       var exml = EXmlLib2.EXml.CreateDefault();
-      exml.ElementSerializers.Push(new TypeElementSerializer<SimpleStructNoCtor>(xti));
-      exml.ElementDeserializers.Push(new TypeElementDeserializer<SimpleStructNoCtor>(xti));
+      exml.ElementSerializers.Push(new SpecificTypeElementSerializer<SimpleStructNoCtor>(xti));
+      exml.ElementDeserializers.Push(new SpecificTypeElementDeserializer<SimpleStructNoCtor>(xti));
 
       XElement root = new XElement("Root");
       exml.Serialize(source, root);
@@ -149,8 +149,8 @@ namespace EXmlLib2Test.CompleteTests
       var exml = EXmlLib2.EXml.CreateDefault();
       var xti = new XmlTypeInfo<SimpleClass>();
       xti.DefaultXmlPropertyInfo.Representation = XmlRepresentation.Attribute;
-      exml.ElementSerializers.Push(new TypeElementSerializer<SimpleClass>(xti));
-      exml.ElementDeserializers.Push(new TypeElementDeserializer<SimpleClass>(xti));
+      exml.ElementSerializers.Push(new SpecificTypeElementSerializer<SimpleClass>(xti));
+      exml.ElementDeserializers.Push(new SpecificTypeElementDeserializer<SimpleClass>(xti));
 
       XElement root = new XElement("Root");
       exml.Serialize(source, root);
