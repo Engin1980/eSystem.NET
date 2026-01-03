@@ -45,60 +45,69 @@ namespace EXmlLib2
       EXml ret = new();
       if (addDefaultSerializers)
       {
-        ret.ctx.ElementSerializers.Push(new NullableSerializer());
-        ret.ctx.AttributeSerializers.Push(new NullableSerializer());
+        List<IElementSerializer> elmSer = [];
+        List<IAttributeSerializer> attSer = [];
 
-        ret.ctx.ElementSerializers.Push(new NumberSerializer());
-        ret.ctx.AttributeSerializers.Push(new NumberSerializer());
+        elmSer.Add(new NullableSerializer());
+        attSer.Add(new NullableSerializer());
 
-        ret.ctx.ElementSerializers.Push(new StringSerializer().AsNullableElementWrapper());
-        ret.ctx.AttributeSerializers.Push(new StringSerializer().AsNullableAttributeWrapper());
+        elmSer.Add(new NumberSerializer());
+        attSer.Add(new NumberSerializer());
 
-        ret.ctx.ElementSerializers.Push(new BoolSerializer());
-        ret.ctx.AttributeSerializers.Push(new BoolSerializer());
+        elmSer.Add(new StringSerializer().AsNullableElementWrapper());
+        attSer.Add(new StringSerializer().AsNullableAttributeWrapper());
 
-        ret.ctx.ElementSerializers.Push(new CharSerializer());
-        ret.ctx.AttributeSerializers.Push(new CharSerializer());
+        elmSer.Add(new BoolSerializer());
+        attSer.Add(new BoolSerializer());
 
-        ret.ctx.ElementSerializers.Push(new EnumSerializer());
-        ret.ctx.AttributeSerializers.Push(new EnumSerializer());
+        elmSer.Add(new CharSerializer());
+        attSer.Add(new CharSerializer());
 
-        ret.ctx.ElementSerializers.Push(new DateTimeSerializer().AsNullableElementWrapper());
-        ret.ctx.AttributeSerializers.Push(new DateTimeSerializer().AsNullableAttributeWrapper());
+        elmSer.Add(new EnumSerializer());
+        attSer.Add(new EnumSerializer());
 
-        ret.ctx.ElementSerializers.Push(new EnumerableSerializer());
+        elmSer.Add(new DateTimeSerializer().AsNullableElementWrapper());
+        attSer.Add(new DateTimeSerializer().AsNullableAttributeWrapper());
+
+        elmSer.Add(new EnumerableSerializer());
+        elmSer.Add(new SpecificTypeElementSerializer<object>(Abstractions.Abstracts.DerivedTypesBehavior.AllowDerivedTypes));
+
+        ret.ctx.ElementSerializers.Set(elmSer);
+        ret.ctx.AttributeSerializers.Set(attSer);
       }
       if (addDefaultDeserializers)
       {
-        ret.ctx.ElementDeserializers.Push(new NumberDeserializer());
-        ret.ctx.AttributeDeserializers.Push(new NumberDeserializer());
-
         //ret.ctx.AddDeserializer((IElementDeserializer)new NullableNumberDeserializer());
         //ret.ctx.AddDeserializer((IAttributeDeserializer)new NullableNumberDeserializer());
 
-        ret.ctx.ElementDeserializers.Push(new CharDeserializer());
-        ret.ctx.AttributeDeserializers.Push(new CharDeserializer());
+        List<IElementDeserializer> elmDeser = [];
+        List<IAttributeDeserializer> attDeser = [];
 
-        //ret.ctx.AddDeserializer((IElementDeserializer<char?>)new NullableCharDeserializer());
-        //ret.ctx.AddDeserializer((IAttributeDeserializer<char?>)new NullableCharDeserializer());
+        elmDeser.Add(new NumberDeserializer());
+        attDeser.Add(new NumberDeserializer());
 
-        ret.ctx.ElementDeserializers.Push(new BoolDeserializer(true));
-        ret.ctx.AttributeDeserializers.Push(new BoolDeserializer(true));
+        elmDeser.Add(new CharDeserializer());
+        attDeser.Add(new CharDeserializer());
 
-        //ret.ctx.AddDeserializer((IElementDeserializer<bool?>)new NullableBoolDeserializer(true));
-        //ret.ctx.AddDeserializer((IAttributeDeserializer<bool?>)new NullableBoolDeserializer(true));
+        elmDeser.Add(new BoolDeserializer(true));
+        attDeser.Add(new BoolDeserializer(true));
 
-        ret.ctx.ElementDeserializers.Push(new StringDeserializer());
-        ret.ctx.AttributeDeserializers.Push(new StringDeserializer());
+        elmDeser.Add(new StringDeserializer());
+        attDeser.Add(new StringDeserializer());
 
-        ret.ctx.ElementDeserializers.Push(new EnumDeserializer());
-        ret.ctx.AttributeDeserializers.Push(new EnumDeserializer());
+        elmDeser.Add(new EnumDeserializer());
+        attDeser.Add(new EnumDeserializer());
 
-        ret.ctx.ElementDeserializers.Push(new NullableDeserializer());
-        ret.ctx.AttributeDeserializers.Push(new NullableDeserializer());
+        elmDeser.Add(new NullableDeserializer());
+        attDeser.Add(new NullableDeserializer());
 
-        ret.ctx.ElementDeserializers.Push(new DateTimeDeserializer().AsNullableElementWrapper());
-        ret.ctx.AttributeDeserializers.Push(new DateTimeDeserializer().AsNullableAttributeWrapper());
+        elmDeser.Add(new DateTimeDeserializer().AsNullableElementWrapper());
+        attDeser.Add(new DateTimeDeserializer().AsNullableAttributeWrapper());
+
+        elmDeser.Add(new SpecificTypeElementDeserializer<object>(Abstractions.Abstracts.DerivedTypesBehavior.AllowDerivedTypes));
+
+        ret.ctx.ElementDeserializers.Set(elmDeser);
+        ret.ctx.AttributeDeserializers.Set(attDeser);
       }
       return ret;
     }
@@ -130,8 +139,8 @@ namespace EXmlLib2
     public void Serialize(object? value, Type expectedType, XElement element)
     {
       EAssert.Argument.IsTrue(
-        value == null || expectedType.IsAssignableFrom(value.GetType()), 
-        nameof(value), 
+        value == null || expectedType.IsAssignableFrom(value.GetType()),
+        nameof(value),
         $"Value type '{value?.GetType().Name ?? "null"}' does not match expected type '{expectedType.Name}'.");
 
       logger.Log(LogLevel.INFO, $"Serializing {value} to {element}");

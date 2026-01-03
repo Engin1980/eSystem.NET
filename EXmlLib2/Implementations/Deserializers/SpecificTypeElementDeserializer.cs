@@ -44,9 +44,9 @@ namespace EXmlLib2.Implementations.Deserializers
       this.XmlTypeInfo = xmlTypeInfo;
     }
 
-    protected virtual PropertyInfo[] GetProperties()
+    protected virtual PropertyInfo[] GetProperties(Type type)
     {
-      PropertyInfo[] ret = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+      PropertyInfo[] ret = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
       return ret;
     }
 
@@ -58,7 +58,9 @@ namespace EXmlLib2.Implementations.Deserializers
 
       EAssert.IsFalse(element.Value == ctx.DefaultNullString, $"Element value cannot be '{ctx.DefaultNullString}' (that is 'null') for deserialization of type {typeof(T)}.");
 
-      var props = GetProperties();
+      Type instanceType = EvaluateInstanceType(element);
+
+      var props = GetProperties(instanceType);
       try
       {
         propertyValues = DeserializeProperties(props, element, ctx);
@@ -69,8 +71,6 @@ namespace EXmlLib2.Implementations.Deserializers
         this.logger.LogException(eex);
         throw eex;
       }
-
-      Type instanceType = EvaluateInstanceType(element);
 
       try
       {

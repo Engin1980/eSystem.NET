@@ -28,4 +28,13 @@ public class SerializerDeserializerRegistry<T> where T : ISelectableByType
     }
     return ret;
   }
+
+  public void Set(IEnumerable<T> newItems)
+  {
+    items.Clear();
+    foreach (T item in newItems.Reverse())
+    {
+      items.Push(item);
+    }
+  }
 }

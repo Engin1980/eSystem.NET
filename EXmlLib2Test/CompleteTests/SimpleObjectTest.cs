@@ -137,7 +137,80 @@ namespace EXmlLib2Test.CompleteTests
     }
 
     [Test]
-    public void SimpleClassToAttributesTest()
+    public void SimpleClassToElementsWithoutCustomSerializerTest()
+    {
+      SimpleClass source = new SimpleClass()
+      {
+        CreatedAt = DateTime.Now,
+        Id = 11,
+        Name = "Test Object"
+      };
+
+      var exml = EXmlLib2.EXml.CreateDefault();
+
+      XElement root = new XElement("Root");
+      exml.Serialize(source, root);
+
+      SimpleClass? dest = exml.Deserialize<SimpleClass>(root);
+
+      source.Should().BeEquivalentTo(dest);
+    }
+
+    [Test]
+    public void SimpleStructWithCtorToElementsWithoutCustomSerializerTest()
+    {
+      SimpleStructWithCtor source = new SimpleStructWithCtor()
+      {
+        CreatedAt = DateTime.Now,
+        Id = 11,
+        Name = "Test Object"
+      };
+
+      var exml = EXmlLib2.EXml.CreateDefault();
+
+      XElement root = new XElement("Root");
+      exml.Serialize(source, root);
+
+      SimpleStructWithCtor? dest = exml.Deserialize<SimpleStructWithCtor>(root);
+
+      source.Should().BeEquivalentTo(dest);
+    }
+
+    [Test]
+    public void SimpleStructNoCtorToElementsWithoutCustomSerializerTest()
+    {
+      SimpleStructNoCtor source = new SimpleStructNoCtor()
+      {
+        CreatedAt = DateTime.Now,
+        Id = 11,
+        Name = "Test Object"
+      };
+
+      XmlTypeInfo<SimpleStructNoCtor> xti = new XmlTypeInfo<SimpleStructNoCtor>()
+      .WithFactoryMethod(props =>
+      {
+        return new SimpleStructNoCtor()
+        {
+          Id = props.GetPropertyValue(q => q.Id)!,
+          Name = props.GetPropertyValue(q => q.Name)!,
+          CreatedAt = props.GetPropertyValue(q => q.CreatedAt)!
+        };
+      });
+
+      var exml = EXmlLib2.EXml.CreateDefault();
+      exml.ElementSerializers.Push(new SpecificTypeElementSerializer<SimpleStructNoCtor>(xti));
+      exml.ElementDeserializers.Push(new SpecificTypeElementDeserializer<SimpleStructNoCtor>(xti));
+
+      XElement root = new XElement("Root");
+      exml.Serialize(source, root);
+
+      SimpleStructNoCtor? dest = exml.Deserialize<SimpleStructNoCtor>(root);
+
+      source.Should().BeEquivalentTo(dest);
+    }
+
+    [Test]
+    public void SimpleClassToPropetiesAsAttributesTest()
     {
       SimpleClass source = new SimpleClass()
       {

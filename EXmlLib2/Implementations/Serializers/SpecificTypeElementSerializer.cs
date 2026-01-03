@@ -61,15 +61,16 @@ public class SpecificTypeElementSerializer<T> : TypedElementSerializer<T>
     }
   }
 
-  protected virtual PropertyInfo[] GetProperties()
+  protected virtual PropertyInfo[] GetProperties(Type type)
   {
-    PropertyInfo[] ret = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+    PropertyInfo[] ret = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
     return ret;
   }
 
   protected virtual void SerializeProperties(T value, XElement element, IXmlContext ctx)
   {
-    var properties = GetProperties();
+    EAssert.IsNotNull(value);
+    var properties = GetProperties(value.GetType());
     foreach (var property in properties)
     {
       SerializeProperty(property, value, element, ctx);
