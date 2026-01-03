@@ -25,16 +25,15 @@ namespace EXmlLib2Test.CompleteTests
       public int ChildProperty { get; set; } = 16;
     }
 
+    public class HolderClass
+    {
+      public ParentClass? HeldObjectA { get; set; }
+      public ParentClass? HeldObjectB { get; set; }
+    }
+
     [Test]
     public void SimpleInheritanceTest()
     {
-      /*
-       * tady serializuju jakože potomka přes serializer předka
-       * ale serializer předka kontroluje, že typ objektu je potomkem předka
-       * a pro potomka to spadne
-       * takže to je v háji a nevím co s tím
-       * */
-
       ParentClass source = new ChildClass()
       {
         ParentProperty = 10,
@@ -56,6 +55,41 @@ namespace EXmlLib2Test.CompleteTests
       }
 
       target.Should().BeOfType<ChildClass>();
+      target.Should().BeEquivalentTo(source);
+    }
+
+    [Test]
+    public void InheritanceInPropertyTest()
+    {
+      HolderClass source = new()
+      {
+        HeldObjectA = new ChildClass()
+        {
+          ParentProperty = 10,
+          ChildProperty = 20
+        },
+        HeldObjectB = new ParentClass()
+        {
+          ParentProperty = 30
+        }
+      };
+      HolderClass? target;
+      XElement element = new XElement("Root");
+
+      {
+        var exml = EXml.CreateDefault();
+        exml.ElementSerializers.Push(new SpecificTypeElementSerializer<ParentClass>(DerivedTypesBehavior.AllowDerivedTypes));
+        exml.Serialize(source, element);
+      }
+
+      {
+        var exml = EXml.CreateDefault();
+        exml.ElementDeserializers.Push(new SpecificTypeElementDeserializer<ParentClass>(DerivedTypesBehavior.AllowDerivedTypes));
+        target = exml.Deserialize<HolderClass>(element);
+      }
+
+      target!.HeldObjectA.Should().BeOfType<ChildClass>();
+      target!.HeldObjectB.Should().BeOfType<ParentClass>();
       target.Should().BeEquivalentTo(source);
     }
   }
