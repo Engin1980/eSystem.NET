@@ -61,7 +61,7 @@ namespace KeyHookNUnit
       Assert.That(ksOut.Modifiers, Is.EqualTo(expectedKs.Modifiers));
     }
 
-    [Test, TestCaseSource(nameof(FormatCases))]
+    [Test, TestCaseSource(nameof(BracketedFormatCases))]
     public void FormatBracketed(KeyChord ksIn, string expectedString)
     {
       string s = ksIn.Format(bracketedFormatOptions);
