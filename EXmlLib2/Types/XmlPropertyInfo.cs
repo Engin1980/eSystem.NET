@@ -13,7 +13,7 @@ namespace EXmlLib2.Types
     public Dictionary<Type, string> XmlNameByType { get; } = new();
     public XmlRepresentation? Representation { get; set; } = null;
     public XmlObligation? Obligation { get; set; } = null;
-    public IElementSerializer? CustomElementSerializer { get; set; } = null;
+    public IElementDeserializer? CustomElementSerializer { get; set; } = null;
     public IAttributeSerializer? CustomAttributeSerializer { get; set; } = null;
     public IElementDeserializer? CustomElementDeserializer { get; set; } = null;
     public IAttributeDeserializer? CustomAttributeDeserializer { get; set; } = null;

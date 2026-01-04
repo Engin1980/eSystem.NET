@@ -40,5 +40,6 @@ namespace EXmlLib2.Abstractions
     T? GetData<T>(string key);
     T GetOrSetData<T>(string key, Func<T> newDataProvider);
     void SerializeToElement(object? value, XElement elm, IElementSerializer serializer);
+    XAttribute SerializeToAttribute(string name, object? value, IAttributeSerializer serializer);
   }
 }

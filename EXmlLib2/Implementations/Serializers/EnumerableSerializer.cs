@@ -45,7 +45,7 @@ namespace EXmlLib2.Implementations.Serializers
         $"This serializer {this.GetType().Name} does not accept provided value of type {value?.GetType()?.Name ?? "null"}.");
 
       Type itemType = ExtractItemType(value);
-      IEnumerable<object> items = ExtractItems(value);
+      IEnumerable<object> items = ExtractItems(value!);
       SaveItemsToElement(items, itemType, element, ctx);
     }
 

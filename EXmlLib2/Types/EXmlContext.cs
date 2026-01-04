@@ -1,7 +1,10 @@
-﻿using ESystem.Logging;
-using ESystem.Asserting;
-using EXmlLib2.Implementations.Serializers;
+﻿using ESystem.Asserting;
+using ESystem.Logging;
 using EXmlLib2.Abstractions;
+using EXmlLib2.Abstractions.Interfaces;
+using EXmlLib2.Implementations.Serializers;
+using EXmlLib2.Types.Internal;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -10,8 +13,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using static EXmlLib2.Abstractions.IXmlContext;
-using EXmlLib2.Types.Internal;
-using EXmlLib2.Abstractions.Interfaces;
 
 namespace EXmlLib2.Types
 {
@@ -110,11 +111,31 @@ namespace EXmlLib2.Types
       T ret;
       if (dataStore.TryGetValue(key, out object? tmp))
         ret = (T)tmp!;
-      else 
+      else
       {
         ret = newDataProvider();
         dataStore[key] = ret!;
       }
+      return ret;
+    }
+
+    public XAttribute SerializeToAttribute(string name, object? value, IAttributeSerializer serializer)
+    {
+      XAttribute ret;
+      EAssert.Argument.IsNotNull(name, nameof(name));
+      EAssert.Argument.IsNotNull(serializer, nameof(serializer));
+      logger.Log(LogLevel.INFO, $"Serializing {value} to attribute {name} using {serializer}.");
+      try
+      {
+        ret = new XAttribute(XName.Get(name), serializer.Serialize(value, this));
+      }
+      catch (Exception ex)
+      {
+        EXmlException eex = new($"Failed to serialize value {value} using serializer {serializer}.", ex);
+        logger.LogException(eex);
+        throw eex;
+      }
+      logger.Log(LogLevel.INFO, $"Serializing {value} to attribute {name} using {serializer}.");
       return ret;
     }
   }
