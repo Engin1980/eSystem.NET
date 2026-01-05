@@ -263,6 +263,7 @@ namespace EXmlLib2.Implementations.Deserializers
 
       return type.IsValueType ? TypeKind.Struct : TypeKind.Class;
     }
+
     private T CreateUsingFactoryMethod(PropertyValuesDictionary<T> propertyValues)
     {
       EAssert.IsNotNull(XmlTypeInfo.FactoryMethod);

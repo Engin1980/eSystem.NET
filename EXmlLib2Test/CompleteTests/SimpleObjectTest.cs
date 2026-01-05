@@ -1,4 +1,6 @@
 ﻿using ESystem.Logging;
+using EXmlLib2;
+using EXmlLib2.Abstractions.Abstracts;
 using EXmlLib2.Implementations.Deserializers;
 using EXmlLib2.Implementations.Serializers;
 using EXmlLib2.Types;
@@ -69,9 +71,9 @@ namespace EXmlLib2Test.CompleteTests
         Name = "Test Object"
       };
 
-      var exml = EXmlLib2.EXml.CreateDefault();
-      exml.ElementSerializers.Push(new SpecificTypeElementSerializer<SimpleClass>());
-      exml.ElementDeserializers.Push(new SpecificTypeElementDeserializer<SimpleClass>());
+      EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization().WithCommonTypesSerialization();
+      exml.ElementSerializers.AddFirst(new NewTypeByPropertySerializer().WithAcceptedType<SimpleClass>());
+      exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer().WithAcceptedType<SimpleClass>());
 
       XElement root = new XElement("Root");
       exml.Serialize(source, root);
@@ -91,9 +93,9 @@ namespace EXmlLib2Test.CompleteTests
         Name = "Test Object"
       };
 
-      var exml = EXmlLib2.EXml.CreateDefault();
-      exml.ElementSerializers.Push(new SpecificTypeElementSerializer<SimpleStructWithCtor>());
-      exml.ElementDeserializers.Push(new SpecificTypeElementDeserializer<SimpleStructWithCtor>());
+      EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization().WithCommonTypesSerialization();
+      exml.ElementSerializers.AddFirst(new NewTypeByPropertySerializer().WithAcceptedType<SimpleStructWithCtor>());
+      exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer().WithAcceptedType<SimpleStructWithCtor>());
 
       XElement root = new XElement("Root");
       exml.Serialize(source, root);
@@ -113,20 +115,28 @@ namespace EXmlLib2Test.CompleteTests
         Name = "Test Object"
       };
 
-      XmlTypeInfo<SimpleStructNoCtor> xti = new XmlTypeInfo<SimpleStructNoCtor>()
-      .WithFactoryMethod(props =>
-      {
-        return new SimpleStructNoCtor()
+      EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization().WithCommonTypesSerialization();
+      exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer()
+        .WithAcceptedType<SimpleStructNoCtor>()
+        //.WithInstanceFactory((type, props) =>
+        //{
+        //  return new SimpleStructNoCtor()
+        //  {
+        //    Id = props.Get<int>("Id")!,
+        //    Name = props.Get<string>(nameof(SimpleStructNoCtor.Name))!,
+        //    CreatedAt = props.Get<DateTime>(nameof(SimpleStructNoCtor.CreatedAt))!
+        //  };
+        //})
+        .WithInstanceFactory<SimpleStructNoCtor>(props =>
         {
-          Id = props.GetPropertyValue(q => q.Id)!,
-          Name = props.GetPropertyValue(q => q.Name)!,
-          CreatedAt = props.GetPropertyValue(q => q.CreatedAt)!
-        };
-      });
-
-      var exml = EXmlLib2.EXml.CreateDefault();
-      exml.ElementSerializers.Push(new SpecificTypeElementSerializer<SimpleStructNoCtor>(xti));
-      exml.ElementDeserializers.Push(new SpecificTypeElementDeserializer<SimpleStructNoCtor>(xti));
+          return new SimpleStructNoCtor()
+          {
+            Id = props.GetPropertyValue(q => q.Id)!,
+            Name = props.GetPropertyValue(q => q.Name)!,
+            CreatedAt = props.GetPropertyValue(q => q.CreatedAt)!
+          };
+        }));
+      exml.ElementSerializers.AddFirst(new NewTypeByPropertySerializer().WithAcceptedType<SimpleStructNoCtor>());
 
       XElement root = new XElement("Root");
       exml.Serialize(source, root);
@@ -146,7 +156,10 @@ namespace EXmlLib2Test.CompleteTests
         Name = "Test Object"
       };
 
-      var exml = EXmlLib2.EXml.CreateDefault();
+      EXml exml = EXml.Create()
+        .WithPrimitiveTypesAndStringSerialization()
+        .WithCommonTypesSerialization()
+        .WithObjectSerialization();
 
       XElement root = new XElement("Root");
       exml.Serialize(source, root);
@@ -166,7 +179,7 @@ namespace EXmlLib2Test.CompleteTests
         Name = "Test Object"
       };
 
-      var exml = EXmlLib2.EXml.CreateDefault();
+      EXml exml = EXml.Create().WithDefaultSerialization();
 
       XElement root = new XElement("Root");
       exml.Serialize(source, root);
@@ -176,38 +189,6 @@ namespace EXmlLib2Test.CompleteTests
       source.Should().BeEquivalentTo(dest);
     }
 
-    [Test]
-    public void SimpleStructNoCtorToElementsWithoutCustomSerializerTest()
-    {
-      SimpleStructNoCtor source = new SimpleStructNoCtor()
-      {
-        CreatedAt = DateTime.Now,
-        Id = 11,
-        Name = "Test Object"
-      };
-
-      XmlTypeInfo<SimpleStructNoCtor> xti = new XmlTypeInfo<SimpleStructNoCtor>()
-      .WithFactoryMethod(props =>
-      {
-        return new SimpleStructNoCtor()
-        {
-          Id = props.GetPropertyValue(q => q.Id)!,
-          Name = props.GetPropertyValue(q => q.Name)!,
-          CreatedAt = props.GetPropertyValue(q => q.CreatedAt)!
-        };
-      });
-
-      var exml = EXmlLib2.EXml.CreateDefault();
-      exml.ElementSerializers.Push(new SpecificTypeElementSerializer<SimpleStructNoCtor>(xti));
-      exml.ElementDeserializers.Push(new SpecificTypeElementDeserializer<SimpleStructNoCtor>(xti));
-
-      XElement root = new XElement("Root");
-      exml.Serialize(source, root);
-
-      SimpleStructNoCtor? dest = exml.Deserialize<SimpleStructNoCtor>(root);
-
-      source.Should().BeEquivalentTo(dest);
-    }
 
     [Test]
     public void SimpleClassToPropetiesAsAttributesTest()
@@ -219,11 +200,11 @@ namespace EXmlLib2Test.CompleteTests
         Name = "Test Object"
       };
 
-      var exml = EXmlLib2.EXml.CreateDefault();
-      var xti = new XmlTypeInfo<SimpleClass>();
-      xti.DefaultXmlPropertyInfo.Representation = XmlRepresentation.Attribute;
-      exml.ElementSerializers.Push(new SpecificTypeElementSerializer<SimpleClass>(xti));
-      exml.ElementDeserializers.Push(new SpecificTypeElementDeserializer<SimpleClass>(xti));
+      EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization().WithCommonTypesSerialization();
+      exml.ElementSerializers.AddFirst(new NewTypeByPropertySerializer()
+        .WithAcceptedType<SimpleClass>()
+        .WithPropertySerializer(new SimplePropertyAsAttribute()));
+      exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer().WithAcceptedType<SimpleClass>().WithPropertyDeserializer(new SimplePropertyAsAttribute()));
 
       XElement root = new XElement("Root");
       exml.Serialize(source, root);

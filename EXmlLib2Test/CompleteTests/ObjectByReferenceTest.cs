@@ -36,7 +36,7 @@ internal class ObjectByReferenceTest
       {
         Description = "Location A"
       },
-      LocationB = new ()
+      LocationB = new()
       {
         Description = "Location B"
       }
@@ -46,23 +46,23 @@ internal class ObjectByReferenceTest
     XElement elm = new("root");
 
     {
-      EXml xml = EXml.CreateDefault();
+      EXml xml = EXml.Create().WithPrimitiveTypesAndStringSerialization();
 
       ObjectByReferenceSerializerWrapper<Location> locationSerializer = new(new SpecificTypeElementSerializer<Location>());
       ObjectByReferenceSerializerWrapper<Item> itemSerializer = new(new SpecificTypeElementSerializer<Item>());
-      xml.ElementSerializers.Push(locationSerializer);
-      xml.ElementSerializers.Push(itemSerializer);
+      xml.ElementSerializers.AddFirst(locationSerializer);
+      xml.ElementSerializers.AddFirst(itemSerializer);
 
       xml.Serialize(source, elm);
     }
 
     {
-      EXml xml = EXml.CreateDefault();
+      EXml xml = EXml.Create().WithPrimitiveTypesAndStringSerialization();
 
       ObjectByReferenceDeserializerWrapper<Location> locationDeserializer = new(new SpecificTypeElementDeserializer<Location>());
       ObjectByReferenceDeserializerWrapper<Item> itemDeserializer = new(new SpecificTypeElementDeserializer<Item>());
-      xml.ElementDeserializers.Push(locationDeserializer);
-      xml.ElementDeserializers.Push(itemDeserializer);
+      xml.ElementDeserializers.AddFirst(locationDeserializer);
+      xml.ElementDeserializers.AddFirst(itemDeserializer);
 
       target = xml.Deserialize<Item>(elm);
     }
@@ -75,29 +75,29 @@ internal class ObjectByReferenceTest
   public void TestReferenceSave()
   {
     Location location = new Location() { Description = "Location A" };
-    Item source = new () { Title = "Item 1", LocationA = location, LocationB=location };
+    Item source = new() { Title = "Item 1", LocationA = location, LocationB = location };
     Item? target;
 
     XElement elm = new("root");
 
     {
-      EXml xml = EXml.CreateDefault();
+      EXml xml = EXml.Create().WithPrimitiveTypesAndStringSerialization();
 
       ObjectByReferenceSerializerWrapper<Location> locationSerializer = new(new SpecificTypeElementSerializer<Location>());
       ObjectByReferenceSerializerWrapper<Item> itemSerializer = new(new SpecificTypeElementSerializer<Item>());
-      xml.ElementSerializers.Push(locationSerializer);
-      xml.ElementSerializers.Push(itemSerializer);
+      xml.ElementSerializers.AddFirst(locationSerializer);
+      xml.ElementSerializers.AddFirst(itemSerializer);
 
       xml.Serialize(source, elm);
     }
 
     {
-      EXml xml = EXml.CreateDefault();
+      EXml xml = EXml.Create().WithPrimitiveTypesAndStringSerialization();
 
       ObjectByReferenceDeserializerWrapper<Location> locationDeserializer = new(new SpecificTypeElementDeserializer<Location>());
       ObjectByReferenceDeserializerWrapper<Item> itemDeserializer = new(new SpecificTypeElementDeserializer<Item>());
-      xml.ElementDeserializers.Push(locationDeserializer);
-      xml.ElementDeserializers.Push(itemDeserializer);
+      xml.ElementDeserializers.AddFirst(locationDeserializer);
+      xml.ElementDeserializers.AddFirst(itemDeserializer);
 
       target = xml.Deserialize<Item>(elm);
     }

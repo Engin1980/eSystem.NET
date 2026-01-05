@@ -8,11 +8,19 @@ using EXmlLib2.Abstractions;
 using EXmlLib2.Types;
 using EXmlLib2.Abstractions.Interfaces;
 using EXmlLib2.Types.Internal;
+using EXmlLib2.Abstractions.Abstracts;
+using System.Runtime.CompilerServices;
 
 namespace EXmlLib2
 {
   public class EXml
   {
+    public enum XmlSupport
+    {
+      Attributes = 1,
+      Elements = 2,
+      AttributesAndElements = Attributes | Elements
+    }
     #region Private Fields
 
     private readonly EXmlContext ctx = new();
@@ -40,79 +48,128 @@ namespace EXmlLib2
 
     #region Public Methods
 
-    public static EXml CreateDefault(bool addDefaultSerializers = true, bool addDefaultDeserializers = true)
+    public static EXml Create() => new();
+
+    public static EXml CreateWithDefaultSerialization() => new EXml().WithDefaultSerialization();
+
+    public EXml WithDefaultSerialization(XmlSupport xmlSupport = XmlSupport.AttributesAndElements) => this
+      .WithPrimitiveTypesAndStringSerialization(xmlSupport)
+      .WithCommonTypesSerialization(xmlSupport)
+      .WithObjectSerialization();
+
+    public EXml WithPrimitiveTypesAndStringSerialization(XmlSupport xmlSupport = XmlSupport.AttributesAndElements) => this
+      .WithPrimitiveTypesAndStringSerializers(xmlSupport)
+      .WithPrimitiveTypesAndStringDeserializers(xmlSupport);
+
+    public EXml WithPrimitiveTypesAndStringSerializers(XmlSupport xmlSupport = XmlSupport.AttributesAndElements)
     {
-      EXml ret = new();
-      if (addDefaultSerializers)
+      if (xmlSupport.HasFlag(XmlSupport.Elements))
       {
-        List<IElementSerializer> elmSer = [];
-        List<IAttributeSerializer> attSer = [];
-
-        elmSer.Add(new NullableSerializer());
-        attSer.Add(new NullableSerializer());
-
-        elmSer.Add(new NumberSerializer());
-        attSer.Add(new NumberSerializer());
-
-        elmSer.Add(new StringSerializer().AsNullableElementWrapper());
-        attSer.Add(new StringSerializer().AsNullableAttributeWrapper());
-
-        elmSer.Add(new BoolSerializer());
-        attSer.Add(new BoolSerializer());
-
-        elmSer.Add(new CharSerializer());
-        attSer.Add(new CharSerializer());
-
-        elmSer.Add(new EnumSerializer());
-        attSer.Add(new EnumSerializer());
-
-        elmSer.Add(new DateTimeSerializer().AsNullableElementWrapper());
-        attSer.Add(new DateTimeSerializer().AsNullableAttributeWrapper());
-
-        elmSer.Add(new EnumerableSerializer());
-        elmSer.Add(new SpecificTypeElementSerializer<object>(Abstractions.Abstracts.DerivedTypesBehavior.AllowDerivedTypes));
-
-        ret.ctx.ElementSerializers.Set(elmSer);
-        ret.ctx.AttributeSerializers.Set(attSer);
+        List<IElementSerializer> lst = [
+          new NullableSerializer(),
+          new NumberSerializer(),
+          new BoolSerializer(),
+          new CharSerializer(),
+          new EnumSerializer(),
+          new StringSerializer().AsNullableElementWrapper()
+        ];
+        this.ctx.ElementSerializers.AddFirst(lst);
       }
-      if (addDefaultDeserializers)
+      if (xmlSupport.HasFlag(XmlSupport.Attributes))
       {
-        //ret.ctx.AddDeserializer((IElementDeserializer)new NullableNumberDeserializer());
-        //ret.ctx.AddDeserializer((IAttributeDeserializer)new NullableNumberDeserializer());
-
-        List<IElementDeserializer> elmDeser = [];
-        List<IAttributeDeserializer> attDeser = [];
-
-        elmDeser.Add(new NumberDeserializer());
-        attDeser.Add(new NumberDeserializer());
-
-        elmDeser.Add(new CharDeserializer());
-        attDeser.Add(new CharDeserializer());
-
-        elmDeser.Add(new BoolDeserializer(true));
-        attDeser.Add(new BoolDeserializer(true));
-
-        elmDeser.Add(new StringDeserializer());
-        attDeser.Add(new StringDeserializer());
-
-        elmDeser.Add(new EnumDeserializer());
-        attDeser.Add(new EnumDeserializer());
-
-        elmDeser.Add(new NullableDeserializer());
-        attDeser.Add(new NullableDeserializer());
-
-        elmDeser.Add(new DateTimeDeserializer().AsNullableElementWrapper());
-        attDeser.Add(new DateTimeDeserializer().AsNullableAttributeWrapper());
-
-        elmDeser.Add(new SpecificTypeElementDeserializer<object>(Abstractions.Abstracts.DerivedTypesBehavior.AllowDerivedTypes));
-
-        ret.ctx.ElementDeserializers.Set(elmDeser);
-        ret.ctx.AttributeDeserializers.Set(attDeser);
+        List<IAttributeSerializer> lst = [
+          new NullableSerializer(),
+          new NumberSerializer(),
+          new BoolSerializer(),
+          new CharSerializer(),
+          new EnumSerializer(),
+          new StringSerializer().AsNullableAttributeWrapper()
+        ];
+        this.ctx.AttributeSerializers.AddFirst(lst);
       }
-      return ret;
+
+      return this;
     }
 
-    public static EXml CreateEmpty() => new();
+    public EXml WithPrimitiveTypesAndStringDeserializers(XmlSupport xmlSupport = XmlSupport.AttributesAndElements)
+    {
+      if (xmlSupport.HasFlag(XmlSupport.Elements))
+      {
+        List<IElementDeserializer> lst = [
+          new NullableDeserializer(),
+          new NumberDeserializer(),
+          new BoolDeserializer(true),
+          new CharDeserializer(),
+          new EnumDeserializer(),
+          new StringDeserializer().AsNullableElementWrapper()
+        ];
+        this.ctx.ElementDeserializers.AddFirst(lst);
+      }
+      if (xmlSupport.HasFlag(XmlSupport.Attributes))
+      {
+        List<IAttributeDeserializer> lst = [
+          new NullableDeserializer(),
+          new NumberDeserializer(),
+          new BoolDeserializer(true),
+          new CharDeserializer(),
+          new EnumDeserializer(),
+          new StringDeserializer().AsNullableAttributeWrapper()
+        ];
+        this.ctx.AttributeDeserializers.AddFirst(lst);
+      }
+
+      return this;
+    }
+
+    public EXml WithCommonTypesSerialization(XmlSupport xmlSupport = XmlSupport.AttributesAndElements) => this
+      .WithCommonTypesSerializers(xmlSupport)
+      .WithCommonTypesDeserializers(xmlSupport);
+
+    public EXml WithCommonTypesSerializers(XmlSupport xmlSupport = XmlSupport.AttributesAndElements)
+    {
+      if (xmlSupport.HasFlag(XmlSupport.Elements))
+        this.ctx.ElementSerializers.AddFirst(new DateTimeSerializer().AsNullableElementWrapper());
+      if (xmlSupport.HasFlag(XmlSupport.Attributes))
+        this.ctx.AttributeSerializers.AddFirst(new DateTimeSerializer().AsNullableAttributeWrapper());
+      return this;
+    }
+
+    public EXml WithCommonTypesDeserializers(XmlSupport xmlSupport = XmlSupport.AttributesAndElements)
+    {
+      if (xmlSupport.HasFlag(XmlSupport.Elements))
+        this.ctx.ElementDeserializers.AddFirst(new DateTimeDeserializer().AsNullableElementWrapper());
+      if (xmlSupport.HasFlag(XmlSupport.Attributes))
+        this.ctx.AttributeDeserializers.AddFirst(new DateTimeDeserializer().AsNullableAttributeWrapper());
+      return this;
+    }
+
+    public EXml WithEnumerableSerialization() => this.WithEnumerableSerializers().WithEnumerableDeserializers();
+
+    private EXml WithEnumerableDeserializers()
+    {
+      //TODO implement
+      return this;
+    }
+
+    private EXml WithEnumerableSerializers()
+    {
+      //TODO implement
+      return this;
+    }
+
+    public EXml WithObjectSerialization() => this.WithObjectSerializers().WithObjectDeserializers();
+
+    private EXml WithObjectDeserializers()
+    {
+      this.ElementDeserializers.AddLast(new NewTypeByPropertyDeserializer().WithAcceptedType<object>(true));
+      return this;
+    }
+
+    private EXml WithObjectSerializers()
+    {
+      this.ElementSerializers.AddLast(new NewTypeByPropertySerializer().WithAcceptedType<object>(true));
+      return this;
+    }
 
     public T? Deserialize<T>(XElement element) => (T)Deserialize(element, typeof(T))!;
 

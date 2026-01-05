@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EXmlLib2;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +16,7 @@ namespace EXmlLib2Test.CompleteTests
     {
       string source = "Hello, World!";
 
-      var exml = EXmlLib2.EXml.CreateDefault();
+      EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization();
       XElement root = new XElement("Root");
       exml.Serialize(source, root);
 
@@ -29,7 +30,7 @@ namespace EXmlLib2Test.CompleteTests
     {
       string? source = "Hello, World!";
 
-      var exml = EXmlLib2.EXml.CreateDefault();
+      EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization();
       XElement root = new XElement("Root");
       exml.Serialize(source, root);
 
@@ -43,7 +44,7 @@ namespace EXmlLib2Test.CompleteTests
     {
       string? source = null;
 
-      var exml = EXmlLib2.EXml.CreateDefault();
+      EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization();
       XElement root = new XElement("Root");
       exml.Serialize(source, root);
 

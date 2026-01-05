@@ -15,7 +15,7 @@ internal class NumberTest
   {
     int source = 67;
 
-    var exml = EXmlLib2.EXml.CreateDefault();
+    var exml = EXmlLib2.EXml.Create().WithPrimitiveTypesAndStringSerialization();
     XElement root = new XElement("Root");
     exml.Serialize(source, root);
 
@@ -29,7 +29,7 @@ internal class NumberTest
   {
     int? source = 68;
 
-    var exml = EXmlLib2.EXml.CreateDefault();
+    var exml = EXmlLib2.EXml.Create().WithPrimitiveTypesAndStringSerialization();
     XElement root = new XElement("Root");
     exml.Serialize(source, root);
 
@@ -43,7 +43,7 @@ internal class NumberTest
   {
     int? source = null;
 
-    var exml = EXmlLib2.EXml.CreateDefault();
+    var exml = EXmlLib2.EXml.Create().WithPrimitiveTypesAndStringSerialization();
     XElement root = new XElement("Root");
     exml.Serialize(source, root);
 
@@ -63,7 +63,7 @@ internal class NumberTest
   {
     double source = Math.PI;
 
-    var exml = EXmlLib2.EXml.CreateDefault();
+    var exml = EXmlLib2.EXml.Create().WithPrimitiveTypesAndStringSerialization();
     XElement root = new XElement("Root");
     exml.Serialize(source, root);
 
@@ -77,7 +77,7 @@ internal class NumberTest
   {
     double? source = Math.E;
 
-    var exml = EXmlLib2.EXml.CreateDefault();
+    var exml = EXmlLib2.EXml.Create().WithPrimitiveTypesAndStringSerialization();
     XElement root = new XElement("Root");
 
     exml.Serialize(source, root);
@@ -92,7 +92,7 @@ internal class NumberTest
   {
     double? source = null;
 
-    var exml = EXmlLib2.EXml.CreateDefault();
+    var exml = EXmlLib2.EXml.Create().WithPrimitiveTypesAndStringSerialization();
     XElement root = new XElement("Root");
     exml.Serialize(source, root);
 

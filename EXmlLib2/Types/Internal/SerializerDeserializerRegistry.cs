@@ -10,10 +10,12 @@ namespace EXmlLib2.Types.Internal;
 
 public class SerializerDeserializerRegistry<T> where T : ISelectableByType
 {
-  private readonly Stack<T> items = new();
-
+  private readonly List<T> items = [];
   public int Count => items.Count;
-  public void Push(T item) => items.Push(item);
+  public void AddFirst(IEnumerable<T> newItems) => items.InsertRange(0, newItems);
+  public void AddLast(IEnumerable<T> newItems) => items.AddRange(newItems);
+  public void AddFirst(T item) => items.Insert(0, item);
+  public void AddLast(T item) => items.Add(item);
   public T GetByType(Type type)
   {
     T ret;
@@ -23,7 +25,7 @@ public class SerializerDeserializerRegistry<T> where T : ISelectableByType
     }
     catch (Exception ex)
     {
-      EXmlException eex = new($"Failed to find element of {typeof(T)} for type {type}.", ex);
+      EXmlException eex = new($"Failed to find {typeof(T).Name} for type {type}.", ex);
       throw eex;
     }
     return ret;
@@ -32,9 +34,9 @@ public class SerializerDeserializerRegistry<T> where T : ISelectableByType
   public void Set(IEnumerable<T> newItems)
   {
     items.Clear();
-    foreach (T item in newItems.Reverse())
+    foreach (T item in newItems)
     {
-      items.Push(item);
+      items.Add(item);
     }
   }
 }

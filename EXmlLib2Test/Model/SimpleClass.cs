@@ -33,10 +33,10 @@ namespace EXmlLib2Test.Model
       var xti = XmlTypeInfo<SimpleClass>.Create();
 
       SpecificTypeElementSerializer<SimpleClass> tes = new(xti);
-      exml.ElementSerializers.Push(tes);
+      exml.ElementSerializers.AddFirst(tes);
 
       SpecificTypeElementDeserializer<SimpleClass> tds = new(xti);
-      exml.ElementDeserializers.Push(tds);
+      exml.ElementDeserializers.AddFirst(tds);
     }
 
     public override bool Equals(object? obj)

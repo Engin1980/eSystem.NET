@@ -1,6 +1,9 @@
 ﻿using ESystem.Asserting;
+using ESystem.Exceptions;
+using ESystem.Logging;
 using ESystem.Miscelaneous;
 using EXmlLib2.Abstractions.Interfaces;
+using EXmlLib2.Types;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -11,10 +14,11 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using static EXmlLib2.Abstractions.Abstracts.SimplePropertyAsElement;
 
 namespace EXmlLib2.Abstractions.Abstracts;
 
-internal abstract class NewTypeSerializer<TDataFieldInfo> : IElementSerializer
+public abstract class NewTypeSerializer<TDataFieldInfo> : IElementSerializer
 {
   public abstract bool AcceptsType(Type type);
 
@@ -41,9 +45,58 @@ public class SimplePropertyAsElement : IPropertySerializer, IPropertyDeserialize
 {
   public const string TYPE_ATTRIBUTE = "__instanceType";
 
-  public object? DeserializeProperty(PropertyInfo propertyInfo, XElement element, IXmlContext ctx)
+  public enum MissingPropertyElementBehavior
   {
-    throw new NotImplementedException();
+    ThrowException,
+    Ignore
+  }
+
+  private MissingPropertyElementBehavior missingPropertyElementBehavior = MissingPropertyElementBehavior.Ignore;
+
+  public SimplePropertyAsElement WithMissingPropertyElementBehavior(MissingPropertyElementBehavior behavior)
+  {
+    this.missingPropertyElementBehavior = behavior;
+    return this;
+  }
+
+  public DeserializationResult DeserializeProperty(PropertyInfo propertyInfo, XElement element, IXmlContext ctx)
+  {
+    DeserializationResult ret;
+
+    XElement? propertyElement = element.Element(XName.Get(propertyInfo.Name));
+    if (propertyElement == null)
+    {
+      ret = this.missingPropertyElementBehavior switch
+      {
+        MissingPropertyElementBehavior.Ignore => DeserializationResult.NoResult(),
+        MissingPropertyElementBehavior.ThrowException => throw new InvalidOperationException($"Cannot find element for property '{propertyInfo.Name}' in element '{element.Name}'."),
+        _ => throw new UnexpectedEnumValueException(this.missingPropertyElementBehavior),
+      };
+    }
+    else
+    {
+      Type instanceType = DetermineIntanceType(propertyElement, propertyInfo);
+      var deserializer = ctx.ElementDeserializers.GetByType(instanceType);
+      object? tmp = deserializer.Deserialize(propertyElement, instanceType, ctx); //TODO: ctx.DeserializeFromElement(element, instanceType, deserializer);
+      ret = tmp == null ? DeserializationResult.Null() : DeserializationResult.ValueResult(tmp);
+    }
+
+    return ret;
+  }
+
+  private static Type DetermineIntanceType(XElement element, PropertyInfo propertyInfo)
+  {
+    Type ret;
+    XAttribute? attribute = element.Attribute(XName.Get(TYPE_ATTRIBUTE));
+    if (attribute != null)
+    {
+      string assemblyQualifiedTypeName = attribute.Value;
+      ret = Type.GetType(assemblyQualifiedTypeName)
+        ?? throw new InvalidOperationException($"Cannot determine instance type from assembly qualified name '{assemblyQualifiedTypeName}' for property '{propertyInfo.Name}'.");
+    }
+    else
+      ret = propertyInfo.PropertyType;
+    return ret;
   }
 
   public void SerializeProperty(PropertyInfo propertyInfo, object? propertyValue, XElement element, IXmlContext ctx)
@@ -60,8 +113,39 @@ public class SimplePropertyAsElement : IPropertySerializer, IPropertyDeserialize
     element.Add(propElement);
   }
 }
-public class SimplePropertyAsAttribute : IPropertySerializer
+public class SimplePropertyAsAttribute : IPropertySerializer, IPropertyDeserializer
 {
+  private MissingPropertyElementBehavior missingPropertyElementBehavior = MissingPropertyElementBehavior.Ignore;
+
+  public SimplePropertyAsAttribute WithMissingPropertyElementBehavior(MissingPropertyElementBehavior behavior)
+  {
+    this.missingPropertyElementBehavior = behavior;
+    return this;
+  }
+
+  public DeserializationResult DeserializeProperty(PropertyInfo propertyInfo, XElement element, IXmlContext ctx)
+  {
+    DeserializationResult ret;
+    XAttribute? attribute = element.Attribute(XName.Get(propertyInfo.Name));
+    if (attribute == null)
+    {
+      ret = this.missingPropertyElementBehavior switch
+      {
+        MissingPropertyElementBehavior.Ignore => DeserializationResult.NoResult(),
+        MissingPropertyElementBehavior.ThrowException => throw new InvalidOperationException($"Cannot find attribute for property '{propertyInfo.Name}' in element '{element.Name}'."),
+        _ => throw new UnexpectedEnumValueException(this.missingPropertyElementBehavior),
+      };
+    }
+    else
+    {
+      var deserializer = ctx.AttributeDeserializers.GetByType(propertyInfo.PropertyType);
+      object? tmp = deserializer.Deserialize(attribute.Value, propertyInfo.PropertyType, ctx); //ctx.DeserializeFromAttribute(attribute, propertyInfo.PropertyType, deserializer);
+      ret = tmp == null ? DeserializationResult.Null() : DeserializationResult.ValueResult(tmp);
+    }
+
+    return ret;
+  }
+
   public void SerializeProperty(PropertyInfo propertyInfo, object? propertyValue, XElement element, IXmlContext ctx)
   {
     if (propertyValue != null && propertyValue.GetType() != propertyInfo.PropertyType)
@@ -79,7 +163,7 @@ public class IgnoredProperty : IPropertySerializer
     // no-op
   }
 }
-public class PolymorphicPropertyAsElement : IPropertySerializer
+public class PolymorphicNamePropertyAsElement : IPropertySerializer
 {
   public enum MissingDefinitionBehavior
   {
@@ -89,19 +173,19 @@ public class PolymorphicPropertyAsElement : IPropertySerializer
   private readonly BiDictionary<Type, string> typeToXmlNameMapping = new();
   private MissingDefinitionBehavior missingDefinitionBehavior = MissingDefinitionBehavior.UseDefault;
 
-  public PolymorphicPropertyAsElement WithMissingDefinitionBehavior(MissingDefinitionBehavior behavior)
+  public PolymorphicNamePropertyAsElement WithMissingDefinitionBehavior(MissingDefinitionBehavior behavior)
   {
     this.missingDefinitionBehavior = behavior;
     return this;
   }
-  public PolymorphicPropertyAsElement With(Type type, string xmlName)
+  public PolymorphicNamePropertyAsElement With(Type type, string xmlName)
   {
     EAssert.Argument.IsNotNull(type, nameof(type));
     EAssert.Argument.IsNonEmptyString(xmlName, nameof(xmlName));
     typeToXmlNameMapping.Set(type, xmlName);
     return this;
   }
-  public PolymorphicPropertyAsElement With<T>(string xmlName)
+  public PolymorphicNamePropertyAsElement With<T>(string xmlName)
   {
     EAssert.Argument.IsNonEmptyString(xmlName, nameof(xmlName));
     return this.With(typeof(T), xmlName);
@@ -122,11 +206,11 @@ public class PolymorphicPropertyAsElement : IPropertySerializer
 
 public interface IInstanceFactory<TDataFieldInfo> where TDataFieldInfo : notnull
 {
-  object CreateInstance(Type targetType, IDictionary<TDataFieldInfo, object?> deserializedValues);
+  object CreateInstance(Type targetType, DataFieldValueDictionary<TDataFieldInfo> deserializedValues);
 }
 public class PublicParameterlessConstructorInstanceFromPropertiesFactory : IInstanceFactory<PropertyInfo>
 {
-  public object CreateInstance(Type targetType, IDictionary<PropertyInfo, object?> deserializedValues)
+  public object CreateInstance(Type targetType, DataFieldValueDictionary<PropertyInfo> deserializedValues)
   {
     object ret = Activator.CreateInstance(targetType)
       ?? throw new InvalidOperationException($"Cannot create instance of type '{targetType.FullName}' using parameterless constructor.");
@@ -138,7 +222,157 @@ public class PublicParameterlessConstructorInstanceFromPropertiesFactory : IInst
   }
 }
 
-internal class NewTypeByPropertySerializer : NewTypeSerializer<PropertyInfo>
+public class UniversalTypeFactory : IInstanceFactory<PropertyInfo>
+{
+  private enum TypeKind
+  {
+    Class,
+    Struct,
+    RecordClass,
+    RecordStruct
+  }
+
+  public object CreateInstance(Type targetType, DataFieldValueDictionary<PropertyInfo> propertyValues)
+  {
+    TypeKind typeKind = GetTypeKind(targetType);
+    object ret = typeKind switch
+    {
+      TypeKind.RecordClass => CreateAndInitStructOrRecord(targetType, true, propertyValues),
+      TypeKind.RecordStruct => CreateAndInitStructOrRecord(targetType, true, propertyValues),
+      TypeKind.Struct => CreateAndInitStructOrRecord(targetType, false, propertyValues),
+      TypeKind.Class => CreateAndInitClass(targetType, propertyValues),
+      _ => throw new UnexpectedEnumValueException(typeKind)
+    };
+    return ret;
+  }
+
+  private object CreateAndInitStructOrRecord(Type type, bool isForRecords, DataFieldValueDictionary<PropertyInfo> propertyValues)
+  {
+    if (!isForRecords)
+      EAssert.IsTrue(type.IsValueType, $"Generic type T must be struct (provided '{type}').");
+
+    var ctors = type.GetConstructors();
+    EAssert.IsTrue(ctors.Length > 0, $"Generic type '{type}' must have public constructor.");
+
+    // here we are looking for .ctor with best match of parameters against properties
+    ConstructorInfo? bestCtor = null;
+    object?[]? bestArgs = null;
+    int bestScore = -1;
+
+    foreach (var ctor in ctors)
+    {
+      var parameters = ctor.GetParameters();
+      var args = new object?[parameters.Length];
+      int score = 0;
+      bool usable = true;
+
+      for (int i = 0; i < parameters.Length; i++)
+      {
+        var param = parameters[i];
+        var prop = propertyValues.Keys.FirstOrDefault(p => string.Equals(p.Name, param.Name, StringComparison.OrdinalIgnoreCase));
+
+        if (prop != null)
+        {
+          var value = propertyValues[prop];
+
+          if (value != null && !param.ParameterType.IsInstanceOfType(value))
+          {
+            try
+            {
+              value = Convert.ChangeType(value, param.ParameterType);
+            }
+            catch
+            {
+              usable = false;
+              break;
+            }
+          }
+
+          args[i] = value;
+          score++;
+        }
+        else if (param.HasDefaultValue)
+          args[i] = param.DefaultValue;
+        else if (param.IsOptional)
+          args[i] = Type.Missing;
+        else
+        {
+          usable = false;
+          break;
+        }
+      }
+
+      if (!usable) continue;
+
+      if (score > bestScore)
+      {
+        bestScore = score;
+        bestCtor = ctor;
+        bestArgs = args;
+      }
+    }
+
+    if (bestCtor == null || bestArgs == null)
+      throw new InvalidOperationException($"No available constructor found to create an instance of {type}.");
+
+    object ret = bestCtor.Invoke(bestArgs);
+    return ret;
+  }
+
+  private object CreateAndInitClass(Type instanceType, DataFieldValueDictionary<PropertyInfo> propertyValues)
+  {
+    var pom = new PublicParameterlessConstructorInstanceFromPropertiesFactory();
+    object ret = pom.CreateInstance(instanceType, propertyValues);
+    return ret;
+  }
+
+  private static TypeKind GetTypeKind(Type type)
+  {
+    bool isRecord =
+        type.GetProperty(
+            "EqualityContract",
+            BindingFlags.Instance | BindingFlags.NonPublic
+        ) != null;
+
+    if (isRecord)
+      return type.IsValueType ? TypeKind.RecordStruct : TypeKind.RecordClass;
+
+    return type.IsValueType ? TypeKind.Struct : TypeKind.Class;
+  }
+}
+
+public class DelegatedInstanceFactory : IInstanceFactory<PropertyInfo>
+{
+  private readonly Func<Type, DataFieldValueDictionary<PropertyInfo>, object> factoryMethod;
+  public DelegatedInstanceFactory(Func<Type, DataFieldValueDictionary<PropertyInfo>, object> factoryMethod)
+  {
+    this.factoryMethod = factoryMethod ?? throw new ArgumentNullException(nameof(factoryMethod));
+  }
+  public object CreateInstance(Type targetType, DataFieldValueDictionary<PropertyInfo> deserializedValues)
+  {
+    object ret = factoryMethod(targetType, deserializedValues);
+    return ret;
+  }
+}
+
+public class DelegatedInstanceFactory<T> : IInstanceFactory<PropertyInfo>
+{
+  private readonly Func<PropertyValuesDictionary<T>, object> factoryMethod;
+  public DelegatedInstanceFactory(Func<PropertyValuesDictionary<T>, object> factoryMethod)
+  {
+    this.factoryMethod = factoryMethod ?? throw new ArgumentNullException(nameof(factoryMethod));
+  }
+  public object CreateInstance(Type targetType, DataFieldValueDictionary<PropertyInfo> deserializedValues)
+  {
+    EAssert.IsTrue(typeof(T) == targetType, $"DelegatedInstanceFactory<{typeof(T)}> unable to create instance of '{targetType}'.");
+    PropertyValuesDictionary<T> tmp = new();
+    deserializedValues.ToList().ForEach(kv => tmp[kv.Key] = kv.Value);
+    object ret = factoryMethod(tmp);
+    return ret;
+  }
+}
+
+public class NewTypeByPropertySerializer : NewTypeSerializer<PropertyInfo>
 {
   public static readonly Func<Type, PropertyInfo[]> PUBLIC_INSTANCE_PROPERTIES_PROVIDER = q => q.GetProperties(BindingFlags.Public | BindingFlags.Instance);
   public static readonly Func<object, PropertyInfo, object?> PROPERTY_VALUE_READER = (obj, prop) => prop.GetValue(obj);
@@ -249,35 +483,72 @@ internal class NewTypeByPropertySerializer : NewTypeSerializer<PropertyInfo>
 
 /****/
 
+public abstract class DataFieldValueDictionary<TDataFieldInfo> : Dictionary<TDataFieldInfo, object?> where TDataFieldInfo : notnull
+{
+  public abstract object? this[string name] { get; }
+  public T? Get<T>(string name)
+  {
+    object? tmp = this[name];
+    T? ret = (T?)tmp;
+    return ret;
+  }
+}
 
-internal abstract class NewTypeDeserializer<TDataFieldInfo> : IElementDeserializer where TDataFieldInfo : notnull
+public class PropertyInfoValueDictionary : DataFieldValueDictionary<PropertyInfo>
+{
+  public override object? this[string name] => this.First(q => q.Key.Name == name).Value;
+}
+
+public abstract class NewTypeDeserializer<TDataFieldInfo> : IElementDeserializer where TDataFieldInfo : notnull
 {
   public abstract bool AcceptsType(Type type);
 
-  protected abstract object? DeserializeDataField(TDataFieldInfo dataField, XElement element, IXmlContext ctx);
+  protected abstract DataFieldValueDictionary<TDataFieldInfo> CreateDataFieldValueDictionaryInstance();
+  protected abstract DeserializationResult DeserializeDataField(TDataFieldInfo dataField, XElement element, IXmlContext ctx);
   protected abstract IEnumerable<TDataFieldInfo> GetTypeDataFields(Type type);
-  protected abstract object CreateInstance(Type targetType, IDictionary<TDataFieldInfo, object?> deserializedValues);
+  protected abstract object CreateInstance(Type targetType, DataFieldValueDictionary<TDataFieldInfo> deserializedValues);
 
   public object? Deserialize(XElement element, Type targetType, IXmlContext ctx)
   {
     IEnumerable<TDataFieldInfo> dataFields = GetTypeDataFields(targetType);
-    Dictionary<TDataFieldInfo, object?> deserializedValues = [];
+    DataFieldValueDictionary<TDataFieldInfo> deserializedValues = CreateDataFieldValueDictionaryInstance();
     foreach (TDataFieldInfo dataField in dataFields)
     {
-      object? deserializedValue = DeserializeDataField(dataField, element, ctx);
-      deserializedValues[dataField] = deserializedValue;
+      DeserializationResult tmp = DeserializeDataField(dataField, element, ctx);
+      if (tmp.HasResult)
+        deserializedValues[dataField] = tmp.Value;
     }
     object ret = CreateInstance(targetType, deserializedValues);
     return ret;
   }
 }
 
-public interface IPropertyDeserializer
+public readonly struct DeserializationResult
 {
-  object? DeserializeProperty(PropertyInfo propertyInfo, XElement element, IXmlContext ctx);
+  public bool HasResult { get; }
+  public bool IsNull { get => Value == null; }
+  public object? Value { get; }
+
+  private DeserializationResult(bool hasResult, object? value)
+  {
+    HasResult = hasResult;
+    Value = value;
+  }
+
+  public static DeserializationResult NoResult() => new(false, null);
+
+  public static DeserializationResult Null() => new(true, null);
+
+  public static DeserializationResult ValueResult(object value) => new(true, value);
 }
 
-internal class NewTypeByPropertyDeserializer : NewTypeDeserializer<PropertyInfo>
+public interface IPropertyDeserializer
+{
+
+  DeserializationResult DeserializeProperty(PropertyInfo propertyInfo, XElement element, IXmlContext ctx);
+}
+
+public class NewTypeByPropertyDeserializer : NewTypeDeserializer<PropertyInfo>
 {
   public static readonly Func<Type, PropertyInfo[]> PUBLIC_INSTANCE_PROPERTIES_PROVIDER = q => q.GetProperties(BindingFlags.Public | BindingFlags.Instance);
   public static readonly Action<object, PropertyInfo, object?> PROPERTY_VALUE_WRITER = (obj, prop, val) => prop.SetValue(obj, val);
@@ -286,7 +557,7 @@ internal class NewTypeByPropertyDeserializer : NewTypeDeserializer<PropertyInfo>
   private Action<object, PropertyInfo, object?> propertyValueUpdater = PROPERTY_VALUE_WRITER; //TODO naming convention
   private IPropertyDeserializer propertyDeserializer = new SimplePropertyAsElement();
   private readonly Dictionary<PropertyInfo, IPropertyDeserializer> propertyDeserializers = [];
-  private IInstanceFactory<PropertyInfo> instanceFactory = new PublicParameterlessConstructorInstanceFromPropertiesFactory();
+  private IInstanceFactory<PropertyInfo> instanceFactory = new UniversalTypeFactory();
   private readonly Dictionary<Type, IInstanceFactory<PropertyInfo>> instanceFactoriesByType = [];
 
   private Func<Type, bool> acceptsTypePredicate = q => false;
@@ -343,6 +614,16 @@ internal class NewTypeByPropertyDeserializer : NewTypeDeserializer<PropertyInfo>
     return this.WithPropertyDeserializerFor(propertyInfo, propertyDeserializer);
   }
 
+  public NewTypeByPropertyDeserializer WithInstanceFactory(Func<Type, DataFieldValueDictionary<PropertyInfo>, object> factoryMethod)
+  {
+    this.instanceFactory = new DelegatedInstanceFactory(factoryMethod);
+    return this;
+  }
+  public NewTypeByPropertyDeserializer WithInstanceFactory<T>(Func<PropertyValuesDictionary<T>, object> factoryMethod)
+  {
+    this.instanceFactory = new DelegatedInstanceFactory<T>(factoryMethod);
+    return this;
+  }
   public NewTypeByPropertyDeserializer WithInstanceFactory(IInstanceFactory<PropertyInfo> instanceFactory)
   {
     this.instanceFactory = instanceFactory ?? throw new ArgumentNullException(nameof(instanceFactory));
@@ -385,16 +666,17 @@ internal class NewTypeByPropertyDeserializer : NewTypeDeserializer<PropertyInfo>
 
   protected override IEnumerable<PropertyInfo> GetTypeDataFields(Type type) => propertiesProvider(type);
 
-  protected override object? DeserializeDataField(PropertyInfo dataField, XElement element, IXmlContext ctx)
+  protected override DeserializationResult DeserializeDataField(PropertyInfo dataField, XElement element, IXmlContext ctx)
   {
     var pds = this.propertyDeserializers.TryGetValue(dataField, out IPropertyDeserializer? tmp)
       ? tmp
       : this.propertyDeserializer;
-    object? deserializedValue = pds.DeserializeProperty(dataField, element, ctx);
+    DeserializationResult deserializedValue = pds.DeserializeProperty(dataField, element, ctx);
     return deserializedValue;
   }
+  protected override DataFieldValueDictionary<PropertyInfo> CreateDataFieldValueDictionaryInstance() => new PropertyInfoValueDictionary();
 
-  protected override object CreateInstance(Type targetType, IDictionary<PropertyInfo, object?> deserializedValues)
+  protected override object CreateInstance(Type targetType, DataFieldValueDictionary<PropertyInfo> deserializedValues)
   {
     IInstanceFactory<PropertyInfo> factory = this.instanceFactoriesByType.TryGetValue(targetType, out IInstanceFactory<PropertyInfo>? tmp)
       ? tmp

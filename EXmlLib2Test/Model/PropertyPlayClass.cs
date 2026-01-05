@@ -30,10 +30,10 @@ namespace EXmlLib2Test.Model
         .WithXmlPropertyInfo(q => q.StringAttribute, q => q.Representation = XmlRepresentation.Attribute);
 
       SpecificTypeElementSerializer<PropertyPlayClass> tes = new(xti);
-      exml.ElementSerializers.Push(tes);
+      exml.ElementSerializers.AddFirst(tes);
 
       SpecificTypeElementDeserializer<PropertyPlayClass> tds = new(xti);
-      exml.ElementDeserializers.Push(tds);
+      exml.ElementDeserializers.AddFirst(tds);
     }
 
     public override bool Equals(object? obj)

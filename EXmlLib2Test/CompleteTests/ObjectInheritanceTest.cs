@@ -43,14 +43,14 @@ namespace EXmlLib2Test.CompleteTests
       XElement element = new XElement("Root");
 
       {
-        var exml = EXml.CreateDefault();
-        exml.ElementSerializers.Push(new SpecificTypeElementSerializer<ParentClass>(DerivedTypesBehavior.AllowDerivedTypes));
+        EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization();
+        exml.ElementSerializers.AddFirst(new SpecificTypeElementSerializer<ParentClass>(DerivedTypesBehavior.AllowDerivedTypes));
         exml.Serialize(source, element);
       }
 
       {
-        var exml = EXml.CreateDefault();
-        exml.ElementDeserializers.Push(new SpecificTypeElementDeserializer<ParentClass>(DerivedTypesBehavior.AllowDerivedTypes));
+        EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization();
+        exml.ElementDeserializers.AddFirst(new SpecificTypeElementDeserializer<ParentClass>(DerivedTypesBehavior.AllowDerivedTypes));
         target = exml.Deserialize<ParentClass>(element);
       }
 
@@ -77,14 +77,50 @@ namespace EXmlLib2Test.CompleteTests
       XElement element = new XElement("Root");
 
       {
-        var exml = EXml.CreateDefault();
-        exml.ElementSerializers.Push(new SpecificTypeElementSerializer<ParentClass>(DerivedTypesBehavior.AllowDerivedTypes));
+        EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization();
+        exml.ElementSerializers.AddFirst(new NewTypeByPropertySerializer().WithAcceptedType<ParentClass>(true));
+        exml.ElementSerializers.AddFirst(new NewTypeByPropertySerializer().WithAcceptedType<HolderClass>(true));
         exml.Serialize(source, element);
       }
 
       {
-        var exml = EXml.CreateDefault();
-        exml.ElementDeserializers.Push(new SpecificTypeElementDeserializer<ParentClass>(DerivedTypesBehavior.AllowDerivedTypes));
+        EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization();
+        exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer().WithAcceptedType<ParentClass>(true));
+        exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer().WithAcceptedType<HolderClass>(true));
+        target = exml.Deserialize<HolderClass>(element);
+      }
+
+      target!.HeldObjectA.Should().BeOfType<ChildClass>();
+      target!.HeldObjectB.Should().BeOfType<ParentClass>();
+      target.Should().BeEquivalentTo(source);
+    }
+
+
+    [Test]
+    public void InheritanceInPropertyTest2()
+    {
+      HolderClass source = new()
+      {
+        HeldObjectA = new ChildClass()
+        {
+          ParentProperty = 10,
+          ChildProperty = 20
+        },
+        HeldObjectB = new ParentClass()
+        {
+          ParentProperty = 30
+        }
+      };
+      HolderClass? target;
+      XElement element = new XElement("Root");
+
+      {
+        EXml exml = EXml.Create().WithDefaultSerialization();
+        exml.Serialize(source, element);
+      }
+
+      {
+        EXml exml = EXml.Create().WithDefaultSerialization();
         target = exml.Deserialize<HolderClass>(element);
       }
 
