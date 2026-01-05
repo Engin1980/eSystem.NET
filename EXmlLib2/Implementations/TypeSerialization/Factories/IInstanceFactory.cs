@@ -2,9 +2,9 @@
 
 namespace EXmlLib2.Implementations.TypeSerialization.Factories;
 
-public interface IInstanceFactory<TDataFieldInfo> where TDataFieldInfo : notnull
+public interface IInstanceFactory
 {
-  object CreateInstance(Type targetType, DataFieldValueDictionary<TDataFieldInfo> deserializedValues);
+  object CreateInstance(Type targetType, Dictionary<string, object?> deserializedValues);
 }
 
 

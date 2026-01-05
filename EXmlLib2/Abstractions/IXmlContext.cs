@@ -36,9 +36,9 @@ namespace EXmlLib2.Abstractions
     public SerializerDeserializerRegistry<IElementDeserializer> ElementDeserializers { get; }
     public SerializerDeserializerRegistry<IAttributeDeserializer> AttributeDeserializers { get; }
 
-    void SetData<T>(string key, T data);
-    T? GetData<T>(string key);
-    T GetOrSetData<T>(string key, Func<T> newDataProvider);
+    void SetCustomData<T>(string key, T data);
+    T? GetCustomData<T>(string key);
+    T GetOrSetCustomData<T>(string key, Func<T> newDataProvider);
     void SerializeToElement(object? value, XElement elm, IElementSerializer serializer);
     XAttribute SerializeToAttribute(string name, object? value, IAttributeSerializer serializer);
   }

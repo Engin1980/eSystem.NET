@@ -1,6 +1,5 @@
 ﻿using ESystem.Asserting;
 using EXmlLib2.Abstractions;
-using EXmlLib2.Implementations.TypeSerialization.Properties;
 using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -8,7 +7,7 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Implementations.TypeSerialization.PropertyBased;
 
-public class NewTypeByPropertySerializer : NewTypeSerializer<PropertyInfo>
+public class NewTypeByPropertySerializer : NewTypeSerializer
 {
   public static readonly Func<Type, PropertyInfo[]> PUBLIC_INSTANCE_PROPERTIES_PROVIDER = q => q.GetProperties(BindingFlags.Public | BindingFlags.Instance);
   public static readonly Func<object, PropertyInfo, object?> PROPERTY_VALUE_READER = (obj, prop) => prop.GetValue(obj);
@@ -102,12 +101,23 @@ public class NewTypeByPropertySerializer : NewTypeSerializer<PropertyInfo>
     return property;
   }
 
-  protected override IEnumerable<PropertyInfo> GetTypeDataFields(Type type) => propertiesProvider(type);
+  protected override IEnumerable<string> GetDataMemberNames(Type type)
+  {
+    var props = GetPropertiesForType(type);
+    var ret = props.Select(q => q.Name).ToList();
+    return ret;
+  }
+
+  private PropertyInfo[] GetPropertiesForType(Type type)
+  {
+    return propertiesProvider(type);
+  }
 
   protected object? GetPropertyValue(object value, PropertyInfo propertyInfo) => propertyValueProvider(value, propertyInfo);
 
-  protected override void SerializeDataField(object value, PropertyInfo propertyInfo, XElement element, IXmlContext ctx)
+  protected override void SerializeDataField(object value, string propertyName, XElement element, IXmlContext ctx)
   {
+    PropertyInfo propertyInfo = GetPropertiesForType(value.GetType()).First(q => q.Name == propertyName);
     object? propertyValue = GetPropertyValue(value, propertyInfo);
     IPropertySerializer psd = propertySerializers.TryGetValue(propertyInfo, out IPropertySerializer? tmp)
       ? tmp

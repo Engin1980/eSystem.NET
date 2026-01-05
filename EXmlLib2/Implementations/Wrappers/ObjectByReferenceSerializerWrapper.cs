@@ -44,7 +44,7 @@ namespace EXmlLib2.Implementations.Wrappers
 
     private Dictionary<object, int> GetReferencesFromXmlContext(IXmlContext ctx)
     {
-      Dictionary<object, int> ret = ctx.GetOrSetData<Dictionary<object, int>>(CONTEXT_REFERENCES_KEY, () => []);
+      Dictionary<object, int> ret = ctx.GetOrSetCustomData<Dictionary<object, int>>(CONTEXT_REFERENCES_KEY, () => []);
       return ret;
     }
   }

@@ -97,7 +97,7 @@ internal class ObjectByReferenceTest
       ObjectByReferenceDeserializerWrapper<Location> locationDeserializer = new(new SpecificTypeElementDeserializer<Location>());
       ObjectByReferenceDeserializerWrapper<Item> itemDeserializer = new(new SpecificTypeElementDeserializer<Item>());
       xml.ElementDeserializers.AddFirst(locationDeserializer);
-      xml.ElementDeserializers.addf(itemDeserializer);
+      xml.ElementDeserializers.AddFirst(itemDeserializer);
 
       target = xml.Deserialize<Item>(elm);
     }

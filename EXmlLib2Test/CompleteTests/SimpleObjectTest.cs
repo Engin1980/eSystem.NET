@@ -3,6 +3,8 @@ using EXmlLib2;
 using EXmlLib2.Abstractions.Abstracts;
 using EXmlLib2.Implementations.Deserializers;
 using EXmlLib2.Implementations.Serializers;
+using EXmlLib2.Implementations.TypeSerialization.PropertyBased;
+using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties;
 using EXmlLib2.Types;
 using FluentAssertions;
 using NUnit.Framework.Constraints;

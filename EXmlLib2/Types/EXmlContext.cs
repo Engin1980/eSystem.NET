@@ -103,18 +103,18 @@ namespace EXmlLib2.Types
       return ret;
     }
 
-    private readonly Dictionary<string, object> dataStore = [];
-    public void SetData<T>(string key, T data) => dataStore[key] = data!;
-    public T? GetData<T>(string key) => (T?)dataStore[key];
-    public T GetOrSetData<T>(string key, Func<T> newDataProvider)
+    private readonly Dictionary<string, object> customDataStore = [];
+    public void SetCustomData<T>(string key, T data) => customDataStore[key] = data!;
+    public T? GetCustomData<T>(string key) => (T?)customDataStore[key];
+    public T GetOrSetCustomData<T>(string key, Func<T> newDataProvider)
     {
       T ret;
-      if (dataStore.TryGetValue(key, out object? tmp))
+      if (customDataStore.TryGetValue(key, out object? tmp))
         ret = (T)tmp!;
       else
       {
         ret = newDataProvider();
-        dataStore[key] = ret!;
+        customDataStore[key] = ret!;
       }
       return ret;
     }

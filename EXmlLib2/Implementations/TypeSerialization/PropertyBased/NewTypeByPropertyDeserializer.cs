@@ -2,7 +2,7 @@
 using EXmlLib2.Abstractions;
 using EXmlLib2.Implementations.TypeSerialization.Factories;
 using EXmlLib2.Implementations.TypeSerialization.Helpers;
-using EXmlLib2.Implementations.TypeSerialization.Properties;
+using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Factories;
 using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties;
 using EXmlLib2.Types;
 using System.Linq.Expressions;
@@ -11,12 +11,8 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Implementations.TypeSerialization.PropertyBased;
 
-public class NewTypeByPropertyDeserializer : NewTypeDeserializer<PropertyInfo>
+public class NewTypeByPropertyDeserializer : NewTypeDeserializer
 {
-  private class PropertyInfoValueDictionary : DataFieldValueDictionary<PropertyInfo>
-  {
-    public override object? this[string name] => this.First(q => q.Key.Name == name).Value;
-  }
 
   public static readonly Func<Type, PropertyInfo[]> PUBLIC_INSTANCE_PROPERTIES_PROVIDER = q => q.GetProperties(BindingFlags.Public | BindingFlags.Instance);
   public static readonly Action<object, PropertyInfo, object?> PROPERTY_VALUE_WRITER = (obj, prop, val) => prop.SetValue(obj, val);
@@ -25,8 +21,8 @@ public class NewTypeByPropertyDeserializer : NewTypeDeserializer<PropertyInfo>
   private Action<object, PropertyInfo, object?> propertyValueUpdater = PROPERTY_VALUE_WRITER; //TODO naming convention
   private IPropertyDeserializer propertyDeserializer = new SimplePropertyAsElement();
   private readonly Dictionary<PropertyInfo, IPropertyDeserializer> propertyDeserializers = [];
-  private IInstanceFactory<PropertyInfo> instanceFactory = new UniversalTypeFactory();
-  private readonly Dictionary<Type, IInstanceFactory<PropertyInfo>> instanceFactoriesByType = [];
+  private IInstanceFactory instanceFactory = new UniversalTypeFactory();
+  private readonly Dictionary<Type, IInstanceFactory> instanceFactoriesByType = [];
 
   private Func<Type, bool> acceptsTypePredicate = q => false;
 
@@ -82,7 +78,7 @@ public class NewTypeByPropertyDeserializer : NewTypeDeserializer<PropertyInfo>
     return WithPropertyDeserializerFor(propertyInfo, propertyDeserializer);
   }
 
-  public NewTypeByPropertyDeserializer WithInstanceFactory(Func<Type, DataFieldValueDictionary<PropertyInfo>, object> factoryMethod)
+  public NewTypeByPropertyDeserializer WithInstanceFactory(Func<Type, Dictionary<string, object?>, object> factoryMethod)
   {
     instanceFactory = new DelegatedInstanceFactory(factoryMethod);
     return this;
@@ -92,12 +88,12 @@ public class NewTypeByPropertyDeserializer : NewTypeDeserializer<PropertyInfo>
     instanceFactory = new DelegatedInstanceFactory<T>(factoryMethod);
     return this;
   }
-  public NewTypeByPropertyDeserializer WithInstanceFactory(IInstanceFactory<PropertyInfo> instanceFactory)
+  public NewTypeByPropertyDeserializer WithInstanceFactory(IInstanceFactory instanceFactory)
   {
     this.instanceFactory = instanceFactory ?? throw new ArgumentNullException(nameof(instanceFactory));
     return this;
   }
-  public NewTypeByPropertyDeserializer WithInstanceFactoryFor(Type type, IInstanceFactory<PropertyInfo> instanceFactory)
+  public NewTypeByPropertyDeserializer WithInstanceFactoryFor(Type type, IInstanceFactory instanceFactory)
   {
     EAssert.Argument.IsNotNull(type, nameof(type));
     EAssert.Argument.IsNotNull(instanceFactory, nameof(instanceFactory));
@@ -132,21 +128,30 @@ public class NewTypeByPropertyDeserializer : NewTypeDeserializer<PropertyInfo>
     return property;
   }
 
-  protected override IEnumerable<PropertyInfo> GetTypeDataFields(Type type) => propertiesProvider(type);
-
-  protected override DeserializationResult DeserializeDataField(PropertyInfo dataField, XElement element, IXmlContext ctx)
+  protected override IEnumerable<string> GetDataMemberNames(Type type)
   {
-    var pds = propertyDeserializers.TryGetValue(dataField, out IPropertyDeserializer? tmp)
+    var props = GetPropertiesForType(type);
+    var ret = props.Select(q => q.Name).ToList();
+    return ret;
+  }
+  private PropertyInfo[] GetPropertiesForType(Type type)
+  {
+    return propertiesProvider(type);
+  }
+
+  protected override DeserializationResult DeserializeDataMember(Type targetType, string dataMemberName, XElement element, IXmlContext ctx)
+  {
+    PropertyInfo pi = GetPropertiesForType(targetType).First(q => q.Name == dataMemberName);
+    var pds = propertyDeserializers.TryGetValue(pi, out IPropertyDeserializer? tmp)
       ? tmp
       : propertyDeserializer;
-    DeserializationResult deserializedValue = pds.DeserializeProperty(dataField, element, ctx);
+    DeserializationResult deserializedValue = pds.DeserializeProperty(pi, element, ctx);
     return deserializedValue;
   }
-  protected override DataFieldValueDictionary<PropertyInfo> CreateDataFieldValueDictionaryInstance() => new PropertyInfoValueDictionary();
 
-  protected override object CreateInstance(Type targetType, DataFieldValueDictionary<PropertyInfo> deserializedValues)
+  protected override object CreateInstance(Type targetType, Dictionary<string, object?> deserializedValues)
   {
-    IInstanceFactory<PropertyInfo> factory = instanceFactoriesByType.TryGetValue(targetType, out IInstanceFactory<PropertyInfo>? tmp)
+    IInstanceFactory factory = instanceFactoriesByType.TryGetValue(targetType, out IInstanceFactory? tmp)
       ? tmp
       : instanceFactory;
     object ret = factory.CreateInstance(targetType, deserializedValues);

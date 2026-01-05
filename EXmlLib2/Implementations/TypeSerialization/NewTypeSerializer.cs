@@ -14,7 +14,7 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Implementations.TypeSerialization;
 
-public abstract class NewTypeSerializer<TDataFieldInfo> : IElementSerializer
+public abstract class NewTypeSerializer : IElementSerializer
 {
   public abstract bool AcceptsType(Type type);
 
@@ -22,13 +22,13 @@ public abstract class NewTypeSerializer<TDataFieldInfo> : IElementSerializer
   {
     EAssert.Argument.IsNotNull(value, nameof(value));
 
-    IEnumerable<TDataFieldInfo> dataFields = GetTypeDataFields(value.GetType());
-    foreach (TDataFieldInfo dataField in dataFields)
+    IEnumerable<string> dataMembers = GetDataMemberNames(value.GetType());
+    foreach (string dataMember in dataMembers)
     {
-      SerializeDataField(value, dataField, element, ctx);
+      SerializeDataField(value, dataMember, element, ctx);
     }
   }
 
-  protected abstract void SerializeDataField(object value, TDataFieldInfo dataField, XElement element, IXmlContext ctx);
-  protected abstract IEnumerable<TDataFieldInfo> GetTypeDataFields(Type type);
+  protected abstract void SerializeDataField(object value, string dataMemberName, XElement element, IXmlContext ctx);
+  protected abstract IEnumerable<string> GetDataMemberNames(Type type);
 }

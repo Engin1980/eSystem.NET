@@ -58,6 +58,6 @@ public class ObjectByReferenceDeserializerWrapper<T> : TypedElementDeserializer<
 
   private Dictionary<int, object> GetContextReferences(IXmlContext ctx)
   {
-    return ctx.GetOrSetData<Dictionary<int, object>>(CONTEXT_REFERENCES_KEY, () => []);
+    return ctx.GetOrSetCustomData<Dictionary<int, object>>(CONTEXT_REFERENCES_KEY, () => []);
   }
 }

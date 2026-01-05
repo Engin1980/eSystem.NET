@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace EXmlLib2.Implementations.TypeSerialization.PropertyBased.Factories;
 
-public class UniversalTypeFactory : IInstanceFactory<PropertyInfo>
+public class UniversalTypeFactory : IInstanceFactory
 {
   private enum TypeKind
   {
@@ -16,7 +16,7 @@ public class UniversalTypeFactory : IInstanceFactory<PropertyInfo>
     RecordStruct
   }
 
-  public object CreateInstance(Type targetType, DataFieldValueDictionary<PropertyInfo> propertyValues)
+  public object CreateInstance(Type targetType, Dictionary<string, object?> propertyValues)
   {
     TypeKind typeKind = GetTypeKind(targetType);
     object ret = typeKind switch
@@ -30,7 +30,7 @@ public class UniversalTypeFactory : IInstanceFactory<PropertyInfo>
     return ret;
   }
 
-  private object CreateAndInitStructOrRecord(Type type, bool isForRecords, DataFieldValueDictionary<PropertyInfo> propertyValues)
+  private object CreateAndInitStructOrRecord(Type type, bool isForRecords, Dictionary<string, object?> propertyValues)
   {
     if (!isForRecords)
       EAssert.IsTrue(type.IsValueType, $"Generic type T must be struct (provided '{type}').");
@@ -53,7 +53,7 @@ public class UniversalTypeFactory : IInstanceFactory<PropertyInfo>
       for (int i = 0; i < parameters.Length; i++)
       {
         var param = parameters[i];
-        var prop = propertyValues.Keys.FirstOrDefault(p => string.Equals(p.Name, param.Name, StringComparison.OrdinalIgnoreCase));
+        var prop = propertyValues.Keys.FirstOrDefault(p => string.Equals(p, param.Name, StringComparison.OrdinalIgnoreCase));
 
         if (prop != null)
         {
@@ -103,7 +103,7 @@ public class UniversalTypeFactory : IInstanceFactory<PropertyInfo>
     return ret;
   }
 
-  private object CreateAndInitClass(Type instanceType, DataFieldValueDictionary<PropertyInfo> propertyValues)
+  private object CreateAndInitClass(Type instanceType, Dictionary<string, object?> propertyValues)
   {
     var pom = new PublicParameterlessConstructorInstanceFromPropertiesFactory();
     object ret = pom.CreateInstance(instanceType, propertyValues);

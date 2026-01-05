@@ -11,6 +11,7 @@ using EXmlLib2.Types.Internal;
 using EXmlLib2.Abstractions.Abstracts;
 using System.Runtime.CompilerServices;
 using EXmlLib2.Implementations.TypeSerialization;
+using EXmlLib2.Implementations.TypeSerialization.PropertyBased;
 
 namespace EXmlLib2
 {
