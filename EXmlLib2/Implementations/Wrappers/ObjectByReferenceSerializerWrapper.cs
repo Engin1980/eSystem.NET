@@ -12,20 +12,22 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Implementations.Wrappers
 {
-  public class ObjectByReferenceSerializerWrapper<T> : TypedElementSerializer<T>
+  public class ObjectByReferenceSerializerWrapper : IElementSerializer
   {
-    public const string REFERENCE_ID_ATTRIBUTE = "__REF_ID";
-    public const string OBJECT_ID_ATTRIBUTE = "__OBJ_ID";
+    public const string REFERENCE_ID_ATTRIBUTE = "__referenceId";
+    public const string OBJECT_ID_ATTRIBUTE = "__objectId";
     public const string CONTEXT_REFERENCES_KEY = "ObjectByReferenceSerializerWrapper_References";
-    private readonly TypedElementSerializer<T> innerSerializer;
+    private readonly IElementSerializer innerSerializer;
 
-    public ObjectByReferenceSerializerWrapper(TypedElementSerializer<T> innerSerializer)
+    public ObjectByReferenceSerializerWrapper(IElementSerializer innerSerializer)
     {
       EAssert.Argument.IsNotNull(innerSerializer, nameof(innerSerializer));
       this.innerSerializer = innerSerializer;
     }
 
-    public override void Serialize(T value, XElement element, IXmlContext ctx)
+    public bool AcceptsType(Type type) => innerSerializer.AcceptsType(type);
+
+    public void Serialize(object? value, XElement element, IXmlContext ctx)
     {
       EAssert.Argument.IsNotNull(value, nameof(value));
 

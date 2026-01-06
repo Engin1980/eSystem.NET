@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace EXmlLib2Test.CompleteTests
 {
@@ -191,7 +192,6 @@ namespace EXmlLib2Test.CompleteTests
       source.Should().BeEquivalentTo(dest);
     }
 
-
     [Test]
     public void SimpleClassToPropetiesAsAttributesTest()
     {
@@ -214,6 +214,79 @@ namespace EXmlLib2Test.CompleteTests
       SimpleClass? dest = exml.Deserialize<SimpleClass>(root);
 
       source.Should().BeEquivalentTo(dest);
+    }
+
+    [Test]
+    public void IgnoredPropertyNotSerializedTest()
+    {
+      SimpleClass source = new SimpleClass()
+      {
+        CreatedAt = DateTime.Now,
+        Id = 11,
+        Name = "Test Object"
+      };
+      SimpleClass? target;
+
+      XElement element = new ("Root");
+
+      {
+        EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization().WithCommonTypesSerialization();
+        exml.ElementSerializers.AddFirst(new NewTypeByPropertySerializer()
+          .WithAcceptedType<SimpleClass>()
+          .WithPropertySerializerFor<SimpleClass>(q => q.CreatedAt, new IgnoredProperty()));
+
+        exml.Serialize(source, element);
+      }
+      {
+        EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization().WithCommonTypesSerialization();
+        exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer()
+          .WithAcceptedType<SimpleClass>()
+          .WithPropertyDeserializerFor<SimpleClass>(q => q.CreatedAt, new IgnoredProperty()));
+        target = exml.Deserialize<SimpleClass>(element);
+      }
+
+      element.XPathSelectElement("./CreatedAt").Should().BeNull();
+      target.Should().NotBeNull();
+      target.Should().NotBeEquivalentTo(source);
+      target.Id.Should().Be(source.Id);
+      target.Name.Should().Be(source.Name);
+      target.CreatedAt.Should().NotBe(source.CreatedAt);
+    }
+
+    [Test]
+    public void IgnoredPropertyNotDeserializedTest()
+    {
+      SimpleClass source = new SimpleClass()
+      {
+        CreatedAt = DateTime.Now,
+        Id = 11,
+        Name = "Test Object"
+      };
+      SimpleClass? target;
+
+      XElement element = new("Root");
+
+      {
+        EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization().WithCommonTypesSerialization();
+        exml.ElementSerializers.AddFirst(new NewTypeByPropertySerializer()
+          .WithAcceptedType<SimpleClass>());
+
+        exml.Serialize(source, element);
+      }
+      {
+        EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization().WithCommonTypesSerialization();
+        exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer()
+          .WithAcceptedType<SimpleClass>()
+          .WithPropertyDeserializerFor<SimpleClass>(q => q.CreatedAt, new IgnoredProperty()));
+        target = exml.Deserialize<SimpleClass>(element);
+      }
+
+      element.XPathSelectElement("./CreatedAt").Should().NotBeNull();
+      target.Should().NotBeNull();
+      target.Should().NotBeEquivalentTo(source);
+      target.Id.Should().Be(source.Id);
+      target.Name.Should().Be(source.Name);
+      target.CreatedAt.Should().NotBe(source.CreatedAt);
     }
   }
 }

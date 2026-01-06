@@ -11,22 +11,24 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Implementations.Wrappers;
 
-public class ObjectByReferenceDeserializerWrapper<T> : TypedElementDeserializer<T>
+public class ObjectByReferenceDeserializerWrapper : IElementDeserializer
 {
-  private const string REFERENCE_ID_ATTRIBUTE = ObjectByReferenceSerializerWrapper<T>.REFERENCE_ID_ATTRIBUTE;
-  public const string OBJECT_ID_ATTRIBUTE = ObjectByReferenceSerializerWrapper<T>.OBJECT_ID_ATTRIBUTE;
+  private const string REFERENCE_ID_ATTRIBUTE = ObjectByReferenceSerializerWrapper.REFERENCE_ID_ATTRIBUTE;
+  public const string OBJECT_ID_ATTRIBUTE = ObjectByReferenceSerializerWrapper.OBJECT_ID_ATTRIBUTE;
   private const string CONTEXT_REFERENCES_KEY = "ObjectByReferenceDeserializerWrapper_References";
-  private readonly TypedElementDeserializer<T> innerDeserializer;
+  private readonly IElementDeserializer innerDeserializer;
 
-  public ObjectByReferenceDeserializerWrapper(TypedElementDeserializer<T> innerSerializer)
+  public bool AcceptsType(Type type) => innerDeserializer.AcceptsType(type);
+
+  public ObjectByReferenceDeserializerWrapper(IElementDeserializer innerSerializer)
   {
     EAssert.Argument.IsNotNull(innerSerializer, nameof(innerSerializer));
     innerDeserializer = innerSerializer;
   }
 
-  public override T Deserialize(XElement element, IXmlContext ctx)
+  public object? Deserialize(XElement element, Type type, IXmlContext ctx)
   {
-    T ret;
+    object? ret;
 
     Dictionary<int, object> references = GetContextReferences(ctx);
 
@@ -34,10 +36,9 @@ public class ObjectByReferenceDeserializerWrapper<T> : TypedElementDeserializer<
     if (attr != null)
     {
       var id = int.Parse(attr.Value);
-      if (references.TryGetValue(id, out object? tmp))
+      if (references.TryGetValue(id, out ret))
       {
-        EAssert.IsNotNull(tmp, $"Referenced object with ID {0} is represented by 'null' in already deserialized objects.");
-        ret = (T)tmp;
+        EAssert.IsNotNull(ret, $"Referenced object with ID {0} is represented by 'null' in already deserialized objects.");
       }
       else
         throw new Exception("Referenced object with ID {0} not found within already deserialized objects.");
@@ -45,7 +46,7 @@ public class ObjectByReferenceDeserializerWrapper<T> : TypedElementDeserializer<
     else
     {
       attr = element.Attribute(OBJECT_ID_ATTRIBUTE);
-      ret = innerDeserializer.Deserialize(element, ctx);
+      ret = innerDeserializer.Deserialize(element, type, ctx);
       if (attr != null)
       {
         EAssert.IsNotNull(ret, "Deserialized object cannot be null.");
