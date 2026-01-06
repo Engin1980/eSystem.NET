@@ -2,7 +2,6 @@
 using ESystem.Logging;
 using EXmlLib2.Abstractions;
 using EXmlLib2.Abstractions.Interfaces;
-using EXmlLib2.Implementations.Serializers;
 using EXmlLib2.Types.Internal;
 using Newtonsoft.Json.Linq;
 using System;
@@ -12,7 +11,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using static EXmlLib2.Abstractions.IXmlContext;
 
 namespace EXmlLib2.Types
 {

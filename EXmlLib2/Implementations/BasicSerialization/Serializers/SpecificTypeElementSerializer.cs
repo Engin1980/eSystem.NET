@@ -14,7 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace EXmlLib2.Implementations.Serializers;
+namespace EXmlLib2.Implementations.BasicSerialization.Serializers;
 
 public class SpecificTypeElementSerializer<T> : TypedElementSerializer<T>
 {
@@ -31,7 +31,7 @@ public class SpecificTypeElementSerializer<T> : TypedElementSerializer<T>
   public SpecificTypeElementSerializer(XmlTypeInfo<T> xmlTypeInfo, DerivedTypesBehavior derivedTypesBehavior) : base(derivedTypesBehavior)
   {
     EAssert.Argument.IsNotNull(xmlTypeInfo, nameof(xmlTypeInfo));
-    this.XmlTypeInfo = xmlTypeInfo;
+    XmlTypeInfo = xmlTypeInfo;
   }
 
   public override void Serialize(T value, XElement element, IXmlContext ctx)
@@ -45,7 +45,7 @@ public class SpecificTypeElementSerializer<T> : TypedElementSerializer<T>
     catch (Exception ex)
     {
       var eex = new EXmlException($"Failed to serialize {value} to element {element}.", ex);
-      this.logger.LogException(eex);
+      logger.LogException(eex);
       throw eex;
     }
   }
@@ -79,7 +79,7 @@ public class SpecificTypeElementSerializer<T> : TypedElementSerializer<T>
 
   protected virtual void SerializeProperty(PropertyInfo property, T value, XElement element, IXmlContext ctx)
   {
-    XmlPropertyInfo xpi = XmlTypeInfo.PropertyInfos.TryGet(property) ?? this.XmlTypeInfo.DefaultXmlPropertyInfo;
+    XmlPropertyInfo xpi = XmlTypeInfo.PropertyInfos.TryGet(property) ?? XmlTypeInfo.DefaultXmlPropertyInfo;
     if (xpi.Obligation == XmlObligation.Ignored)
       return;
     object? propertyValue = GetPropertyValue(property, value);

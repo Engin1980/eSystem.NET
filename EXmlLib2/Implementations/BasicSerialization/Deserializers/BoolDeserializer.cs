@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace EXmlLib2.Implementations.Deserializers
+namespace EXmlLib2.Implementations.BasicSerialization.Deserializers
 {
   public class BoolDeserializer : TypedDeserializer<bool>
   {
@@ -32,7 +32,7 @@ namespace EXmlLib2.Implementations.Deserializers
 
     public override bool Deserialize(XElement element, IXmlContext ctx)
     {
-      return this.Deserialize(element.Value, ctx);
+      return Deserialize(element.Value, ctx);
     }
   }
 }

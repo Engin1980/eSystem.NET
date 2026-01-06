@@ -25,10 +25,10 @@ public abstract class NewTypeSerializer : IElementSerializer
     IEnumerable<string> dataMembers = GetDataMemberNames(value.GetType());
     foreach (string dataMember in dataMembers)
     {
-      SerializeDataField(value, dataMember, element, ctx);
+      SerializeDataMember(value, dataMember, element, ctx);
     }
   }
 
-  protected abstract void SerializeDataField(object value, string dataMemberName, XElement element, IXmlContext ctx);
+  protected abstract void SerializeDataMember(object value, string dataMemberName, XElement element, IXmlContext ctx);
   protected abstract IEnumerable<string> GetDataMemberNames(Type type);
 }

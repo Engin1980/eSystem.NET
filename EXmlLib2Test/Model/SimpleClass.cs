@@ -1,6 +1,6 @@
 ﻿using EXmlLib2;
-using EXmlLib2.Implementations.Deserializers;
-using EXmlLib2.Implementations.Serializers;
+using EXmlLib2.Implementations.BasicSerialization.Deserializers;
+using EXmlLib2.Implementations.BasicSerialization.Serializers;
 using EXmlLib2.Types;
 using System;
 using System.Collections.Generic;

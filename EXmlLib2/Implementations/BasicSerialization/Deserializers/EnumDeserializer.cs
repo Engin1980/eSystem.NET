@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace EXmlLib2.Implementations.Deserializers
+namespace EXmlLib2.Implementations.BasicSerialization.Deserializers
 {
   public class EnumDeserializer : IAttributeDeserializer, IElementDeserializer
   {

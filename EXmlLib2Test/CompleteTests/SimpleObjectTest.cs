@@ -1,8 +1,6 @@
 ﻿using ESystem.Logging;
 using EXmlLib2;
 using EXmlLib2.Abstractions.Abstracts;
-using EXmlLib2.Implementations.Deserializers;
-using EXmlLib2.Implementations.Serializers;
 using EXmlLib2.Implementations.TypeSerialization.PropertyBased;
 using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties;
 using EXmlLib2.Types;
@@ -198,7 +196,7 @@ namespace EXmlLib2Test.CompleteTests
       EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization().WithCommonTypesSerialization();
       exml.ElementSerializers.AddFirst(new NewTypeByPropertySerializer()
         .WithAcceptedType<SimpleClass>()
-        .WithPropertySerializer(new SimplePropertyAsAttribute()));
+        .WithDefaultOptions(opts => opts.WithPropertySerializer(new SimplePropertyAsAttribute())));
       exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer()
         .WithAcceptedType<SimpleClass>()
         .WithDefaultOptions(opts => opts.WithPropertyDeserializer(new SimplePropertyAsAttribute())));
@@ -231,7 +229,7 @@ namespace EXmlLib2Test.CompleteTests
         EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization().WithCommonTypesSerialization();
         exml.ElementSerializers.AddFirst(new NewTypeByPropertySerializer()
           .WithAcceptedType<SimpleClass>()
-          .WithPropertySerializerFor<SimpleClass>(q => q.CreatedAt, new IgnoredProperty()));
+          .WithTypeOptions<SimpleClass>(opts => opts.WithIgnoredProperty(q => q.CreatedAt)));
 
         exml.Serialize(source, element);
       }

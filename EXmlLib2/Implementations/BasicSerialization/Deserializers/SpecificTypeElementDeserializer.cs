@@ -14,9 +14,9 @@ using System.Xml;
 using System.Xml.Linq;
 using EXmlLib2.Abstractions.Interfaces;
 using EXmlLib2.Abstractions.Abstracts;
-using EXmlLib2.Implementations.Serializers;
+using EXmlLib2.Implementations.BasicSerialization.Serializers;
 
-namespace EXmlLib2.Implementations.Deserializers
+namespace EXmlLib2.Implementations.BasicSerialization.Deserializers
 {
   public class SpecificTypeElementDeserializer<T> : TypedElementDeserializer<T>
   {
@@ -41,7 +41,7 @@ namespace EXmlLib2.Implementations.Deserializers
     public SpecificTypeElementDeserializer(XmlTypeInfo<T> xmlTypeInfo, DerivedTypesBehavior derivedTypesBehavior) : base(derivedTypesBehavior)
     {
       EAssert.Argument.IsNotNull(xmlTypeInfo, nameof(xmlTypeInfo));
-      this.XmlTypeInfo = xmlTypeInfo;
+      XmlTypeInfo = xmlTypeInfo;
     }
 
     protected virtual PropertyInfo[] GetProperties(Type type)
@@ -68,7 +68,7 @@ namespace EXmlLib2.Implementations.Deserializers
       catch (Exception ex)
       {
         var eex = new EXmlException($"Failed to deserialize {typeof(T)} from element {element} - failed to read properties.", ex);
-        this.logger.LogException(eex);
+        logger.LogException(eex);
         throw eex;
       }
 
@@ -79,7 +79,7 @@ namespace EXmlLib2.Implementations.Deserializers
       catch (Exception ex)
       {
         var eex = new EXmlException($"Failed to deserialize {typeof(T)} from element {element} - failed to create & fill the instance.", ex);
-        this.logger.LogException(eex);
+        logger.LogException(eex);
         throw eex;
       }
       return ret;
@@ -341,7 +341,7 @@ namespace EXmlLib2.Implementations.Deserializers
     private object? DeserializeProperty(PropertyInfo property, XElement element, IXmlContext ctx)
     {
       object? ret;
-      XmlPropertyInfo xpi = XmlTypeInfo.PropertyInfos.TryGet(property) ?? this.XmlTypeInfo.DefaultXmlPropertyInfo;
+      XmlPropertyInfo xpi = XmlTypeInfo.PropertyInfos.TryGet(property) ?? XmlTypeInfo.DefaultXmlPropertyInfo;
       if (xpi.Obligation == XmlObligation.Ignored)
         ret = IGNORED_PROPERTY;
       else
@@ -382,7 +382,7 @@ namespace EXmlLib2.Implementations.Deserializers
       if (element.Attributes().FirstOrDefault(q => q.Name.Equals(XName.Get(ctx.TypeNameAttribute))) is XAttribute typeAttribute)
       {
         string typeName = typeAttribute.Value;
-        targetType = global::System.Type.GetType(typeName)
+        targetType = Type.GetType(typeName)
           ?? throw new EXmlException($"Custom type is defined as {typeName}, but cannot be loaded.");
       }
       IElementDeserializer deserializer = ctx.ElementDeserializers.GetByType(targetType);

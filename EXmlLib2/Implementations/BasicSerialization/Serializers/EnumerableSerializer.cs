@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace EXmlLib2.Implementations.Serializers
+namespace EXmlLib2.Implementations.BasicSerialization.Serializers
 {
   public class EnumerableSerializer : IElementSerializer
   {
@@ -18,13 +18,13 @@ namespace EXmlLib2.Implementations.Serializers
 
     public EnumerableSerializer()
     {
-      this.xii = new XmlIterableInfo();
+      xii = new XmlIterableInfo();
     }
 
     public EnumerableSerializer(XmlIterableInfo xmlIterableInfo)
     {
       EAssert.Argument.IsNotNull(xmlIterableInfo, nameof(xmlIterableInfo));
-      this.xii = xmlIterableInfo;
+      xii = xmlIterableInfo;
     }
 
     public bool AcceptsType(Type type)
@@ -42,7 +42,7 @@ namespace EXmlLib2.Implementations.Serializers
       EAssert.Argument.IsTrue(
         value == null || AcceptsType(value.GetType()),
         nameof(value),
-        $"This serializer {this.GetType().Name} does not accept provided value of type {value?.GetType()?.Name ?? "null"}.");
+        $"This serializer {GetType().Name} does not accept provided value of type {value?.GetType()?.Name ?? "null"}.");
 
       Type itemType = ExtractItemType(value);
       IEnumerable<object> items = ExtractItems(value!);
@@ -83,9 +83,9 @@ namespace EXmlLib2.Implementations.Serializers
       string? xmlName;
       bool storeType;
       if (itemTypeOrNull == null || itemTypeOrNull.GetType() == expectedType)
-        xmlName = this.xii.XmlItemName.Get(null);
+        xmlName = xii.XmlItemName.Get(null);
       else
-        xmlName = this.xii.XmlItemName.Get(itemTypeOrNull.GetType());
+        xmlName = xii.XmlItemName.Get(itemTypeOrNull.GetType());
       if (xmlName == null)
       {
         storeType = itemTypeOrNull != null && itemTypeOrNull != expectedType;

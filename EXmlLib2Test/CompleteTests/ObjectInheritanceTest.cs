@@ -1,8 +1,6 @@
 ﻿using EXmlLib2;
 using EXmlLib2.Abstractions.Abstracts;
 using EXmlLib2.Abstractions.Interfaces;
-using EXmlLib2.Implementations.Deserializers;
-using EXmlLib2.Implementations.Serializers;
 using EXmlLib2.Implementations.TypeSerialization.PropertyBased;
 using FluentAssertions;
 using System;
@@ -45,13 +43,16 @@ namespace EXmlLib2Test.CompleteTests
 
       {
         EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization();
-        exml.ElementSerializers.AddFirst(new SpecificTypeElementSerializer<ParentClass>(DerivedTypesBehavior.AllowDerivedTypes));
-        exml.Serialize(source, element);
+        exml.ElementSerializers.AddFirst(new NewTypeByPropertySerializer().WithAcceptedType<ParentClass>(true));
+        exml.Serialize(source, typeof(ParentClass), element);
+        error tady
+        // tady je problem, ze se nezapise typ te tridy, protoze serializer nevi, jaky typ uklada
+        // bude treba udelat IElementSerializer at prijima i ocekavany typ a ty TypedSerializery at to zabali a neresi.
       }
 
       {
         EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization();
-        exml.ElementDeserializers.AddFirst(new SpecificTypeElementDeserializer<ParentClass>(DerivedTypesBehavior.AllowDerivedTypes));
+        exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer().WithAcceptedType<ParentClass>(true));
         target = exml.Deserialize<ParentClass>(element);
       }
 

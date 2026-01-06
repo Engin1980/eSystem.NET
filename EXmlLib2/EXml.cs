@@ -2,8 +2,6 @@
 using ESystem.Asserting;
 using ESystem.Exceptions;
 using ESystem.Logging;
-using EXmlLib2.Implementations.Deserializers;
-using EXmlLib2.Implementations.Serializers;
 using EXmlLib2.Abstractions;
 using EXmlLib2.Types;
 using EXmlLib2.Abstractions.Interfaces;
@@ -12,6 +10,8 @@ using EXmlLib2.Abstractions.Abstracts;
 using System.Runtime.CompilerServices;
 using EXmlLib2.Implementations.TypeSerialization;
 using EXmlLib2.Implementations.TypeSerialization.PropertyBased;
+using EXmlLib2.Implementations.BasicSerialization.Serializers;
+using EXmlLib2.Implementations.BasicSerialization.Deserializers;
 
 namespace EXmlLib2
 {

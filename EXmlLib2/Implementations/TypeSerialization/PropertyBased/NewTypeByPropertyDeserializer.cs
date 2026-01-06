@@ -30,7 +30,7 @@ public class NewTypeByPropertyDeserializer : NewTypeDeserializer
 
     public TypeOptions<T> WithInstanceFactory(Func<PropertyValuesDictionary<T>, object> factoryMethod)
     {
-      parent.instanceFactory = new DelegatedInstanceFactory<T>(factoryMethod);
+      parent.defaultInstanceFactory = new DelegatedInstanceFactory<T>(factoryMethod);
       return this;
     }
   }
@@ -51,13 +51,10 @@ public class NewTypeByPropertyDeserializer : NewTypeDeserializer
 
     public DefaultOptions WithInstanceFactory(IInstanceFactory instanceFactory)
     {
-      parent.instanceFactory = instanceFactory ?? throw new ArgumentNullException(nameof(instanceFactory));
+      parent.defaultInstanceFactory = instanceFactory ?? throw new ArgumentNullException(nameof(instanceFactory));
       return this;
     }
   }
-
-  
-
 
   public static readonly Func<Type, PropertyInfo[]> PUBLIC_INSTANCE_PROPERTIES_PROVIDER = q => q.GetProperties(BindingFlags.Public | BindingFlags.Instance);
   private Func<Type, PropertyInfo[]> propertiesProvider = PUBLIC_INSTANCE_PROPERTIES_PROVIDER;
@@ -65,9 +62,8 @@ public class NewTypeByPropertyDeserializer : NewTypeDeserializer
   private IPropertyDeserializer defaultPropertyDeserializer = new SimplePropertyAsElement();
   private readonly SmartPropertyInfoDictionary<IPropertyDeserializer> propertyDeserializers = new();
 
-  private IInstanceFactory instanceFactory = new UniversalTypeFactory();
-  private readonly Dictionary<Type, IInstanceFactory> instanceFactoriesByType = [];
-
+  private IInstanceFactory defaultInstanceFactory = new UniversalTypeFactory();
+  private readonly Dictionary<Type, IInstanceFactory> instanceFactories = [];
   private Func<Type, bool> acceptsTypePredicate = q => false;
 
   public override bool AcceptsType(Type type) => acceptsTypePredicate(type);
@@ -117,7 +113,7 @@ public class NewTypeByPropertyDeserializer : NewTypeDeserializer
 
   public NewTypeByPropertyDeserializer WithInstanceFactory(Func<Type, Dictionary<string, object?>, object> factoryMethod)
   {
-    instanceFactory = new DelegatedInstanceFactory(factoryMethod);
+    defaultInstanceFactory = new DelegatedInstanceFactory(factoryMethod);
     return this;
   }
 
@@ -125,7 +121,7 @@ public class NewTypeByPropertyDeserializer : NewTypeDeserializer
   {
     EAssert.Argument.IsNotNull(type, nameof(type));
     EAssert.Argument.IsNotNull(instanceFactory, nameof(instanceFactory));
-    instanceFactoriesByType[type] = instanceFactory;
+    instanceFactories[type] = instanceFactory;
     return this;
   }
 
@@ -174,9 +170,9 @@ public class NewTypeByPropertyDeserializer : NewTypeDeserializer
 
   protected override object CreateInstance(Type targetType, Dictionary<string, object?> deserializedValues)
   {
-    IInstanceFactory factory = instanceFactoriesByType.TryGetValue(targetType, out IInstanceFactory? tmp)
+    IInstanceFactory factory = instanceFactories.TryGetValue(targetType, out IInstanceFactory? tmp)
       ? tmp
-      : instanceFactory;
+      : defaultInstanceFactory;
     object ret = factory.CreateInstance(targetType, deserializedValues);
     return ret;
   }

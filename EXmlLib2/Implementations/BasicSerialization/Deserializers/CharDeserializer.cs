@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace EXmlLib2.Implementations.Deserializers
+namespace EXmlLib2.Implementations.BasicSerialization.Deserializers
 {
   public class CharDeserializer : TypedDeserializer<char>
   {
@@ -19,7 +19,7 @@ namespace EXmlLib2.Implementations.Deserializers
 
     public override char Deserialize(XElement element, IXmlContext ctx)
     {
-      return this.Deserialize(element.Value, ctx);
+      return Deserialize(element.Value, ctx);
     }
   }
 }

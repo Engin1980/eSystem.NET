@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace EXmlLib2.Implementations.Serializers
+namespace EXmlLib2.Implementations.BasicSerialization.Serializers
 {
   internal class NullableSerializer : IAttributeSerializer, IElementSerializer
   {

@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <Folder Include="Implementations\EnumerableSerialization\" />
-    <Folder Include="Implementations\Shared\" />
   </ItemGroup>
 
 </Project>
