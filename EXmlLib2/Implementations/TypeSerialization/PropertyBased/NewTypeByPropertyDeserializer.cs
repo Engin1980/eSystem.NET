@@ -3,8 +3,10 @@ using EXmlLib2.Abstractions;
 using EXmlLib2.Implementations.TypeSerialization.Factories;
 using EXmlLib2.Implementations.TypeSerialization.Helpers;
 using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Factories;
+using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Internal;
 using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties;
 using EXmlLib2.Types;
+using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Xml.Linq;
@@ -13,14 +15,56 @@ namespace EXmlLib2.Implementations.TypeSerialization.PropertyBased;
 
 public class NewTypeByPropertyDeserializer : NewTypeDeserializer
 {
+  public class TypeOptions<T>(NewTypeByPropertyDeserializer parent)
+  {
+    public TypeOptions<T> WithPropertyDeserializer(Expression<Func<T, object?>> propertyExpression, IPropertyDeserializer propertyDeserializer)
+    {
+      EAssert.Argument.IsNotNull(propertyExpression, nameof(propertyExpression));
+      EAssert.Argument.IsNotNull(propertyDeserializer, nameof(propertyDeserializer));
+      PropertyInfo propertyInfo = ExtractPropertyInfo(propertyExpression);
+      parent.WithPropertyDeserializerFor(propertyInfo, propertyDeserializer);
+      return this;
+    }
+
+    public TypeOptions<T> WithIgnoredProperty(Expression<Func<T, object?>> propertyExpression) => this.WithPropertyDeserializer(propertyExpression, new IgnoredProperty());
+
+    public TypeOptions<T> WithInstanceFactory(Func<PropertyValuesDictionary<T>, object> factoryMethod)
+    {
+      parent.instanceFactory = new DelegatedInstanceFactory<T>(factoryMethod);
+      return this;
+    }
+  }
+
+  public class DefaultOptions(NewTypeByPropertyDeserializer parent)
+  {
+    public DefaultOptions WithPropertiesProvider(Func<Type, PropertyInfo[]> propertiesProvider)
+    {
+      parent.propertiesProvider = propertiesProvider ?? throw new ArgumentNullException(nameof(propertiesProvider));
+      return this;
+    }
+
+    public DefaultOptions WithPropertyDeserializer(IPropertyDeserializer propertySerializer)
+    {
+      parent.defaultPropertyDeserializer = propertySerializer ?? throw new ArgumentNullException(nameof(propertySerializer));
+      return this;
+    }
+
+    public DefaultOptions WithInstanceFactory(IInstanceFactory instanceFactory)
+    {
+      parent.instanceFactory = instanceFactory ?? throw new ArgumentNullException(nameof(instanceFactory));
+      return this;
+    }
+  }
+
+  
+
 
   public static readonly Func<Type, PropertyInfo[]> PUBLIC_INSTANCE_PROPERTIES_PROVIDER = q => q.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-  public static readonly Action<object, PropertyInfo, object?> PROPERTY_VALUE_WRITER = (obj, prop, val) => prop.SetValue(obj, val);
-
   private Func<Type, PropertyInfo[]> propertiesProvider = PUBLIC_INSTANCE_PROPERTIES_PROVIDER;
-  private Action<object, PropertyInfo, object?> propertyValueUpdater = PROPERTY_VALUE_WRITER; //TODO naming convention
-  private IPropertyDeserializer propertyDeserializer = new SimplePropertyAsElement();
-  private readonly Dictionary<PropertyInfo, IPropertyDeserializer> propertyDeserializers = [];
+
+  private IPropertyDeserializer defaultPropertyDeserializer = new SimplePropertyAsElement();
+  private readonly SmartPropertyInfoDictionary<IPropertyDeserializer> propertyDeserializers = new();
+
   private IInstanceFactory instanceFactory = new UniversalTypeFactory();
   private readonly Dictionary<Type, IInstanceFactory> instanceFactoriesByType = [];
 
@@ -48,34 +92,27 @@ public class NewTypeByPropertyDeserializer : NewTypeDeserializer
     return this;
   }
 
-  public NewTypeByPropertyDeserializer WithPropertiesProvider(Func<Type, PropertyInfo[]> propertiesProvider)
+  public NewTypeByPropertyDeserializer WithTypeOptions<T>(Action<TypeOptions<T>> opts)
   {
-    this.propertiesProvider = propertiesProvider ?? throw new ArgumentNullException(nameof(propertiesProvider));
+    TypeOptions<T> typeOpts = new TypeOptions<T>(this);
+    opts(typeOpts);
     return this;
   }
-  public NewTypeByPropertyDeserializer WithPropertyValueUpdater(Action<object, PropertyInfo, object?> propertyValueProvider)
+
+  public NewTypeByPropertyDeserializer WithDefaultOptions(Action<DefaultOptions> opts)
   {
-    propertyValueUpdater = propertyValueProvider ?? throw new ArgumentNullException(nameof(propertyValueProvider));
+    DefaultOptions defaultOptions = new(this);
+    opts(defaultOptions);
     return this;
   }
-  public NewTypeByPropertyDeserializer WithPropertyDeserializer(IPropertyDeserializer propertySerializer)
-  {
-    propertyDeserializer = propertySerializer ?? throw new ArgumentNullException(nameof(propertySerializer));
-    return this;
-  }
+
+  [EditorBrowsable(EditorBrowsableState.Never)]
   public NewTypeByPropertyDeserializer WithPropertyDeserializerFor(PropertyInfo propertyInfo, IPropertyDeserializer propertyDeserializer)
   {
     EAssert.Argument.IsNotNull(propertyInfo, nameof(propertyInfo));
     EAssert.Argument.IsNotNull(propertyDeserializer, nameof(propertyDeserializer));
-    propertyDeserializers[propertyInfo] = propertyDeserializer;
+    propertyDeserializers.Put(propertyInfo, propertyDeserializer);
     return this;
-  }
-  public NewTypeByPropertyDeserializer WithPropertyDeserializerFor<T>(Expression<Func<T, object?>> propertyExpression, IPropertyDeserializer propertyDeserializer)
-  {
-    EAssert.Argument.IsNotNull(propertyExpression, nameof(propertyExpression));
-    EAssert.Argument.IsNotNull(propertyDeserializer, nameof(propertyDeserializer));
-    PropertyInfo propertyInfo = ExtractPropertyInfo(propertyExpression);
-    return WithPropertyDeserializerFor(propertyInfo, propertyDeserializer);
   }
 
   public NewTypeByPropertyDeserializer WithInstanceFactory(Func<Type, Dictionary<string, object?>, object> factoryMethod)
@@ -83,16 +120,7 @@ public class NewTypeByPropertyDeserializer : NewTypeDeserializer
     instanceFactory = new DelegatedInstanceFactory(factoryMethod);
     return this;
   }
-  public NewTypeByPropertyDeserializer WithInstanceFactory<T>(Func<PropertyValuesDictionary<T>, object> factoryMethod)
-  {
-    instanceFactory = new DelegatedInstanceFactory<T>(factoryMethod);
-    return this;
-  }
-  public NewTypeByPropertyDeserializer WithInstanceFactory(IInstanceFactory instanceFactory)
-  {
-    this.instanceFactory = instanceFactory ?? throw new ArgumentNullException(nameof(instanceFactory));
-    return this;
-  }
+
   public NewTypeByPropertyDeserializer WithInstanceFactoryFor(Type type, IInstanceFactory instanceFactory)
   {
     EAssert.Argument.IsNotNull(type, nameof(type));
@@ -100,6 +128,7 @@ public class NewTypeByPropertyDeserializer : NewTypeDeserializer
     instanceFactoriesByType[type] = instanceFactory;
     return this;
   }
+
 
   private static PropertyInfo ExtractPropertyInfo<T>(Expression<Func<T, object?>> propertySelector)
   {
@@ -130,21 +159,15 @@ public class NewTypeByPropertyDeserializer : NewTypeDeserializer
 
   protected override IEnumerable<string> GetDataMemberNames(Type type)
   {
-    var props = GetPropertiesForType(type);
+    var props = propertiesProvider(type);
     var ret = props.Select(q => q.Name).ToList();
     return ret;
-  }
-  private PropertyInfo[] GetPropertiesForType(Type type)
-  {
-    return propertiesProvider(type);
   }
 
   protected override DeserializationResult DeserializeDataMember(Type targetType, string dataMemberName, XElement element, IXmlContext ctx)
   {
-    PropertyInfo pi = GetPropertiesForType(targetType).First(q => q.Name == dataMemberName);
-    var pds = propertyDeserializers.TryGetValue(pi, out IPropertyDeserializer? tmp)
-      ? tmp
-      : propertyDeserializer;
+    PropertyInfo pi = propertiesProvider(targetType).First(q => q.Name == dataMemberName);
+    var pds = propertyDeserializers.TryGet(pi) ?? defaultPropertyDeserializer;
     DeserializationResult deserializedValue = pds.DeserializeProperty(pi, element, ctx);
     return deserializedValue;
   }

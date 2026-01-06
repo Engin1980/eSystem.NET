@@ -10,7 +10,9 @@ using FluentAssertions;
 using NUnit.Framework.Constraints;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -121,16 +123,7 @@ namespace EXmlLib2Test.CompleteTests
       EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization().WithCommonTypesSerialization();
       exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer()
         .WithAcceptedType<SimpleStructNoCtor>()
-        //.WithInstanceFactory((type, props) =>
-        //{
-        //  return new SimpleStructNoCtor()
-        //  {
-        //    Id = props.Get<int>("Id")!,
-        //    Name = props.Get<string>(nameof(SimpleStructNoCtor.Name))!,
-        //    CreatedAt = props.Get<DateTime>(nameof(SimpleStructNoCtor.CreatedAt))!
-        //  };
-        //})
-        .WithInstanceFactory<SimpleStructNoCtor>(props =>
+        .WithTypeOptions<SimpleStructNoCtor>(opt => opt.WithInstanceFactory(props =>
         {
           return new SimpleStructNoCtor()
           {
@@ -138,7 +131,7 @@ namespace EXmlLib2Test.CompleteTests
             Name = props.GetPropertyValue(q => q.Name)!,
             CreatedAt = props.GetPropertyValue(q => q.CreatedAt)!
           };
-        }));
+        })));
       exml.ElementSerializers.AddFirst(new NewTypeByPropertySerializer().WithAcceptedType<SimpleStructNoCtor>());
 
       XElement root = new XElement("Root");
@@ -206,13 +199,18 @@ namespace EXmlLib2Test.CompleteTests
       exml.ElementSerializers.AddFirst(new NewTypeByPropertySerializer()
         .WithAcceptedType<SimpleClass>()
         .WithPropertySerializer(new SimplePropertyAsAttribute()));
-      exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer().WithAcceptedType<SimpleClass>().WithPropertyDeserializer(new SimplePropertyAsAttribute()));
+      exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer()
+        .WithAcceptedType<SimpleClass>()
+        .WithDefaultOptions(opts => opts.WithPropertyDeserializer(new SimplePropertyAsAttribute())));
 
       XElement root = new XElement("Root");
       exml.Serialize(source, root);
 
       SimpleClass? dest = exml.Deserialize<SimpleClass>(root);
 
+      root.Attribute("Id").Should().NotBeNull().And.Subject.Value.Should().Be(11.ToString());
+      root.Attribute("Name").Should().NotBeNull().And.Subject.Value.Should().Be("Test Object");
+      root.Attribute("CreatedAt").Should().NotBeNull();
       source.Should().BeEquivalentTo(dest);
     }
 
@@ -227,7 +225,7 @@ namespace EXmlLib2Test.CompleteTests
       };
       SimpleClass? target;
 
-      XElement element = new ("Root");
+      XElement element = new("Root");
 
       {
         EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization().WithCommonTypesSerialization();
@@ -241,7 +239,7 @@ namespace EXmlLib2Test.CompleteTests
         EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization().WithCommonTypesSerialization();
         exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer()
           .WithAcceptedType<SimpleClass>()
-          .WithPropertyDeserializerFor<SimpleClass>(q => q.CreatedAt, new IgnoredProperty()));
+          .WithTypeOptions<SimpleClass>(opts => opts.WithIgnoredProperty(q => q.CreatedAt)));
         target = exml.Deserialize<SimpleClass>(element);
       }
 
@@ -270,14 +268,14 @@ namespace EXmlLib2Test.CompleteTests
         EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization().WithCommonTypesSerialization();
         exml.ElementSerializers.AddFirst(new NewTypeByPropertySerializer()
           .WithAcceptedType<SimpleClass>());
-
         exml.Serialize(source, element);
       }
       {
         EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization().WithCommonTypesSerialization();
         exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer()
           .WithAcceptedType<SimpleClass>()
-          .WithPropertyDeserializerFor<SimpleClass>(q => q.CreatedAt, new IgnoredProperty()));
+          .WithTypeOptions<SimpleClass>(opt => opt
+            .WithIgnoredProperty(q => q.CreatedAt)));
         target = exml.Deserialize<SimpleClass>(element);
       }
 

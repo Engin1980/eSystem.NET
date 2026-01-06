@@ -129,5 +129,43 @@ namespace EXmlLib2Test.CompleteTests
       target!.HeldObjectB.Should().BeOfType<ParentClass>();
       target.Should().BeEquivalentTo(source);
     }
+
+    [Test]
+    public void InheritanceInPropertyWithIgnoredTest()
+    {
+      HolderClass source = new()
+      {
+        HeldObjectA = new ChildClass()
+        {
+          ParentProperty = 10,
+          ChildProperty = 20
+        },
+        HeldObjectB = new ParentClass()
+        {
+          ParentProperty = 30
+        }
+      };
+      HolderClass? target;
+      XElement element = new XElement("Root");
+
+      {
+        EXml exml = EXml.Create().WithDefaultSerialization();
+        exml.Serialize(source, element);
+      }
+
+      {
+        EXml exml = EXml.Create().WithDefaultSerialization();
+        exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer()
+          .WithAcceptedType<ParentClass>(true)
+          .WithTypeOptions<ParentClass>(opt => opt.WithIgnoredProperty(q => q.ParentProperty))
+          );
+        target = exml.Deserialize<HolderClass>(element);
+      }
+
+      target!.HeldObjectA.Should().BeOfType<ChildClass>();
+      target!.HeldObjectB.Should().BeOfType<ParentClass>();
+      target.HeldObjectA.ParentProperty.Should().Be(8);
+      target.HeldObjectB.ParentProperty.Should().Be(8);
+    }
   }
 }
