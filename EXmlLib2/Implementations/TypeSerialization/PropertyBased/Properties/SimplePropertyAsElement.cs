@@ -8,8 +8,6 @@ namespace EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties;
 
 public class SimplePropertyAsElement : IPropertySerializer, IPropertyDeserializer
 {
-  public const string TYPE_ATTRIBUTE = "__instanceType";
-
   public enum MissingPropertyElementBehavior
   {
     ThrowException,
@@ -40,27 +38,11 @@ public class SimplePropertyAsElement : IPropertySerializer, IPropertyDeserialize
     }
     else
     {
-      Type instanceType = DetermineIntanceType(propertyElement, propertyInfo);
-      var deserializer = ctx.ElementDeserializers.GetByType(instanceType);
-      object? tmp = deserializer.Deserialize(propertyElement, instanceType, ctx); //TODO: ctx.DeserializeFromElement(element, instanceType, deserializer);
+      var deserializer = ctx.ElementDeserializers.GetByType(propertyInfo.PropertyType);
+      object? tmp = deserializer.Deserialize(propertyElement, propertyInfo.PropertyType, ctx); //TODO: ctx.DeserializeFromElement(element, instanceType, deserializer);
       ret = tmp == null ? DeserializationResult.Null() : DeserializationResult.ValueResult(tmp);
     }
 
-    return ret;
-  }
-
-  private static Type DetermineIntanceType(XElement element, PropertyInfo propertyInfo)
-  {
-    Type ret;
-    XAttribute? attribute = element.Attribute(XName.Get(TYPE_ATTRIBUTE));
-    if (attribute != null)
-    {
-      string assemblyQualifiedTypeName = attribute.Value;
-      ret = Type.GetType(assemblyQualifiedTypeName)
-        ?? throw new InvalidOperationException($"Cannot determine instance type from assembly qualified name '{assemblyQualifiedTypeName}' for property '{propertyInfo.Name}'.");
-    }
-    else
-      ret = propertyInfo.PropertyType;
     return ret;
   }
 
@@ -68,13 +50,7 @@ public class SimplePropertyAsElement : IPropertySerializer, IPropertyDeserialize
   {
     var ser = ctx.ElementSerializers.GetByType(propertyInfo.PropertyType);
     XElement propElement = new(propertyInfo.Name);
-    ctx.SerializeToElement(propertyValue, propElement, ser);
-
-    if (propertyValue != null && propertyValue.GetType() != propertyInfo.PropertyType)
-    {
-      propElement.SetAttributeValue(TYPE_ATTRIBUTE, propertyValue.GetType().AssemblyQualifiedName);
-    }
-
+    ctx.SerializeToElement(propertyValue, propertyInfo.PropertyType, propElement, ser);
     element.Add(propElement);
   }
 }

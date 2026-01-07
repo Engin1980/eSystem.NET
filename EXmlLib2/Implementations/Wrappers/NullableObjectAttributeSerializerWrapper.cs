@@ -15,11 +15,11 @@ public class NullableObjectAttributeSerializerWrapper : IAttributeSerializer
 
   public bool AcceptsType(Type type) => innerSerializer.AcceptsType(type);
 
-  public string Serialize(object? value, IXmlContext ctx)
+  public string Serialize(object? value, Type expectedType, IXmlContext ctx)
   {
     if (value == null)
       return ctx.DefaultNullString;
     else
-      return innerSerializer.Serialize(value, ctx);
+      return innerSerializer.Serialize(value, expectedType, ctx);
   }
 }

@@ -2,8 +2,7 @@
 
 namespace EXmlLib2.Abstractions.Abstracts
 {
-  public abstract class TypedAttributeDeserializer<T>(DerivedTypesBehavior derivedTypesBehavior = DerivedTypesBehavior.ExactTypeOnly) :
-    TypedBase<T>(derivedTypesBehavior), IAttributeDeserializer
+  public abstract class TypedAttributeDeserializer<T> : TypedBase<T>, IAttributeDeserializer
   {
     public object? Deserialize(string value, Type targetType, IXmlContext ctx)
     {

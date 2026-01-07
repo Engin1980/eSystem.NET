@@ -26,7 +26,7 @@ namespace EXmlLib2.Implementations.BasicSerialization.Serializers
       
     public bool AcceptsType(Type type) => GetUnderlyingType(type) != null;
 
-    public void Serialize(object? value, XElement element, IXmlContext ctx)
+    public void Serialize(object? value, Type expectedType, XElement element, IXmlContext ctx)
     {
       if (value == null)
         element.Value = ctx.DefaultNullString;
@@ -35,11 +35,11 @@ namespace EXmlLib2.Implementations.BasicSerialization.Serializers
         object innerValue = GetInnerValue(value);
         EAssert.IsNotNull(innerValue, nameof(innerValue));
         IElementSerializer ser = ctx.ElementSerializers.GetByType(innerValue.GetType());
-        ctx.SerializeToElement(innerValue, element, ser);
+        ctx.SerializeToElement(innerValue, expectedType, element, ser);
       }
     }
 
-    public string Serialize(object? value, IXmlContext ctx)
+    public string Serialize(object? value, Type expectedType, IXmlContext ctx)
     {
       if (value == null)
         return ctx.DefaultNullString;
@@ -48,7 +48,7 @@ namespace EXmlLib2.Implementations.BasicSerialization.Serializers
         object innerValue = GetInnerValue(value);
         EAssert.IsNotNull(innerValue, nameof(innerValue));
         IAttributeSerializer ser = ctx.AttributeSerializers.GetByType(innerValue.GetType());
-        string ret = ser.Serialize(innerValue, ctx);
+        string ret = ser.Serialize(innerValue, expectedType, ctx);
         return ret;
       }
     }

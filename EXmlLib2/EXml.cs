@@ -206,7 +206,7 @@ namespace EXmlLib2
       try
       {
         IElementSerializer serializer = ctx.ElementSerializers.GetByType(expectedType);
-        ctx.SerializeToElement(value, element, serializer);
+        ctx.SerializeToElement(value, expectedType, element, serializer);
       }
       catch (Exception ex)
       {

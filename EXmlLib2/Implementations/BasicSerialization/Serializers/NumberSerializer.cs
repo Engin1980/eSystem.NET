@@ -30,7 +30,7 @@ namespace EXmlLib2.Implementations.BasicSerialization.Serializers
       return false;
     }
 
-    public void Serialize(object? value, XElement element, IXmlContext ctx)
+    public void Serialize(object? value, Type expectedType, XElement element, IXmlContext ctx)
     {
       string s = SerializeToString(value, ctx);
       element.Value = s;
@@ -44,7 +44,7 @@ namespace EXmlLib2.Implementations.BasicSerialization.Serializers
       return ret;
     }
 
-    public string Serialize(object? value, IXmlContext ctx)
+    public string Serialize(object? value, Type expectedType, IXmlContext ctx)
     {
       string s = SerializeToString(value, ctx);
       return s;

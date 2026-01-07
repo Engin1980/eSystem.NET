@@ -8,6 +8,6 @@ namespace EXmlLib2.Abstractions.Interfaces
 {
   public interface IAttributeSerializer : ISelectableByType
   {
-    string Serialize(object? value, IXmlContext ctx);
+    string Serialize(object? value, Type expectedType, IXmlContext ctx);
   }
 }

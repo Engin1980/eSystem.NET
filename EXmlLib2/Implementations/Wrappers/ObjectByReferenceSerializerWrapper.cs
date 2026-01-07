@@ -27,7 +27,7 @@ namespace EXmlLib2.Implementations.Wrappers
 
     public bool AcceptsType(Type type) => innerSerializer.AcceptsType(type);
 
-    public void Serialize(object? value, XElement element, IXmlContext ctx)
+    public void Serialize(object? value, Type expectedType, XElement element, IXmlContext ctx)
     {
       EAssert.Argument.IsNotNull(value, nameof(value));
 
@@ -37,7 +37,7 @@ namespace EXmlLib2.Implementations.Wrappers
         element.SetAttributeValue(REFERENCE_ID_ATTRIBUTE, id);
       else
       {
-        innerSerializer.Serialize(value, element, ctx);
+        innerSerializer.Serialize(value, expectedType, element, ctx);
         id = references.Count > 0 ? references.Values.Max() + 1 : 1;
         references[value] = id;
         element.SetAttributeValue(OBJECT_ID_ATTRIBUTE, id);

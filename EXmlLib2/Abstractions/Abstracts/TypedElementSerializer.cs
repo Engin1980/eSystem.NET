@@ -5,12 +5,12 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Abstractions.Abstracts
 {
-  public abstract class TypedElementSerializer<T>(DerivedTypesBehavior derivedTypesBehavior = DerivedTypesBehavior.ExactTypeOnly) : 
-    TypedBase<T>(derivedTypesBehavior), IElementSerializer
+  public abstract class TypedElementSerializer<T> : TypedBase<T>, IElementSerializer
   {
-    public void Serialize(object? value, XElement element, IXmlContext ctx)
+    public void Serialize(object? value, Type expectedType, XElement element, IXmlContext ctx)
     {
       CheckTypeSanity(value?.GetType());
+      CheckTypeSanity(expectedType);
       T typedValue = (T)value!;
       Serialize(typedValue, element, ctx);
     }

@@ -46,7 +46,7 @@ public class SimplePropertyAsAttribute : IPropertySerializer, IPropertyDeseriali
       throw new InvalidOperationException($"Cannot serialize property '{propertyInfo.Name}' as attribute because its runtime value type '{propertyValue.GetType().FullName}' differs from declared property type '{propertyInfo.PropertyType.FullName}' (type ${propertyInfo.DeclaringType}).");
 
     var ser = ctx.AttributeSerializers.GetByType(propertyInfo.PropertyType);
-    XAttribute attr = ctx.SerializeToAttribute(propertyInfo.Name, propertyValue, ser);
+    XAttribute attr = ctx.SerializeToAttribute(propertyInfo.Name, propertyValue, propertyInfo.PropertyType, ser);
     element.Add(attr);
   }
 }

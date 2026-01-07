@@ -9,6 +9,6 @@ namespace EXmlLib2.Abstractions.Interfaces
 {
   public interface IElementSerializer : ISelectableByType
   {
-    void Serialize(object? value, XElement element, IXmlContext ctx);
+    void Serialize(object? value, Type expectedType, XElement element, IXmlContext ctx);
   }
 }

@@ -3,17 +3,19 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Abstractions.Abstracts
 {
-  public abstract class TypedSerializer<T>(DerivedTypesBehavior derivedTypesBehavior = DerivedTypesBehavior.ExactTypeOnly) :
-    TypedBase<T>(derivedTypesBehavior), IElementSerializer, IAttributeSerializer
+  public abstract class TypedSerializer<T> : TypedBase<T>, IElementSerializer, IAttributeSerializer
   {
-    public void Serialize(object? value, XElement element, IXmlContext ctx)
+    public void Serialize(object? value, Type expectedType, XElement element, IXmlContext ctx)
     {
       CheckTypeSanity(value?.GetType());
+      CheckTypeSanity(expectedType);
       T typedValue = ConvertToTypedObject(value);
       Serialize(typedValue, element, ctx);
     }
-    public string Serialize(object? value, IXmlContext ctx)
+    public string Serialize(object? value, Type expectedType, IXmlContext ctx)
     {
+      CheckTypeSanity(value?.GetType());
+      CheckTypeSanity(expectedType);
       T typedValue = ConvertToTypedObject(value);
       return Serialize(typedValue, ctx);
     }

@@ -13,11 +13,11 @@ namespace EXmlLib2.Implementations.BasicSerialization.Serializers
   {
     public bool AcceptsType(Type type) => type.IsEnum;
 
-    public void Serialize(object? value, XElement element, IXmlContext ctx)
+    public void Serialize(object? value, Type expectedType, XElement element, IXmlContext ctx)
     {
-      element.Value = Serialize(value, ctx);
+      element.Value = Serialize(value, expectedType, ctx);
     }
 
-    public string Serialize(object? value, IXmlContext ctx) => value!.ToString() ?? throw new EXmlException("Enum value must be not nul.");
+    public string Serialize(object? value, Type expectedType, IXmlContext ctx) => value!.ToString() ?? throw new EXmlException("Enum value must be not nul.");
   }
 }

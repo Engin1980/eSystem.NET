@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ESystem.Miscelaneous
 {
-  public sealed class BiDictionary<TKey, TValue> where TKey : notnull where TValue : notnull
+  public sealed class BiDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> where TKey : notnull where TValue : notnull
   {
     private readonly Dictionary<TKey, TValue> forward;
     private readonly Dictionary<TValue, TKey> reverse;
@@ -102,6 +102,17 @@ namespace ESystem.Miscelaneous
     {
       forward.Clear();
       reverse.Clear();
+    }
+
+    public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+    {
+      List<KeyValuePair<TKey, TValue>> lst = this.forward.ToList();
+      return lst.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+      return GetEnumerator();
     }
   }
 

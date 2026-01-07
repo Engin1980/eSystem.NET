@@ -21,7 +21,6 @@ namespace EXmlLib2.Types
     public SerializerDeserializerRegistry<IAttributeSerializer> AttributeSerializers { get; private init; } = new();
     public SerializerDeserializerRegistry<IElementDeserializer> ElementDeserializers { get; private init; } = new();
     public SerializerDeserializerRegistry<IAttributeDeserializer> AttributeDeserializers { get; private init; } = new();
-    public XmlPropertyInfo DefaultXmlPropertyInfo { get; private init; } = new();
 
     private CultureInfo _DefaultCultureInfo = CultureInfo.GetCultureInfo("en-US");
     public CultureInfo DefaultCultureInfo
@@ -62,14 +61,14 @@ namespace EXmlLib2.Types
     }
 
 
-    public void SerializeToElement(object? value, XElement element, IElementSerializer serializer)
+    public void SerializeToElement(object? value, Type expectedType, XElement element, IElementSerializer serializer)
     {
       EAssert.Argument.IsNotNull(element, nameof(element));
       EAssert.Argument.IsNotNull(serializer, nameof(serializer));
       logger.Log(LogLevel.INFO, $"Serializing {value} to {element} using {serializer}.");
       try
       {
-        serializer.Serialize(value, element, this);
+        serializer.Serialize(value, expectedType, element, this);
       }
       catch (Exception ex)
       {
@@ -117,7 +116,7 @@ namespace EXmlLib2.Types
       return ret;
     }
 
-    public XAttribute SerializeToAttribute(string name, object? value, IAttributeSerializer serializer)
+    public XAttribute SerializeToAttribute(string name, object? value, Type expectedType, IAttributeSerializer serializer)
     {
       XAttribute ret;
       EAssert.Argument.IsNotNull(name, nameof(name));
@@ -125,7 +124,7 @@ namespace EXmlLib2.Types
       logger.Log(LogLevel.INFO, $"Serializing {value} to attribute {name} using {serializer}.");
       try
       {
-        ret = new XAttribute(XName.Get(name), serializer.Serialize(value, this));
+        ret = new XAttribute(XName.Get(name), serializer.Serialize(value, expectedType, this));
       }
       catch (Exception ex)
       {

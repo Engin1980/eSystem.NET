@@ -7,6 +7,7 @@ namespace EXmlLib2.Implementations.TypeSerialization;
 
 public abstract class NewTypeDeserializer : IElementDeserializer
 {
+  public const string TYPE_NAME_ATTRIBUTE = NewTypeSerializer.TYPE_NAME_ATTRIBUTE;
   public abstract bool AcceptsType(Type type);
 
   protected abstract DeserializationResult DeserializeDataMember(Type targetType, string dataMemberName, XElement element, IXmlContext ctx);
@@ -23,7 +24,43 @@ public abstract class NewTypeDeserializer : IElementDeserializer
       if (tmp.HasResult)
         deserializedValues[dataMemberName] = tmp.Value;
     }
-    object ret = CreateInstance(targetType, deserializedValues);
+
+    Type realTargetType = EvaluateRealTargetType(element, targetType);
+
+    object ret = CreateInstance(realTargetType, deserializedValues);
     return ret;
+  }
+
+  private static Type EvaluateRealTargetType(XElement element, Type targetType)
+  {
+    Type ret;
+    XAttribute? typeAttribute = element.Attribute(TYPE_NAME_ATTRIBUTE);
+    if (typeAttribute != null)
+    {
+      string typeName = typeAttribute.Value;
+      Type? realType = ResolveType(typeName);
+      ret = realType ?? targetType;
+    }
+    else
+      ret = targetType;
+    return ret;
+  }
+
+  private static Type? ResolveType(string typeName)
+  {
+    // direct type load
+    var type = Type.GetType(typeName, throwOnError: false);
+    if (type != null)
+      return type;
+
+    // searching in loaded/referenced assemblies
+    foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+    {
+      type = asm.GetType(typeName, throwOnError: false);
+      if (type != null)
+        return type;
+    }
+
+    return null;
   }
 }

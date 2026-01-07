@@ -17,11 +17,11 @@ public class NullableObjectElementSerializerWrapper : IElementSerializer
 
   public bool AcceptsType(Type type) => innerSerializer.AcceptsType(type);
 
-  public void Serialize(object? value, XElement element, IXmlContext ctx)
+  public void Serialize(object? value, Type expectedType, XElement element, IXmlContext ctx)
   {
     if (value == null)
       element.Value = ctx.DefaultNullString;
     else
-      innerSerializer.Serialize(value, element, ctx);
+      innerSerializer.Serialize(value, expectedType, element, ctx);
   }
 }

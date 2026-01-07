@@ -39,7 +39,7 @@ namespace EXmlLib2.Abstractions
     void SetCustomData<T>(string key, T data);
     T? GetCustomData<T>(string key);
     T GetOrSetCustomData<T>(string key, Func<T> newDataProvider);
-    void SerializeToElement(object? value, XElement elm, IElementSerializer serializer);
-    XAttribute SerializeToAttribute(string name, object? value, IAttributeSerializer serializer);
+    void SerializeToElement(object? value, Type expectedType, XElement elm, IElementSerializer serializer);
+    XAttribute SerializeToAttribute(string name, object? value, Type expectedType, IAttributeSerializer serializer);
   }
 }

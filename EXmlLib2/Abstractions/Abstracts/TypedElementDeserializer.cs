@@ -3,8 +3,7 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Abstractions.Abstracts
 {
-  public abstract class TypedElementDeserializer<T>(DerivedTypesBehavior derivedTypesBehavior = DerivedTypesBehavior.ExactTypeOnly) : 
-    TypedBase<T>(derivedTypesBehavior), IElementDeserializer
+  public abstract class TypedElementDeserializer<T> : TypedBase<T>, IElementDeserializer
   {
     public object? Deserialize(XElement element, Type targetType, IXmlContext ctx)
     {
