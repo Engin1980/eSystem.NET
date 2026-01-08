@@ -10,38 +10,28 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace EXmlLib2.Implementations.BasicSerialization.Serializers
+namespace EXmlLib2.Implementations.EnumerableSerialization
 {
-  public abstract class EnumerableSerializer : IElementSerializer, IElementDeserializer
+  public abstract class EnumerableSerializer : IElementSerializer
   {
     public abstract bool AcceptsType(Type type);
 
-    public object? Deserialize(XElement element, Type targetType, IXmlContext ctx)
-    {
-      Type itemType = GetItemType();
-
-      List<object> items = DeserializeItems(element, itemType, ctx).ToList();
-
-      object ret = CreateInstance(items);
-      return ret;
-    }
-
-    protected abstract List<object> DeserializeItems(XElement element, Type itemType, IXmlContext ctx);
-    protected abstract object CreateInstance(List<object> items);
-
-    protected abstract Type GetItemType();
-    protected abstract IEnumerable<object> GetItems();
-    protected abstract void StoreItem(object item, Type itemType, XElement element, IXmlContext ctx);
-
+    protected abstract Type ExtractItemType(Type iterableType);
+    protected abstract IEnumerable<object> ExtractItems(object value);
+    protected abstract void SerializeItem(object item, Type itemType, XElement element, IXmlContext ctx);
     public void Serialize(object? value, Type expectedType, XElement element, IXmlContext ctx)
     {
-      Type itemType = GetItemType();
-      IEnumerable<object> items = GetItems();
+      //TODO tady je to divne, tkery typ se ma brat, ten z value nebo ten expected?
+      EAssert.Argument.IsNotNull(value, nameof(value));
+      Type itemType = ExtractItemType(expectedType);
+      IEnumerable<object> items = ExtractItems(value);
+      SerializeItems(items, itemType, element, ctx);
+    }
 
-      foreach (var item in items)
-      {
-        StoreItem(item, itemType, element, ctx);
-      }
+    public virtual void SerializeItems(IEnumerable<object> items, Type itemType, XElement element, IXmlContext ctx)
+    {
+      foreach (object item in items)
+        SerializeItem(item, itemType, element, ctx);
     }
 
     //  internal readonly XmlIterableInfo xii;
