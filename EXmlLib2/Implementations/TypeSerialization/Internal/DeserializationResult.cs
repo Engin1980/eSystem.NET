@@ -17,4 +17,6 @@ public readonly struct DeserializationResult
   public static DeserializationResult Null() => new(true, null);
 
   public static DeserializationResult ValueResult(object value) => new(true, value);
+
+  public static DeserializationResult Result(object? value) => value == null ? Null() : ValueResult(value);
 }

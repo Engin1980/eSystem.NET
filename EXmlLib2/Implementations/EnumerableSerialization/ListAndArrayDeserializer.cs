@@ -17,9 +17,12 @@ namespace EXmlLib2.Implementations.EnumerableSerialization
 {
   public class ListAndArrayDeserializer : EnumerableDeserializer
   {
+    private Func<Type, bool> typeAccepter = q => EnumerableTypeUtils.IsListOrArray(q);
+
     public enum UnknownElementHandling
     {
       Skip,
+      UseDefaultItemType,
       ThrowException
     }
 
@@ -62,6 +65,12 @@ namespace EXmlLib2.Implementations.EnumerableSerialization
     private readonly BiDictionary<Type, string> typeToXmlNameMapping = new();
     private UnknownElementHandling unknownElementHandling = UnknownElementHandling.Skip;
 
+    public ListAndArrayDeserializer WithAcceptedType<T>()
+    {
+      this.typeAccepter = q => EnumerableTypeUtils.IsListOrArray(typeof(T)) && q == typeof(T);
+      return this;
+    }
+
     public ListAndArrayDeserializer WithDefaultOptions(Action<DefaultOptions> opts)
     {
       EAssert.Argument.IsNotNull(opts, nameof(opts));
@@ -76,7 +85,7 @@ namespace EXmlLib2.Implementations.EnumerableSerialization
       return this;
     }
 
-    public override bool AcceptsType(Type type) => EnumerableTypeUtils.IsListOrArray(type);
+    public override bool AcceptsType(Type type) => typeAccepter(type);
 
     protected override object CreateInstance(Type enumerableType, List<object?> items)
     {
@@ -121,10 +130,19 @@ namespace EXmlLib2.Implementations.EnumerableSerialization
           case XmlRepresentation.Element:
             childType = TryEstimateItemTypeByElementName(childElement, itemType);
             if (childType == null)
-              if (this.unknownElementHandling == UnknownElementHandling.Skip)
-                continue;
-              else
-                throw new InvalidOperationException($"Cannot determine item type for element '{childElement.Name.LocalName}'");
+            {
+              switch (this.unknownElementHandling)
+              {
+                case UnknownElementHandling.Skip:
+                  continue;
+                case UnknownElementHandling.UseDefaultItemType:
+                  childType = itemType;
+                  break;
+                case UnknownElementHandling.ThrowException:
+                  throw new InvalidOperationException($"Cannot determine item type for element '{childElement.Name.LocalName}'");
+              }
+            }
+            EAssert.IsNotNull(childType);
             IElementDeserializer elementDeserializer = ctx.ElementDeserializers.GetByType(childType);
             item = elementDeserializer.Deserialize(childElement, childType, ctx);
             break;

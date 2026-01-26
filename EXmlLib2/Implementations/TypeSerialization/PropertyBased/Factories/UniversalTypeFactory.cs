@@ -97,7 +97,7 @@ public class UniversalTypeFactory : IInstanceFactory
     }
 
     if (bestCtor == null || bestArgs == null)
-      throw new InvalidOperationException($"No available constructor found to create an instance of {type}.");
+      throw new InvalidOperationException($"No available constructor found to create an instance of {type} from [{string.Join(", ", propertyValues.Select(q=>q.Key))}].");
 
     object ret = bestCtor.Invoke(bestArgs);
     return ret;

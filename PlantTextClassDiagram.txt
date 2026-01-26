@@ -1,0 +1,86 @@
+@startuml
+
+package Simulation{
+ package Api{
+   class SimulationApi{}
+   class CsApi{}
+   class RestApi{}
+ }
+
+ package World {
+  package Static{
+   class Airport{}
+   class Navaid{}
+   class Atc{}
+   
+   package Commands{
+    class Command{}
+    class ProceedDirectToCommand{}
+    class HoldCommand{}
+   }   
+  }
+
+  package Dynamic{
+   package Weather{
+    class WeatherModel{}
+   }
+   package Traffic{
+   class AirplaneType{
+    type
+   }
+   class Airplane{
+    speed
+    altitude
+    registration
+   }
+   }
+  }
+ }
+ package Agents{
+  class Agent{}
+  class PilotAgent{}
+  class AtcAgent{}
+  class ComputerAtcAgent{}
+  class HumanAtcAgent{}
+ }
+ 
+ package AirplaneBehaviors{
+  class Behavior{
+   adjustPlane()
+  }
+  class HoldingBehavior{}
+  class ApproachBehavior{}
+  class TakeOffBehavior{}
+  class DirectToBehavior{}
+ }
+ 
+}
+
+package XmlBuilder {}
+
+package WpfClient{}
+
+HoldingBehavior -up-|> Behavior
+ApproachBehavior -up-|> Behavior
+TakeOffBehavior -up-|> Behavior
+DirectToBehavior -up-|> Behavior
+
+ProceedDirectToCommand -up-|> Command
+HoldCommand -up-|> Command
+
+PilotAgent -up-|> Agent
+AtcAgent -up-|> Agent
+ComputerAtcAgent -up-|> AtcAgent
+HumanAtcAgent -up-|> AtcAgent
+
+XmlBuilder -down-> Static
+XmlBuilder -down-> Traffic
+XmlBuilder -down-> Weather
+
+RestApi -up-|> SimulationApi
+CsApi -up-|> SimulationApi
+
+AtcAgent -> Atc
+PilotAgent ..> Airplane
+
+@enduml

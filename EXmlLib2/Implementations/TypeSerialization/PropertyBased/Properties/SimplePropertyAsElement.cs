@@ -8,13 +8,8 @@ namespace EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties;
 
 public class SimplePropertyAsElement : IPropertySerializer, IPropertyDeserializer
 {
-  public enum MissingPropertyElementBehavior
-  {
-    ThrowException,
-    Ignore
-  }
-
   private MissingPropertyElementBehavior missingPropertyElementBehavior = MissingPropertyElementBehavior.Ignore;
+  private NameCaseMatching nameCaseMatching = NameCaseMatching.IgnoreCase;
 
   public SimplePropertyAsElement WithMissingPropertyElementBehavior(MissingPropertyElementBehavior behavior)
   {
@@ -22,11 +17,31 @@ public class SimplePropertyAsElement : IPropertySerializer, IPropertyDeserialize
     return this;
   }
 
+  public SimplePropertyAsElement WithNameCaseMatching(NameCaseMatching matching)
+  {
+    nameCaseMatching = matching;
+    return this;
+  }
+
+  private XElement? GetElementByName(XElement parentElement, string name)
+  {
+    XElement? ret;
+    if (nameCaseMatching == NameCaseMatching.Exact)
+    {
+      ret = parentElement.Element(XName.Get(name));
+    }
+    else
+    {
+      ret = parentElement.Elements().FirstOrDefault(q => string.Equals(q.Name.LocalName, name, StringComparison.OrdinalIgnoreCase));
+    }
+    return ret;
+  }
+
   public DeserializationResult DeserializeProperty(PropertyInfo propertyInfo, XElement element, IXmlContext ctx)
   {
     DeserializationResult ret;
 
-    XElement? propertyElement = element.Element(XName.Get(propertyInfo.Name));
+    XElement? propertyElement = GetElementByName(element, propertyInfo.Name);
     if (propertyElement == null)
     {
       ret = missingPropertyElementBehavior switch

@@ -10,6 +10,7 @@ namespace EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties;
 public class SimplePropertyAsAttribute : IPropertySerializer, IPropertyDeserializer
 {
   private MissingPropertyElementBehavior missingPropertyElementBehavior = MissingPropertyElementBehavior.Ignore;
+  private NameCaseMatching nameCaseMatching = NameCaseMatching.IgnoreCase;
 
   public SimplePropertyAsAttribute WithMissingPropertyElementBehavior(MissingPropertyElementBehavior behavior)
   {
@@ -17,10 +18,30 @@ public class SimplePropertyAsAttribute : IPropertySerializer, IPropertyDeseriali
     return this;
   }
 
+  public SimplePropertyAsAttribute WithNameCaseMatching(NameCaseMatching matching)
+  {
+    nameCaseMatching = matching;
+    return this;
+  }
+
+  private XAttribute? GetAttributeByName(XElement element, string name)
+  {
+    XAttribute? ret;
+    if (nameCaseMatching == NameCaseMatching.Exact)
+    {
+      ret = element.Attribute(XName.Get(name));
+    }
+    else
+    {
+      ret = element.Attributes().FirstOrDefault(q => string.Equals(q.Name.LocalName, name, StringComparison.OrdinalIgnoreCase));
+    }
+    return ret;
+  }
+
   public DeserializationResult DeserializeProperty(PropertyInfo propertyInfo, XElement element, IXmlContext ctx)
   {
     DeserializationResult ret;
-    XAttribute? attribute = element.Attribute(XName.Get(propertyInfo.Name));
+    XAttribute? attribute = GetAttributeByName(element, propertyInfo.Name);
     if (attribute == null)
     {
       ret = missingPropertyElementBehavior switch
