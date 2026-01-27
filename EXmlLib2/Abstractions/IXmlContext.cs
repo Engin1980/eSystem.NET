@@ -40,6 +40,10 @@ namespace EXmlLib2.Abstractions
     T? GetCustomData<T>(string key);
     T GetOrSetCustomData<T>(string key, Func<T> newDataProvider);
     void SerializeToElement(object? value, Type expectedType, XElement elm, IElementSerializer serializer);
+
+    object? DeserializeFromElement(XElement element, Type targetType, IElementDeserializer deserializer);
+    T? DeserializeFromElement<T>(XElement element, IElementDeserializer deserializer) 
+      => (T?)DeserializeFromElement(element, typeof(T), deserializer);
     XAttribute SerializeToAttribute(string name, object? value, Type expectedType, IAttributeSerializer serializer);
   }
 }

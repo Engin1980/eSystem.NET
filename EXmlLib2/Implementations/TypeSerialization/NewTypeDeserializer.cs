@@ -1,6 +1,7 @@
 ﻿using EXmlLib2.Abstractions;
 using EXmlLib2.Abstractions.Interfaces;
 using EXmlLib2.Implementations.TypeSerialization.Helpers;
+using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 
 namespace EXmlLib2.Implementations.TypeSerialization;
@@ -14,8 +15,18 @@ public abstract class NewTypeDeserializer : IElementDeserializer
   protected abstract IEnumerable<string> GetDataMemberNames(Type type);
   protected abstract object CreateInstance(Type targetType, Dictionary<string, object?> deserializedValues);
 
+  public delegate void BeforeXmlReadoutDelegate(XElement element);
+  public event BeforeXmlReadoutDelegate? BeforeXmlReadout;
+
+  public delegate void BeforeInstanceCreationDelegate(Dictionary<string, object?> deserializedValues);
+  public event BeforeInstanceCreationDelegate? BeforeInstanceCreation;
+
+  public delegate void AfterInstanceCreationDelegate(object createdInstance);
+  public event AfterInstanceCreationDelegate? AfterInstanceCreation;
+
   public object? Deserialize(XElement element, Type targetType, IXmlContext ctx)
   {
+    BeforeXmlReadout?.Invoke(element);
     IEnumerable<string> dataMemberNames = GetDataMemberNames(targetType);
     Dictionary<string, object?> deserializedValues = [];
     foreach (string dataMemberName in dataMemberNames)
@@ -27,7 +38,10 @@ public abstract class NewTypeDeserializer : IElementDeserializer
 
     Type realTargetType = EvaluateRealTargetType(element, targetType);
 
+    BeforeInstanceCreation?.Invoke(deserializedValues);
     object ret = CreateInstance(realTargetType, deserializedValues);
+
+    AfterInstanceCreation?.Invoke(ret);
     return ret;
   }
 

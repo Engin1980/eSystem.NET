@@ -79,7 +79,7 @@ namespace EXmlLib2.Types
       logger.Log(LogLevel.INFO, $"Serialized {value} to {element} using {serializer}.");
     }
 
-    internal object? DeserializeFromElement(XElement element, Type targetType, IElementDeserializer deserializer)
+    public object? DeserializeFromElement(XElement element, Type targetType, IElementDeserializer deserializer)
     {
       object? ret;
       EAssert.Argument.IsNotNull(element, nameof(element));
