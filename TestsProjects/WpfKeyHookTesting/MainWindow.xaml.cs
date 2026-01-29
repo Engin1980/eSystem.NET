@@ -49,11 +49,16 @@ namespace WpfKeyHookTesting
     }
 
     private readonly VM vm;
-
+    private KeyHook kh = new();
     public MainWindow()
     {
       InitializeComponent();
       this.DataContext = this.vm = new();
+
+      kh.RegisterKeyShortcut(new(Key.F5), () =>
+      {
+        MessageBox.Show("Global Shortcut F5 pressed!");
+      });
     }
 
     private async void btnAddShortcut_Click(object sender, RoutedEventArgs e)

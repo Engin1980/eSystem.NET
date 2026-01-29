@@ -1,7 +1,9 @@
-﻿using ESystem.Logging;
-using ESystem.Asserting;
-using EXmlLib2.Implementations.Serializers;
-using EXmlLib2.Interfaces;
+﻿using ESystem.Asserting;
+using ESystem.Logging;
+using EXmlLib2.Abstractions;
+using EXmlLib2.Abstractions.Interfaces;
+using EXmlLib2.Types.Internal;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -15,10 +17,10 @@ namespace EXmlLib2.Types
   internal class EXmlContext : IXmlContext
   {
     private readonly Logger logger = Logger.Create(typeof(EXmlContext), "EXml+Ctx");
-    private readonly List<IElementSerializer> elementSerializers = new();
-    private readonly List<IAttributeSerializer> attributeSerializers = new();
-    private readonly List<IElementDeserializer> elementDeserializers = new();
-    private readonly List<IAttributeDeserializer> attributeDeserializers = new();
+    public SerializerDeserializerRegistry<IElementSerializer> ElementSerializers { get; private init; } = new();
+    public SerializerDeserializerRegistry<IAttributeSerializer> AttributeSerializers { get; private init; } = new();
+    public SerializerDeserializerRegistry<IElementDeserializer> ElementDeserializers { get; private init; } = new();
+    public SerializerDeserializerRegistry<IAttributeDeserializer> AttributeDeserializers { get; private init; } = new();
 
     private CultureInfo _DefaultCultureInfo = CultureInfo.GetCultureInfo("en-US");
     public CultureInfo DefaultCultureInfo
@@ -58,143 +60,26 @@ namespace EXmlLib2.Types
       set => _DefaultItemXmlName = value ?? throw new ArgumentNullException();
     }
 
-    public void AddSerializer(IElementSerializer serializer) => this.InsertSerializer(elementSerializers.Count, serializer);
-
-    public void AddDeserializer(IElementDeserializer deserializer) => this.InsertDeserializer(elementDeserializers.Count, deserializer);
-
-    public void AddDeserializer<T>(IElementDeserializer<T> deserializer) => this.InsertDeserializer(elementDeserializers.Count, deserializer);
-
-    public void InsertSerializer(int index, IElementSerializer serializer)
+    public void SerializeToElement(object? value, Type expectedType, XElement element)
     {
-      try
-      {
-        this.elementSerializers.Insert(index, serializer);
-      }
-      catch (Exception ex)
-      {
-        var eex = new EXmlException($"Unable to insert element serializer at position {index}.", ex);
-        logger.LogException(eex);
-        throw eex;
-      }
+      EAssert.Argument.IsNotNull(element, nameof(element));
+      EAssert.Argument.IsNotNull(expectedType, nameof(expectedType));
+      logger.Log(LogLevel.INFO, $"Serializing {value} to {element}.");
+      IElementSerializer serializer = ElementSerializers.GetByType(expectedType);
+      logger.Log(LogLevel.INFO, $"Using serializer {serializer}.");
+      SerializeToElement(value, expectedType, element, serializer);
+      logger.Log(LogLevel.INFO, $"Serialized {value} to {element}.");
     }
 
-    public void InsertDeserializer<T>(int index, IElementDeserializer<T> deserializer)
-    {
-      var w = new TypedElementDeserializerWrapper<T>(deserializer);
-      this.elementDeserializers.Insert(index, w);
-    }
-
-    public void InsertDeserializer(int index, IElementDeserializer deserializer)
-    {
-      try
-      {
-        this.elementDeserializers.Insert(index, deserializer);
-      }
-      catch (Exception ex)
-      {
-        var eex = new EXmlException($"Unable to insert element deserializer at position {index}.", ex);
-        logger.LogException(eex);
-        throw eex;
-      }
-    }
-
-    public void AddSerializer(IAttributeSerializer serializer) => this.InsertSerializer(attributeSerializers.Count, serializer);
-
-    public void AddDeserializer(IAttributeDeserializer deserializer) => this.InsertDeserializer(attributeDeserializers.Count, deserializer);
-
-    public void AddDeserializer<T>(IAttributeDeserializer<T> deserializer) => this.InsertDeserializer(attributeDeserializers.Count, deserializer);
-
-    public void InsertSerializer(int index, IAttributeSerializer serializer)
-    {
-      try
-      {
-        this.attributeSerializers.Insert(index, serializer);
-      }
-      catch (Exception ex)
-      {
-        var eex = new EXmlException($"Unable to insert attribute serializer at position {index}.", ex);
-        logger.LogException(eex);
-        throw eex;
-      }
-    }
-
-    public void InsertDeserializer(int index, IAttributeDeserializer deserializer)
-    {
-      try
-      {
-        this.attributeDeserializers.Insert(index, deserializer);
-      }
-      catch (Exception ex)
-      {
-        var eex = new EXmlException($"Unable to insert attribute deserializer at position {index}.", ex);
-        logger.LogException(eex);
-        throw eex;
-      }
-    }
-
-    public void InsertDeserializer<T>(int index, IAttributeDeserializer<T> deserializer)
-    {
-      TypedAttributeDeserializerWrapper<T> w = new(deserializer);
-      InsertDeserializer(index, w);
-    }
-
-    public IElementSerializer<T> GetElementSerializer<T>()
-    {
-      IElementSerializer<T> ret;
-      try
-      {
-        ret = (IElementSerializer<T>)elementSerializers.First(q => q is IElementSerializer<T>);
-      }
-      catch (Exception ex)
-      {
-        EXmlException eex = new($"Failed to find element serializer for type {typeof(T).Name}.", ex);
-        logger.LogException(eex);
-        throw eex;
-      }
-      return ret;
-    }
-
-    public IElementSerializer GetElementSerializer(object? value)
-    {
-      IElementSerializer ret;
-      try
-      {
-        ret = elementSerializers.First(q => q.AcceptsValue(value));
-      }
-      catch (Exception ex)
-      {
-        EXmlException eex = new($"Failed to find element serializer for value {value}.", ex);
-        logger.LogException(eex);
-        throw eex;
-      }
-      return ret;
-    }
-
-    public IElementDeserializer GetElementDeserializer(Type type)
-    {
-      IElementDeserializer ret;
-      try
-      {
-        ret = elementDeserializers.First(q => q.AcceptsType(type));
-      }
-      catch (Exception ex)
-      {
-        EXmlException eex = new($"Failed to find element deserializer for type {type}.", ex);
-        logger.LogException(eex);
-        throw eex;
-      }
-      return ret;
-    }
-
-    public void SerializeToElement(object? value, XElement element, IElementSerializer serializer)
+    public void SerializeToElement(object? value, Type expectedType, XElement element, IElementSerializer serializer)
     {
       EAssert.Argument.IsNotNull(element, nameof(element));
       EAssert.Argument.IsNotNull(serializer, nameof(serializer));
+      EAssert.Argument.IsNotNull(expectedType, nameof(expectedType));
       logger.Log(LogLevel.INFO, $"Serializing {value} to {element} using {serializer}.");
       try
       {
-        EAssert.IsTrue(serializer.AcceptsValue(value));
-        serializer.Serialize(value, element, this);
+        serializer.Serialize(value, expectedType, element, this);
       }
       catch (Exception ex)
       {
@@ -205,51 +90,19 @@ namespace EXmlLib2.Types
       logger.Log(LogLevel.INFO, $"Serialized {value} to {element} using {serializer}.");
     }
 
-    internal void AddSerializer<T>(IElementSerializer<T> elementSerializer)
+    public object? DeserializeFromElement(XElement element, Type targetType)
     {
-      TypedElementSerializerWrapper<T> w = new(elementSerializer);
-      AddSerializer(w);
-    }
-
-    internal void AddSerializer<T>(IAttributeSerializer<T> attributeSerializer)
-    {
-      TypedAttributeSerializerWrapper<T> w = new(attributeSerializer);
-      AddSerializer(w);
-    }
-
-    public IAttributeSerializer<T> GetAttributeSerializer<T>(T? value)
-    {
-      IAttributeSerializer<T> ret;
-      try
-      {
-        ret = (IAttributeSerializer<T>)attributeSerializers.First(q => q is IAttributeSerializer<T>);
-      }
-      catch (Exception ex)
-      {
-        EXmlException eex = new($"Failed to find attribute serializer for type {typeof(T).Name}.", ex);
-        logger.LogException(eex);
-        throw eex;
-      }
+      EAssert.Argument.IsNotNull(element, nameof(element));
+      EAssert.Argument.IsNotNull(targetType, nameof(targetType));
+      logger.Log(LogLevel.INFO, $"Deserializing {targetType} from {element}.");
+      IElementDeserializer deserializer = ElementDeserializers.GetByType(targetType);
+      logger.Log(LogLevel.INFO, $"Using deserializer {deserializer}.");
+      object? ret = DeserializeFromElement(element, targetType, deserializer);
+      logger.Log(LogLevel.INFO, $"Deserialized {targetType} from {element} to {ret}.");
       return ret;
     }
 
-    public IAttributeSerializer GetAttributeSerializer(object? value)
-    {
-      IAttributeSerializer ret;
-      try
-      {
-        ret = attributeSerializers.First(q => q.AcceptsValue(value));
-      }
-      catch (Exception ex)
-      {
-        EXmlException eex = new($"Failed to find attribute serializer for value {value}.", ex);
-        logger.LogException(eex);
-        throw eex;
-      }
-      return ret;
-    }
-
-    internal object? DeserializeFromElement(XElement element, Type targetType, IElementDeserializer deserializer)
+    public object? DeserializeFromElement(XElement element, Type targetType, IElementDeserializer deserializer)
     {
       object? ret;
       EAssert.Argument.IsNotNull(element, nameof(element));
@@ -270,51 +123,51 @@ namespace EXmlLib2.Types
       return ret;
     }
 
-    public IAttributeDeserializer GetAttributeDeserializer(Type targetType)
+    private readonly Dictionary<string, object> customDataStore = [];
+    public void SetCustomData<T>(string key, T data) => customDataStore[key] = data!;
+    public T? GetCustomData<T>(string key) => (T?)customDataStore[key];
+    public T GetOrSetCustomData<T>(string key, Func<T> newDataProvider)
     {
-      IAttributeDeserializer ret;
-      try
+      T ret;
+      if (customDataStore.TryGetValue(key, out object? tmp))
+        ret = (T)tmp!;
+      else
       {
-        ret = attributeDeserializers.First(q => q.AcceptsType(targetType));
-      }
-      catch (Exception ex)
-      {
-        EXmlException eex = new($"Failed to find attribute deserializer for type {targetType}.", ex);
-        logger.LogException(eex);
-        throw eex;
+        ret = newDataProvider();
+        customDataStore[key] = ret!;
       }
       return ret;
     }
 
-    public IAttributeDeserializer<T> GetAttributeDeserializer<T>()
+    public XAttribute SerializeToAttribute(string name, object? value, Type expectedType)
     {
-      IAttributeDeserializer<T> ret;
-      try
-      {
-        ret = (IAttributeDeserializer<T>)attributeDeserializers.First(q => q is IAttributeDeserializer<T>);
-      }
-      catch (Exception ex)
-      {
-        EXmlException eex = new($"Failed to find attribute deserializer for type {typeof(T).Name}.", ex);
-        logger.LogException(eex);
-        throw eex;
-      }
+      EAssert.Argument.IsNotNull(name, nameof(name));
+      EAssert.Argument.IsNotNull(expectedType, nameof(expectedType));
+      logger.Log(LogLevel.INFO, $"Serializing {value} to attribute {name}.");
+      IAttributeSerializer serializer = AttributeSerializers.GetByType(expectedType);
+      logger.Log(LogLevel.INFO, $"Using serializer {serializer}.");
+      XAttribute ret = SerializeToAttribute(name, value, expectedType, serializer);
+      logger.Log(LogLevel.INFO, $"Serialized {value} to attribute {name}.");
       return ret;
     }
 
-    public IElementDeserializer<T> GetElementDeserializer<T>()
+    public XAttribute SerializeToAttribute(string name, object? value, Type expectedType, IAttributeSerializer serializer)
     {
-      IElementDeserializer<T> ret;
+      XAttribute ret;
+      EAssert.Argument.IsNotNull(name, nameof(name));
+      EAssert.Argument.IsNotNull(serializer, nameof(serializer));
+      logger.Log(LogLevel.INFO, $"Serializing {value} to attribute {name} using {serializer}.");
       try
       {
-        ret = (IElementDeserializer<T>)elementDeserializers.First(q => q is IElementDeserializer<T>);
+        ret = new XAttribute(XName.Get(name), serializer.Serialize(value, expectedType, this));
       }
       catch (Exception ex)
       {
-        EXmlException eex = new($"Failed to find element deserializer for type {typeof(T).Name}.", ex);
+        EXmlException eex = new($"Failed to serialize value {value} using serializer {serializer}.", ex);
         logger.LogException(eex);
         throw eex;
       }
+      logger.Log(LogLevel.INFO, $"Serializing {value} to attribute {name} using {serializer}.");
       return ret;
     }
   }

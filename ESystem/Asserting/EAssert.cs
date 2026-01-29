@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,6 +12,32 @@ namespace ESystem.Asserting
   {
     public class Argument
     {
+      public static void IfThen(bool antecedent, bool consequent, string argumentName, Func<string> violationDescription)
+      {
+        EAssert.IfThen(antecedent,
+          consequent,
+          () => $"Argument '{argumentName}' if->then condition check failed. Violation: {violationDescription()})");
+      }
+
+      public static void IfThen(bool antecedent, bool consequent, string argumentName, string violationDescription)
+      {
+        IfThen(antecedent, consequent, argumentName, () => violationDescription);
+      }
+
+      public static void IfThen(bool antecedent, bool consequent, string argumentName)
+      {
+        IfThen(antecedent, consequent,
+          argumentName,
+          () => $"Antecedent is true, but consequent is false.");
+      }
+
+      public static void IsInRange(double value, double minimum, double maximum, string argumentName)
+      {
+        EAssert.Argument.IsTrue(value >= minimum && value <= maximum,
+          argumentName,
+          () => $"Argument '{argumentName}' with value {value} is out of range [{minimum}, {maximum}].");
+      }
+
       public static void IsNotNull([NotNull] object? value, string argumentName)
       {
         EAssert.IsNotNull(value, $"Argument '{argumentName}' is null.");
@@ -80,6 +107,16 @@ namespace ESystem.Asserting
       if (value != null)
         throw new EAssertException(message);
     }
-  }
 
+    public static void IfThen(bool antecedent, bool consequent, Func<string> violationDescription)
+    {
+      if (antecedent)
+        IsTrue(consequent, violationDescription);
+    }
+
+    public static void IfThen(bool antecedent, bool consequent, string violationDescription)
+    {
+      IfThen(antecedent, consequent, () => violationDescription);
+    }
+  }
 }

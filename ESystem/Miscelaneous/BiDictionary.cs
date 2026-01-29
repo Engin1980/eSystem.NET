@@ -9,73 +9,111 @@ using System.Threading.Tasks;
 
 namespace ESystem.Miscelaneous
 {
-  public class BiDictionary<AType, BType> where AType : notnull where BType : notnull
+  public sealed class BiDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> where TKey : notnull where TValue : notnull
   {
-    private readonly Dictionary<AType, BType> dctA = new();
-    private readonly Dictionary<BType, AType> dctB = new();
+    private readonly Dictionary<TKey, TValue> forward;
+    private readonly Dictionary<TValue, TKey> reverse;
 
-    public ICollection<AType> As => dctA.Keys;
-
-    public ICollection<BType> Bs => dctB.Keys;
-
-    public bool TryGetValue(BType key, out AType? value) => dctB.TryGetValue(key, out value);
-    public bool TryGetValue(AType key, out BType? value) => dctA.TryGetValue(key, out value);
-
-    public HashSet<KeyValuePair<AType, BType>> ToHashSet() => dctA.ToHashSet();
-
-    public int Count => dctA.Count;
-
-    public bool IsReadOnly => false;
-
-    public BType this[AType item]
+    public BiDictionary()
+      : this(null, null)
     {
-      get => dctA[item];
-      set
-      {
-        dctA[item] = value;
-        dctB[value] = item;
-      }
     }
 
-    public AType this[BType item]
+    public BiDictionary(
+      IEqualityComparer<TKey>? keyComparer,
+      IEqualityComparer<TValue>? valueComparer)
     {
-      get => dctB[item];
-      set
-      {
-        dctA[value] = item;
-        dctB[item] = value;
-      }
+      forward = new Dictionary<TKey, TValue>(keyComparer);
+      reverse = new Dictionary<TValue, TKey>(valueComparer);
     }
 
-    public void Add(AType a, BType b)
+    public int Count => forward.Count;
+
+    public TValue this[TKey key] => forward[key];
+    public TKey GetKey(TValue value) => reverse[value];
+
+    public bool TryGetValue(TKey key, out TValue value)
+      => forward.TryGetValue(key, out value!);
+
+    public bool TryGetKey(TValue value, out TKey key)
+      => reverse.TryGetValue(value, out key!);
+
+    public TValue TryGetValueOrDefault(TKey key, TValue defaultValue = default!)
+      => forward.TryGetValue(key, out var value) ? value : defaultValue;
+    public TKey TryGetKeyOrDefault(TValue value, TKey defaultValue = default!)
+      => reverse.TryGetValue(value, out var key) ? key : defaultValue;
+
+    public bool ContainsKey(TKey key) => forward.ContainsKey(key);
+    public bool ContainsValue(TValue value) => reverse.ContainsKey(value);
+
+    public IReadOnlyDictionary<TKey, TValue> Forward => forward;
+    public IReadOnlyDictionary<TValue, TKey> Reverse => reverse;
+
+    public void Add(TKey key, TValue value)
     {
-      dctA.Add(a, b);
-      dctB.Add(b, a);
+      if (forward.ContainsKey(key))
+        throw new ArgumentException($"Duplicate key {key}.", nameof(key));
+
+      if (reverse.ContainsKey(value))
+        throw new ArgumentException($"Duplicate value {value}.", nameof(value));
+
+      forward.Add(key, value);
+      reverse.Add(value, key);
+    }
+
+    public void Set(TKey key, TValue value)
+    {
+      if (forward.ContainsKey(key))
+      {
+        reverse.Remove(forward[key]);
+        forward.Remove(key);
+      }
+      if (reverse.ContainsKey(value))
+      {
+        forward.Remove(reverse[value]);
+        reverse.Remove(value);
+      }
+
+      forward.Add(key, value);
+      reverse.Add(value, key);
+    }
+
+    public bool RemoveByKey(TKey key)
+    {
+      if (!forward.TryGetValue(key, out var value))
+        return false;
+
+      forward.Remove(key);
+      reverse.Remove(value);
+      return true;
+    }
+
+    public bool RemoveByValue(TValue value)
+    {
+      if (!reverse.TryGetValue(value, out var key))
+        return false;
+
+      reverse.Remove(value);
+      forward.Remove(key);
+      return true;
     }
 
     public void Clear()
     {
-      dctA.Clear();
-      dctB.Clear();
+      forward.Clear();
+      reverse.Clear();
     }
 
-    public bool ContainsKey(AType a) => dctA.ContainsKey(a);
-    public bool ContainsKey(BType b) => dctB.ContainsKey(b);
-
-    public IEnumerator<KeyValuePair<AType, BType>> GetEnumerator() => dctA.GetEnumerator();
-
-    public void Remove(AType a)
+    public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
     {
-      var b = dctA[a];
-      dctA.Remove(a);
-      dctB.Remove(b);
+      List<KeyValuePair<TKey, TValue>> lst = this.forward.ToList();
+      return lst.GetEnumerator();
     }
 
-    public void Remove(BType b)
+    IEnumerator IEnumerable.GetEnumerator()
     {
-      var a = dctB[b];
-      dctA.Remove(a);
-      dctB.Remove(b);
+      return GetEnumerator();
     }
   }
+
 }

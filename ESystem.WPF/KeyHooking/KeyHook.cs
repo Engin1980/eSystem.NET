@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -75,6 +76,20 @@ public class KeyHook : IDisposable
 
   [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
   private static extern IntPtr GetModuleHandle(string lpModuleName);
+
+  // RegisterHotKey / UnregisterHotKey for probing availability
+  [DllImport("user32.dll", SetLastError = true)]
+  private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
+
+  [DllImport("user32.dll", SetLastError = true)]
+  private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+
+  private const uint MOD_ALT = 0x0001;
+  private const uint MOD_CONTROL = 0x0002;
+  private const uint MOD_SHIFT = 0x0004;
+  private const uint MOD_WIN = 0x0008;
+
+  private static int hotkeyTestId = 0;
 
   // WinAPI constants
   private const int WH_KEYBOARD_LL = 13;
@@ -234,6 +249,24 @@ public class KeyHook : IDisposable
         throw new KeyShortcutAlreadyRegisteredException(keyShortcut);
     }
 
+    // try to briefly register as system hotkey to detect conflicts; unregister immediately
+    try
+    {
+      var reserved = TryReserveHotkey(keyShortcut);
+      if (reserved)
+      {
+        this.logger.Log(Logging.LogLevel.DEBUG, $"Hotkey test succeeded for {keyShortcut}");
+      }
+      else
+      {
+        this.logger.Log(Logging.LogLevel.WARNING, $"Hotkey test failed for {keyShortcut}; falling back to low-level hook. See logs for details.");
+      }
+    }
+    catch (Exception ex)
+    {
+      this.logger.Log(Logging.LogLevel.WARNING, $"Hotkey test threw exception for {keyShortcut}: {ex}");
+    }
+
     keyShortcutCallbacks.Add(new KeyShortcutAction(keyShortcut, action));
     EnsureHookInstalled();
   }
@@ -249,6 +282,43 @@ public class KeyHook : IDisposable
     if (toRem.Count == 0 && failIfNotFound)
       throw new KeyShortcutNotFoundException(keyShortcut);
     UnregisterKeyShortcutInternal(toRem);
+  }
+
+  private bool TryReserveHotkey(KeyShortcut ks)
+  {
+    // attempt to register a system hotkey on behalf of the current thread (hWnd = IntPtr.Zero)
+    // success means the combination is not already registered by another app.
+    int id = Interlocked.Increment(ref hotkeyTestId);
+    uint mods = ModifierKeysToMods(ks.Modifiers);
+    uint vk = (uint)KeyInterop.VirtualKeyFromKey(ks.Key);
+
+    bool ok = RegisterHotKey(IntPtr.Zero, id, mods, vk);
+    if (ok)
+    {
+      // un-register immediately
+      UnregisterHotKey(IntPtr.Zero, id);
+      return true;
+    }
+    else
+    {
+      int err = Marshal.GetLastWin32Error();
+      // ERROR_HOTKEY_ALREADY_REGISTERED == 1409
+      if (err == 1409)
+        this.logger.Log(Logging.LogLevel.WARNING, $"RegisterHotKey: combination {ks} already registered by another application (ERROR_HOTKEY_ALREADY_REGISTERED).");
+      else
+        this.logger.Log(Logging.LogLevel.WARNING, $"RegisterHotKey failed for {ks}, Win32 error {err}.");
+      return false;
+    }
+  }
+
+  private static uint ModifierKeysToMods(ModifierKeys m)
+  {
+    uint r = 0;
+    if ((m & ModifierKeys.Alt) != 0) r |= MOD_ALT;
+    if ((m & ModifierKeys.Control) != 0) r |= MOD_CONTROL;
+    if ((m & ModifierKeys.Shift) != 0) r |= MOD_SHIFT;
+    if ((m & ModifierKeys.Windows) != 0) r |= MOD_WIN;
+    return r;
   }
 
   /// <summary>
