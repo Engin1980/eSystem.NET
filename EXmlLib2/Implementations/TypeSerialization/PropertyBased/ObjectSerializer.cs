@@ -40,7 +40,23 @@ public class ObjectSerializer : TypeSerializerBase
 
     public DefaultOptions WithPropertySerializer(IPropertySerializer propertySerializer)
     {
-      parent.defaultPropertySerializer = propertySerializer ?? throw new ArgumentNullException(nameof(propertySerializer));
+      EAssert.Argument.IsNotNull(propertySerializer, nameof(propertySerializer));
+      parent.defaultPropertySerializer = propertySerializer;
+      return this;
+    }
+
+    public DefaultOptions WithPropertySerialization(PropertySerialization propertySerialization)
+    {
+      EAssert.Argument.IsNotNull(propertySerialization, nameof(propertySerialization));
+      parent.defaultPropertySerializer = propertySerialization;
+      return this;
+    }
+
+    public DefaultOptions WithPropertySerialization(Action<PropertySerialization> opts)
+    {
+      EAssert.Argument.IsNotNull(opts, nameof(opts));
+      EAssert.IsTrue(parent.defaultPropertySerializer is PropertySerialization, "Default property serializer is not of type PropertySerialization.");
+      opts((PropertySerialization) parent.defaultPropertySerializer);
       return this;
     }
 
@@ -56,6 +72,7 @@ public class ObjectSerializer : TypeSerializerBase
   private Func<Type, PropertyInfo[]> propertiesProvider = PropertyProviders.PublicInstancePropertiesProvider;
   private Func<object, PropertyInfo, object?> propertyValueProvider = PropertyValueReaders.DefaultPropertyReader;
   private IPropertySerializer defaultPropertySerializer = new PropertySerialization()
+    .WithXmlSourceOrder(XmlSourceOrder.AttributeFirst)
     .WithMissingXmlSourceBehavior(MissingPropertyXmlSourceBehavior.ThrowException);
   private readonly SmartPropertyInfoDictionary<IPropertySerializer> customPropertySerializers = new();
   private Func<Type, bool> acceptsTypePredicate = q => false;
@@ -101,7 +118,7 @@ public class ObjectSerializer : TypeSerializerBase
   {
     EAssert.Argument.IsNotNull(propertyInfo, nameof(propertyInfo));
     EAssert.Argument.IsNotNull(propertySerializer, nameof(propertySerializer));
-    customPropertySerializers.Put(propertyInfo,propertySerializer);
+    customPropertySerializers.Put(propertyInfo, propertySerializer);
     return this;
   }
 

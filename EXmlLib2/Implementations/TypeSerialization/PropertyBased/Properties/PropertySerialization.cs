@@ -158,27 +158,39 @@ namespace EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties
         ? propertyInfo.Name
         : typeToXmlNameMapping.TryGetValueOrDefault(propertyValue.GetType(), propertyInfo.Name);
 
-      switch (this.xmlSourceOrder)
+
+      var xso = this.xmlSourceOrder;
+
+      if (xso == XmlSourceOrder.ElementOnly)
+        SerializePropertyToElement(propertyInfo, propertyValue, element, ctx, elementName);
+      else if (xso == XmlSourceOrder.AttributeOnly)
+        SerializePropertyToAttribute(propertyInfo, propertyValue, element, ctx, elementName);
+      else
       {
-        case XmlSourceOrder.ElementFirst:
-        case XmlSourceOrder.ElementOnly:
+        IElementSerializer? elementSerializer = ctx.ElementSerializers.TryGetByType(propertyValue?.GetType() ?? propertyInfo.PropertyType);
+        IAttributeSerializer? attributeSerializer = ctx.AttributeSerializers.TryGetByType(propertyValue?.GetType() ?? propertyInfo.PropertyType);
+
+        if (xso == XmlSourceOrder.ElementFirst && elementSerializer != null)
           SerializePropertyToElement(propertyInfo, propertyValue, element, ctx, elementName);
-          break;
-        case XmlSourceOrder.AttributeFirst:
-        case XmlSourceOrder.AttributeOnly:
+        else if (xso == XmlSourceOrder.ElementFirst && attributeSerializer != null)
           SerializePropertyToAttribute(propertyInfo, propertyValue, element, ctx, elementName);
-          break;
-        default:
-          throw new ESystem.Exceptions.UnexpectedEnumValueException(this.xmlSourceOrder);
+        else if (xso == XmlSourceOrder.AttributeFirst && attributeSerializer != null)
+          SerializePropertyToAttribute(propertyInfo, propertyValue, element, ctx, elementName);
+        else if (xso == XmlSourceOrder.AttributeFirst && elementSerializer != null)
+          SerializePropertyToElement(propertyInfo, propertyValue, element, ctx, elementName);
+        else
+          throw new EXmlException($"Unable to find any serializer for " +
+            $"type '{propertyValue?.GetType().FullName ?? "null"}' " +
+            $"of property '{propertyInfo.Name}'.");
       }
     }
 
     private static void SerializePropertyToAttribute(PropertyInfo propertyInfo, object? propertyValue, XElement element, IXmlContext ctx, string elementName)
     {
-      if (propertyValue != null && propertyValue.GetType() != propertyInfo.PropertyType)
-        throw new InvalidOperationException($"Cannot serialize property '{propertyInfo.Name}' as attribute " +
-          $"because its runtime value type '{propertyValue.GetType().FullName}' differs from declared property " +
-          $"type '{propertyInfo.PropertyType.FullName}' (type ${propertyInfo.DeclaringType}).");
+      //if (propertyValue != null && propertyValue.GetType() != propertyInfo.PropertyType)
+      //  throw new InvalidOperationException($"Cannot serialize property '{propertyInfo.Name}' as attribute " +
+      //    $"because its runtime value type '{propertyValue.GetType().FullName}' differs from declared property " +
+      //    $"type '{propertyInfo.PropertyType.FullName}' (type ${propertyInfo.DeclaringType}).");
 
       var attrSer = ctx.AttributeSerializers.GetByType(propertyValue?.GetType() ?? propertyInfo.PropertyType);
       XAttribute propAttr = ctx.SerializeToAttribute(elementName, propertyValue, propertyInfo.PropertyType, attrSer);

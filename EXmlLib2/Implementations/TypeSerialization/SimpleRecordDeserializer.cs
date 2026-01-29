@@ -20,7 +20,7 @@ namespace EXmlLib2.Implementations.TypeSerialization;
 
 public class SimpleRecordDeserializer<T> : TypeDeserializerBase
 {
-  private Func<Type, bool> typeAccepter = q => q == typeof(T);
+  private readonly Func<Type, bool> typeAccepter = q => q == typeof(T);
   private readonly Dictionary<PropertyInfo, Func<object?>> optionalProperties = [];
   private readonly Func<Type, PropertyInfo[]> propertiesProvider = PropertyProviders.PublicInstancePropertiesProvider;
   private readonly IPropertyDeserializer propertyDeserializer = new PropertySerialization()

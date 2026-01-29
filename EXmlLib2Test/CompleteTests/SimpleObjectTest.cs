@@ -267,7 +267,9 @@ namespace EXmlLib2Test.CompleteTests
       {
         EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization().WithCommonTypesSerialization();
         exml.ElementSerializers.AddFirst(new ObjectSerializer()
-          .WithAcceptedType<SimpleClass>());
+          .WithAcceptedType<SimpleClass>()
+          .WithDefaultOptions(o =>
+            o.WithPropertySerialization(p => p.WithXmlSourceOrder(XmlSourceOrder.ElementFirst))));
         exml.Serialize(source, element);
       }
       {

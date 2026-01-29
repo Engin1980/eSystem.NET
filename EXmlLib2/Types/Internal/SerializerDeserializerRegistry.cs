@@ -18,16 +18,18 @@ public class SerializerDeserializerRegistry<T> where T : ISelectableByType
   public void AddLast(T item) => items.Add(item);
   public T GetByType(Type type)
   {
-    T ret;
-    try
+    T? ret = TryGetByType(type);
+    if (ret == null)
     {
-      ret = items.First(q => q.AcceptsType(type));
-    }
-    catch (Exception ex)
-    {
-      EXmlException eex = new($"Failed to find {typeof(T).Name} for type {type}.", ex);
+      EXmlException eex = new($"Failed to find {typeof(T).Name} for type {type}.");
       throw eex;
     }
+    return ret;
+  }
+
+  public T? TryGetByType(Type type)
+  {
+    T? ret = items.FirstOrDefault(q => q.AcceptsType(type));
     return ret;
   }
 

@@ -58,8 +58,7 @@ public class ObjectDeserializer : TypeDeserializerBase
     }
   }
 
-  public static readonly Func<Type, PropertyInfo[]> PUBLIC_INSTANCE_PROPERTIES_PROVIDER = q => q.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-  private Func<Type, PropertyInfo[]> propertiesProvider = PUBLIC_INSTANCE_PROPERTIES_PROVIDER;
+  private Func<Type, PropertyInfo[]> propertiesProvider = PropertyProviders.PublicInstancePropertiesProvider;
 
   private IPropertyDeserializer defaultPropertyDeserializer = new PropertySerialization()
     .WithMissingXmlSourceBehavior(MissingPropertyXmlSourceBehavior.ThrowException);
