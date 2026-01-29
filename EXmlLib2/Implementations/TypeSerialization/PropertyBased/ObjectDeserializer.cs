@@ -56,6 +56,21 @@ public class ObjectDeserializer : TypeDeserializerBase
       parent.defaultInstanceFactory = instanceFactory ?? throw new ArgumentNullException(nameof(instanceFactory));
       return this;
     }
+
+    public DefaultOptions WithPropertySerialization(PropertySerialization propertySerialization)
+    {
+      EAssert.Argument.IsNotNull(propertySerialization, nameof(propertySerialization));
+      parent.defaultPropertyDeserializer = propertySerialization;
+      return this;
+    }
+
+    public DefaultOptions WithPropertySerialization(Action<PropertySerialization> opts)
+    {
+      EAssert.Argument.IsNotNull(opts, nameof(opts));
+      EAssert.IsTrue(parent.defaultPropertyDeserializer is PropertySerialization, "Default property deserializer is not of type PropertySerialization.");
+      opts((PropertySerialization)parent.defaultPropertyDeserializer);
+      return this;
+    }
   }
 
   private Func<Type, PropertyInfo[]> propertiesProvider = PropertyProviders.PublicInstancePropertiesProvider;

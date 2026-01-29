@@ -24,6 +24,7 @@ public class SimpleRecordDeserializer<T> : TypeDeserializerBase
   private readonly Dictionary<PropertyInfo, Func<object?>> optionalProperties = [];
   private readonly Func<Type, PropertyInfo[]> propertiesProvider = PropertyProviders.PublicInstancePropertiesProvider;
   private readonly IPropertyDeserializer propertyDeserializer = new PropertySerialization()
+    .WithNameCaseMatching(NameCaseMatching.IgnoreCase)
     .WithMissingXmlSourceBehavior(MissingPropertyXmlSourceBehavior.Ignore);
 
   public override bool AcceptsType(Type type) => typeAccepter(type);
@@ -38,7 +39,6 @@ public class SimpleRecordDeserializer<T> : TypeDeserializerBase
     optionalProperties[propertyInfo] = () => defaultValueProvider();
     return this;
   }
-
 
   private static PropertyInfo ExtractPropertyInfo<V>(Expression<Func<T, V?>> propertySelector)
   {
