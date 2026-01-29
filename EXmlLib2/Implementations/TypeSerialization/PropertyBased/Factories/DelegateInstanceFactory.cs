@@ -6,10 +6,10 @@ using System.Reflection;
 
 namespace EXmlLib2.Implementations.TypeSerialization.PropertyBased.Factories;
 
-public class DelegatedInstanceFactory : IInstanceFactory
+public class DelegateInstanceFactory : IInstanceFactory
 {
   private readonly Func<Type, Dictionary<string, object?>, object> factoryMethod;
-  public DelegatedInstanceFactory(Func<Type, Dictionary<string, object?>, object> factoryMethod)
+  public DelegateInstanceFactory(Func<Type, Dictionary<string, object?>, object> factoryMethod)
   {
     this.factoryMethod = factoryMethod ?? throw new ArgumentNullException(nameof(factoryMethod));
   }

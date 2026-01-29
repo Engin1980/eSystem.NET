@@ -43,13 +43,13 @@ namespace EXmlLib2Test.CompleteTests
 
       {
         EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization();
-        exml.ElementSerializers.AddFirst(new NewTypeByPropertySerializer().WithAcceptedType<ParentClass>(true));
+        exml.ElementSerializers.AddFirst(new ObjectSerializer().WithAcceptedType<ParentClass>(true));
         exml.Serialize(source, typeof(ParentClass), element);
       }
 
       {
         EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization();
-        exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer().WithAcceptedType<ParentClass>(true));
+        exml.ElementDeserializers.AddFirst(new ObjectDeserializer().WithAcceptedType<ParentClass>(true));
         target = exml.Deserialize<ParentClass>(element);
       }
 
@@ -77,15 +77,15 @@ namespace EXmlLib2Test.CompleteTests
 
       {
         EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization();
-        exml.ElementSerializers.AddFirst(new NewTypeByPropertySerializer().WithAcceptedType<ParentClass>(true));
-        exml.ElementSerializers.AddFirst(new NewTypeByPropertySerializer().WithAcceptedType<HolderClass>(true));
+        exml.ElementSerializers.AddFirst(new ObjectSerializer().WithAcceptedType<ParentClass>(true));
+        exml.ElementSerializers.AddFirst(new ObjectSerializer().WithAcceptedType<HolderClass>(true));
         exml.Serialize(source, element);
       }
 
       {
         EXml exml = EXml.Create().WithPrimitiveTypesAndStringSerialization();
-        exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer().WithAcceptedType<ParentClass>(true));
-        exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer().WithAcceptedType<HolderClass>(true));
+        exml.ElementDeserializers.AddFirst(new ObjectDeserializer().WithAcceptedType<ParentClass>(true));
+        exml.ElementDeserializers.AddFirst(new ObjectDeserializer().WithAcceptedType<HolderClass>(true));
         target = exml.Deserialize<HolderClass>(element);
       }
 
@@ -153,7 +153,7 @@ namespace EXmlLib2Test.CompleteTests
 
       {
         EXml exml = EXml.Create().WithDefaultSerialization();
-        exml.ElementDeserializers.AddFirst(new NewTypeByPropertyDeserializer()
+        exml.ElementDeserializers.AddFirst(new ObjectDeserializer()
           .WithAcceptedType<ParentClass>(true)
           .WithTypeOptions<ParentClass>(opt => opt.WithIgnoredProperty(q => q.ParentProperty))
           );

@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace EXmlLib2.Implementations.TypeSerialization.PropertyBased.Factories;
 
-public class UniversalTypeFactory : IInstanceFactory
+public class CtorParamMatchTypeFactory : IInstanceFactory
 {
   private enum TypeKind
   {
@@ -105,7 +105,7 @@ public class UniversalTypeFactory : IInstanceFactory
 
   private object CreateAndInitClass(Type instanceType, Dictionary<string, object?> propertyValues)
   {
-    var pom = new PublicParameterlessConstructorInstanceFromPropertiesFactory();
+    var pom = new ParamlessCtorFactory();
     object ret = pom.CreateInstance(instanceType, propertyValues);
     return ret;
   }

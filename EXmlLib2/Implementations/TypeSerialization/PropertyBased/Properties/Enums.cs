@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties
 {
-  public enum MissingPropertyElementBehavior
+  public enum MissingPropertyXmlSourceBehavior
   {
     ThrowException,
     Ignore,
-    ReturnNull
+    ReturnDefault,
   }
 
   public enum NameCaseMatching
@@ -21,7 +21,9 @@ namespace EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties
 
   public enum XmlSourceOrder
   {
-    AttributesFirst,
-    ElementsFirst
+    AttributeFirst,
+    ElementFirst,
+    AttributeOnly,
+    ElementOnly
   }
 }

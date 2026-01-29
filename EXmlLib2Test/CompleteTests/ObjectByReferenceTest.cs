@@ -49,8 +49,8 @@ internal class ObjectByReferenceTest
 
       //ObjectByReferenceSerializerWrapper<Location> locationSerializer = new(new SpecificTypeElementSerializer<Location>());
       //ObjectByReferenceSerializerWrapper<Item> itemSerializer = new(new SpecificTypeElementSerializer<Item>());
-      ObjectByReferenceSerializerWrapper locationSerializer = new(new NewTypeByPropertySerializer().WithAcceptedType<Location>());
-      ObjectByReferenceSerializerWrapper itemSerializer = new(new NewTypeByPropertySerializer().WithAcceptedType<Item>());
+      ObjectByReferenceSerializerWrapper locationSerializer = new(new ObjectSerializer().WithAcceptedType<Location>());
+      ObjectByReferenceSerializerWrapper itemSerializer = new(new ObjectSerializer().WithAcceptedType<Item>());
       xml.ElementSerializers.AddFirst(locationSerializer);
       xml.ElementSerializers.AddFirst(itemSerializer);
 
@@ -62,8 +62,8 @@ internal class ObjectByReferenceTest
 
       //ObjectByReferenceDeserializerWrapper<Location> locationDeserializer = new(new SpecificTypeElementDeserializer<Location>());
       //ObjectByReferenceDeserializerWrapper<Item> itemDeserializer = new(new SpecificTypeElementDeserializer<Item>());
-      ObjectByReferenceDeserializerWrapper locationDeserializer = new(new NewTypeByPropertyDeserializer().WithAcceptedType<Location>());
-      ObjectByReferenceDeserializerWrapper itemDeserializer = new(new NewTypeByPropertyDeserializer().WithAcceptedType<Item>());
+      ObjectByReferenceDeserializerWrapper locationDeserializer = new(new ObjectDeserializer().WithAcceptedType<Location>());
+      ObjectByReferenceDeserializerWrapper itemDeserializer = new(new ObjectDeserializer().WithAcceptedType<Item>());
       xml.ElementDeserializers.AddFirst(locationDeserializer);
       xml.ElementDeserializers.AddFirst(itemDeserializer);
 
@@ -88,8 +88,8 @@ internal class ObjectByReferenceTest
 
       //ObjectByReferenceSerializerWrapper<Location> locationSerializer = new(new SpecificTypeElementSerializer<Location>());
       //ObjectByReferenceSerializerWrapper<Item> itemSerializer = new(new SpecificTypeElementSerializer<Item>());
-      ObjectByReferenceSerializerWrapper locationSerializer = new(new NewTypeByPropertySerializer().WithAcceptedType<Location>());
-      ObjectByReferenceSerializerWrapper itemSerializer = new(new NewTypeByPropertySerializer().WithAcceptedType<Item>());
+      ObjectByReferenceSerializerWrapper locationSerializer = new(new ObjectSerializer().WithAcceptedType<Location>());
+      ObjectByReferenceSerializerWrapper itemSerializer = new(new ObjectSerializer().WithAcceptedType<Item>());
       xml.ElementSerializers.AddFirst(locationSerializer);
       xml.ElementSerializers.AddFirst(itemSerializer);
 
@@ -101,8 +101,8 @@ internal class ObjectByReferenceTest
 
       //ObjectByReferenceDeserializerWrapper<Location> locationDeserializer = new(new SpecificTypeElementDeserializer<Location>());
       //ObjectByReferenceDeserializerWrapper<Item> itemDeserializer = new(new SpecificTypeElementDeserializer<Item>());
-      ObjectByReferenceDeserializerWrapper locationDeserializer = new(new NewTypeByPropertyDeserializer().WithAcceptedType<Location>());
-      ObjectByReferenceDeserializerWrapper itemDeserializer = new(new NewTypeByPropertyDeserializer().WithAcceptedType<Item>());
+      ObjectByReferenceDeserializerWrapper locationDeserializer = new(new ObjectDeserializer().WithAcceptedType<Location>());
+      ObjectByReferenceDeserializerWrapper itemDeserializer = new(new ObjectDeserializer().WithAcceptedType<Item>());
       xml.ElementDeserializers.AddFirst(locationDeserializer);
       xml.ElementDeserializers.AddFirst(itemDeserializer);
 

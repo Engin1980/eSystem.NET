@@ -12,11 +12,11 @@ public readonly struct DeserializationResult
     Value = value;
   }
 
-  public static DeserializationResult NoResult() => new(false, null);
+  public static DeserializationResult FromNoResult() => new(false, null);
 
-  public static DeserializationResult Null() => new(true, null);
+  public static DeserializationResult FromNull() => new(true, null);
 
-  public static DeserializationResult ValueResult(object value) => new(true, value);
+  public static DeserializationResult FromValue(object value) => new(true, value);
 
-  public static DeserializationResult Result(object? value) => value == null ? Null() : ValueResult(value);
+  public static DeserializationResult From(object? value) => value == null ? FromNull() : FromValue(value);
 }

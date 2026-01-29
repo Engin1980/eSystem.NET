@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace EXmlLib2.Implementations.TypeSerialization.PropertyBased.Factories;
 
-public class PublicParameterlessConstructorInstanceFromPropertiesFactory : IInstanceFactory
+public class ParamlessCtorFactory : IInstanceFactory
 {
   public object CreateInstance(Type targetType, Dictionary<string, object?> deserializedValues)
   {

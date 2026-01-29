@@ -1,10 +1,12 @@
 ﻿using ESystem.Asserting;
 using EXmlLib2.Abstractions;
 using EXmlLib2.Abstractions.Interfaces;
-using EXmlLib2.Implementations.TypeSerialization.AnyBased;
+using EXmlLib2.Implementations.TypeSerialization.Abstractions;
 using EXmlLib2.Implementations.TypeSerialization.Factories;
 using EXmlLib2.Implementations.TypeSerialization.Helpers;
+using EXmlLib2.Implementations.TypeSerialization.PropertyBased;
 using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties;
+using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,13 +18,13 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Implementations.TypeSerialization;
 
-public class SimpleRecordDeserializer<T> : NewTypeDeserializer
+public class SimpleRecordDeserializer<T> : TypeDeserializerBase
 {
   private Func<Type, bool> typeAccepter = q => q == typeof(T);
   private readonly Dictionary<PropertyInfo, Func<object?>> optionalProperties = [];
-  private readonly Func<Type, PropertyInfo[]> propertiesProvider = TypeFromAnyDeserializer.PUBLIC_INSTANCE_PROPERTIES_PROVIDER;
-  private readonly IPropertyDeserializer propertyDeserializer = new PropertyFromAnyDeserializer()
-    .WithMissingPropertyElementBehavior(MissingPropertyElementBehavior.Ignore);
+  private readonly Func<Type, PropertyInfo[]> propertiesProvider = PropertyProviders.PublicInstancePropertiesProvider;
+  private readonly IPropertyDeserializer propertyDeserializer = new PropertySerialization()
+    .WithMissingXmlSourceBehavior(MissingPropertyXmlSourceBehavior.Ignore);
 
   public override bool AcceptsType(Type type) => typeAccepter(type);
 
@@ -82,7 +84,7 @@ public class SimpleRecordDeserializer<T> : NewTypeDeserializer
       if (optionalProperties.TryGetValue(pi, out Func<object?>? defaultValueProvider))
       {
         object? defaultValue = defaultValueProvider();
-        deserializedValue = DeserializationResult.Result(defaultValue);
+        deserializedValue = DeserializationResult.From(defaultValue);
       }
       else
         throw new Exception("Missing required property value for '" + dataMemberName + "'.");

@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Xml.Linq;
 
-namespace EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties;
+namespace EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties.Abstractions;
 
 public interface IPropertySerializer
 {

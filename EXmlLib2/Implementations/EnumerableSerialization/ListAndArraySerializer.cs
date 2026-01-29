@@ -3,6 +3,7 @@ using ESystem.Exceptions;
 using ESystem.Miscelaneous;
 using EXmlLib2.Abstractions;
 using EXmlLib2.Abstractions.Interfaces;
+using EXmlLib2.Implementations.EnumerableSerialization.Abstractions;
 using EXmlLib2.Implementations.EnumerableSerialization.Internal;
 using EXmlLib2.Types;
 using System;
@@ -15,7 +16,7 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Implementations.EnumerableSerialization
 {
-  public class ListAndArraySerializer : EnumerableSerializer
+  public class ListAndArraySerializer : EnumerableSerializerBase
   {
     public class DefaultOptions(ListAndArraySerializer parent)
     {
@@ -45,10 +46,19 @@ namespace EXmlLib2.Implementations.EnumerableSerialization
       }
     }
 
+    private Func<Type, bool> typeAccepter = q => EnumerableTypeUtils.IsListOrArray(q);
     private const string DEFAULT_ITEM_ELEMENT_NAME = "Item";
     private string defaultItemElementName = DEFAULT_ITEM_ELEMENT_NAME;
     private XmlRepresentation itemXmlRepresentation = XmlRepresentation.Element;
-    private readonly BiDictionary<Type, string> typeToXmlNameMapping = new();
+    private readonly BiDictionary<Type, string> typeToXmlNameMapping = [];
+    
+    public ListAndArraySerializer WithAcceptedType<T>()
+    {
+      EAssert.IsTrue(EnumerableTypeUtils.IsListOrArray(typeof(T)),
+        $"Typ {typeof(T).FullName} is not Array or IEnumerable.");
+      this.typeAccepter = q => q == typeof(T);
+      return this;
+    }
 
     public ListAndArraySerializer WithDefaultOptions(Action<DefaultOptions> opts)
     {
@@ -64,7 +74,7 @@ namespace EXmlLib2.Implementations.EnumerableSerialization
       return this;
     }
 
-    public override bool AcceptsType(Type type) => EnumerableTypeUtils.IsListOrArray(type);
+    public override bool AcceptsType(Type type) => this.typeAccepter(type);
 
     protected override IEnumerable<object> ExtractItems(object value)
     {
@@ -104,7 +114,6 @@ namespace EXmlLib2.Implementations.EnumerableSerialization
         ret = Internal.EnumerableTypeUtils.GetItemTypeForIEnumerable(iterableType);
       return ret;
     }
-
 
     protected override void SerializeItem(object? item, Type itemType, XElement element, IXmlContext ctx)
     {

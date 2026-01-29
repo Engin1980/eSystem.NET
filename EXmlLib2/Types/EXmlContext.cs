@@ -60,11 +60,22 @@ namespace EXmlLib2.Types
       set => _DefaultItemXmlName = value ?? throw new ArgumentNullException();
     }
 
+    public void SerializeToElement(object? value, Type expectedType, XElement element)
+    {
+      EAssert.Argument.IsNotNull(element, nameof(element));
+      EAssert.Argument.IsNotNull(expectedType, nameof(expectedType));
+      logger.Log(LogLevel.INFO, $"Serializing {value} to {element}.");
+      IElementSerializer serializer = ElementSerializers.GetByType(expectedType);
+      logger.Log(LogLevel.INFO, $"Using serializer {serializer}.");
+      SerializeToElement(value, expectedType, element, serializer);
+      logger.Log(LogLevel.INFO, $"Serialized {value} to {element}.");
+    }
 
     public void SerializeToElement(object? value, Type expectedType, XElement element, IElementSerializer serializer)
     {
       EAssert.Argument.IsNotNull(element, nameof(element));
       EAssert.Argument.IsNotNull(serializer, nameof(serializer));
+      EAssert.Argument.IsNotNull(expectedType, nameof(expectedType));
       logger.Log(LogLevel.INFO, $"Serializing {value} to {element} using {serializer}.");
       try
       {
@@ -77,6 +88,18 @@ namespace EXmlLib2.Types
         throw eex;
       }
       logger.Log(LogLevel.INFO, $"Serialized {value} to {element} using {serializer}.");
+    }
+
+    public object? DeserializeFromElement(XElement element, Type targetType)
+    {
+      EAssert.Argument.IsNotNull(element, nameof(element));
+      EAssert.Argument.IsNotNull(targetType, nameof(targetType));
+      logger.Log(LogLevel.INFO, $"Deserializing {targetType} from {element}.");
+      IElementDeserializer deserializer = ElementDeserializers.GetByType(targetType);
+      logger.Log(LogLevel.INFO, $"Using deserializer {deserializer}.");
+      object? ret = DeserializeFromElement(element, targetType, deserializer);
+      logger.Log(LogLevel.INFO, $"Deserialized {targetType} from {element} to {ret}.");
+      return ret;
     }
 
     public object? DeserializeFromElement(XElement element, Type targetType, IElementDeserializer deserializer)
@@ -113,6 +136,18 @@ namespace EXmlLib2.Types
         ret = newDataProvider();
         customDataStore[key] = ret!;
       }
+      return ret;
+    }
+
+    public XAttribute SerializeToAttribute(string name, object? value, Type expectedType)
+    {
+      EAssert.Argument.IsNotNull(name, nameof(name));
+      EAssert.Argument.IsNotNull(expectedType, nameof(expectedType));
+      logger.Log(LogLevel.INFO, $"Serializing {value} to attribute {name}.");
+      IAttributeSerializer serializer = AttributeSerializers.GetByType(expectedType);
+      logger.Log(LogLevel.INFO, $"Using serializer {serializer}.");
+      XAttribute ret = SerializeToAttribute(name, value, expectedType, serializer);
+      logger.Log(LogLevel.INFO, $"Serialized {value} to attribute {name}.");
       return ret;
     }
 

@@ -1,9 +1,11 @@
 ﻿using ESystem.Asserting;
 using EXmlLib2.Abstractions;
+using EXmlLib2.Implementations.TypeSerialization.Abstractions;
 using EXmlLib2.Implementations.TypeSerialization.Factories;
 using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Factories;
 using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Internal;
 using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties;
+using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties.Abstractions;
 using EXmlLib2.Types;
 using System.ComponentModel;
 using System.Linq.Expressions;
@@ -12,9 +14,9 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Implementations.TypeSerialization.PropertyBased;
 
-public class NewTypeByPropertySerializer : NewTypeSerializer
+public class ObjectSerializer : TypeSerializerBase
 {
-  public class TypeOptions<T>(NewTypeByPropertySerializer parent)
+  public class TypeOptions<T>(ObjectSerializer parent)
   {
     public TypeOptions<T> WithPropertyDeserializer(Expression<Func<T, object?>> propertyExpression, IPropertySerializer propertySerializer)
     {
@@ -25,10 +27,10 @@ public class NewTypeByPropertySerializer : NewTypeSerializer
       return this;
     }
 
-    public TypeOptions<T> WithIgnoredProperty(Expression<Func<T, object?>> propertyExpression) => this.WithPropertyDeserializer(propertyExpression, new IgnoredProperty());
+    public TypeOptions<T> WithIgnoredProperty(Expression<Func<T, object?>> propertyExpression) => this.WithPropertyDeserializer(propertyExpression, new IgnoredPropertySerialization());
   }
 
-  public class DefaultOptions(NewTypeByPropertySerializer parent)
+  public class DefaultOptions(ObjectSerializer parent)
   {
     public DefaultOptions WithPropertiesProvider(Func<Type, PropertyInfo[]> propertiesProvider)
     {
@@ -49,18 +51,18 @@ public class NewTypeByPropertySerializer : NewTypeSerializer
     }
   }
 
-  public static readonly Func<Type, PropertyInfo[]> PUBLIC_INSTANCE_PROPERTIES_PROVIDER = q => q.GetProperties(BindingFlags.Public | BindingFlags.Instance);
   public static readonly Func<object, PropertyInfo, object?> PROPERTY_VALUE_READER = (obj, prop) => prop.GetValue(obj);
 
-  private Func<Type, PropertyInfo[]> propertiesProvider = PUBLIC_INSTANCE_PROPERTIES_PROVIDER;
-  private Func<object, PropertyInfo, object?> propertyValueProvider = PROPERTY_VALUE_READER;
-  private IPropertySerializer defaultPropertySerializer = new SimplePropertyAsElement();
-  private readonly SmartPropertyInfoDictionary<IPropertySerializer> propertySerializers = new();
+  private Func<Type, PropertyInfo[]> propertiesProvider = PropertyProviders.PublicInstancePropertiesProvider;
+  private Func<object, PropertyInfo, object?> propertyValueProvider = PropertyValueReaders.DefaultPropertyReader;
+  private IPropertySerializer defaultPropertySerializer = new PropertySerialization()
+    .WithMissingXmlSourceBehavior(MissingPropertyXmlSourceBehavior.ThrowException);
+  private readonly SmartPropertyInfoDictionary<IPropertySerializer> customPropertySerializers = new();
   private Func<Type, bool> acceptsTypePredicate = q => false;
 
   public override bool AcceptsType(Type type) => acceptsTypePredicate(type);
 
-  public NewTypeByPropertySerializer WithAcceptedType(Type type, bool acceptDerivedTypes = false)
+  public ObjectSerializer WithAcceptedType(Type type, bool acceptDerivedTypes = false)
   {
     EAssert.Argument.IsNotNull(type, nameof(type));
     if (acceptDerivedTypes)
@@ -68,11 +70,11 @@ public class NewTypeByPropertySerializer : NewTypeSerializer
     else
       return WithAcceptedType(q => q == type);
   }
-  public NewTypeByPropertySerializer WithAcceptedType<T>(bool acceptDerivedTypes = false)
+  public ObjectSerializer WithAcceptedType<T>(bool acceptDerivedTypes = false)
   {
     return WithAcceptedType(typeof(T), acceptDerivedTypes);
   }
-  public NewTypeByPropertySerializer WithAcceptedType(Func<Type, bool> predicate)
+  public ObjectSerializer WithAcceptedType(Func<Type, bool> predicate)
   {
     EAssert.Argument.IsNotNull(predicate, nameof(predicate));
     var tmp = acceptsTypePredicate;
@@ -80,14 +82,14 @@ public class NewTypeByPropertySerializer : NewTypeSerializer
     return this;
   }
 
-  public NewTypeByPropertySerializer WithTypeOptions<T>(Action<TypeOptions<T>> opts)
+  public ObjectSerializer WithTypeOptions<T>(Action<TypeOptions<T>> opts)
   {
     TypeOptions<T> typeOpts = new TypeOptions<T>(this);
     opts(typeOpts);
     return this;
   }
 
-  public NewTypeByPropertySerializer WithDefaultOptions(Action<DefaultOptions> opts)
+  public ObjectSerializer WithDefaultOptions(Action<DefaultOptions> opts)
   {
     DefaultOptions defaultOptions = new(this);
     opts(defaultOptions);
@@ -95,11 +97,11 @@ public class NewTypeByPropertySerializer : NewTypeSerializer
   }
 
   [EditorBrowsable(EditorBrowsableState.Never)]
-  public NewTypeByPropertySerializer WithPropertySerializerFor(PropertyInfo propertyInfo, IPropertySerializer propertySerializer)
+  public ObjectSerializer WithPropertySerializerFor(PropertyInfo propertyInfo, IPropertySerializer propertySerializer)
   {
     EAssert.Argument.IsNotNull(propertyInfo, nameof(propertyInfo));
     EAssert.Argument.IsNotNull(propertySerializer, nameof(propertySerializer));
-    propertySerializers.Put(propertyInfo,propertySerializer);
+    customPropertySerializers.Put(propertyInfo,propertySerializer);
     return this;
   }
 
@@ -144,7 +146,7 @@ public class NewTypeByPropertySerializer : NewTypeSerializer
   {
     PropertyInfo propertyInfo = propertiesProvider(value.GetType()).First(q => q.Name == propertyName);
     object? propertyValue = GetPropertyValue(value, propertyInfo);
-    IPropertySerializer psd = propertySerializers.TryGet(propertyInfo) ?? defaultPropertySerializer;
+    IPropertySerializer psd = customPropertySerializers.TryGet(propertyInfo) ?? defaultPropertySerializer;
     psd.SerializeProperty(propertyInfo, propertyValue, element, ctx);
   }
 }

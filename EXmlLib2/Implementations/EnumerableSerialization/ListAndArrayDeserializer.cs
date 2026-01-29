@@ -3,6 +3,7 @@ using ESystem.Exceptions;
 using ESystem.Miscelaneous;
 using EXmlLib2.Abstractions;
 using EXmlLib2.Abstractions.Interfaces;
+using EXmlLib2.Implementations.EnumerableSerialization.Abstractions;
 using EXmlLib2.Implementations.EnumerableSerialization.Internal;
 using EXmlLib2.Types;
 using System;
@@ -15,9 +16,8 @@ using System.Xml.Linq;
 
 namespace EXmlLib2.Implementations.EnumerableSerialization
 {
-  public class ListAndArrayDeserializer : EnumerableDeserializer
+  public class ListAndArrayDeserializer : EnumerableDeserializerBase
   {
-    private Func<Type, bool> typeAccepter = q => EnumerableTypeUtils.IsListOrArray(q);
 
     public enum UnknownElementHandling
     {
@@ -59,15 +59,18 @@ namespace EXmlLib2.Implementations.EnumerableSerialization
       }
     }
 
+    private Func<Type, bool> typeAccepter = q => EnumerableTypeUtils.IsListOrArray(q);
     private const string DEFAULT_ITEM_ELEMENT_NAME = "Item";
     private string defaultItemElementName = DEFAULT_ITEM_ELEMENT_NAME;
     private XmlRepresentation itemXmlRepresentation = XmlRepresentation.Element;
-    private readonly BiDictionary<Type, string> typeToXmlNameMapping = new();
+    private readonly BiDictionary<Type, string> typeToXmlNameMapping = [];
     private UnknownElementHandling unknownElementHandling = UnknownElementHandling.Skip;
 
     public ListAndArrayDeserializer WithAcceptedType<T>()
     {
-      this.typeAccepter = q => EnumerableTypeUtils.IsListOrArray(typeof(T)) && q == typeof(T);
+      EAssert.IsTrue(EnumerableTypeUtils.IsListOrArray(typeof(T)), 
+        $"Typ {typeof(T).FullName} is not Array or IEnumerable.");
+      this.typeAccepter = q => q == typeof(T);
       return this;
     }
 

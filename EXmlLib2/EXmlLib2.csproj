@@ -12,4 +12,8 @@
     <ProjectReference Include="..\ESystem\ESystem.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Implementations\TypeSerialization\FieldBased\" />
+  </ItemGroup>
+
 </Project>

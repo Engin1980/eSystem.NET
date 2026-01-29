@@ -12,13 +12,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace EXmlLib2.Implementations.TypeSerialization;
+namespace EXmlLib2.Implementations.TypeSerialization.Abstractions;
 
-public abstract class NewTypeSerializer : IElementSerializer
+public abstract class TypeSerializerBase : IElementSerializer
 {
   public const string TYPE_NAME_ATTRIBUTE = "__instanceType";
   public abstract bool AcceptsType(Type type);
-
   public void Serialize(object? value, Type expectedType, XElement element, IXmlContext ctx)
   {
     EAssert.Argument.IsNotNull(value, nameof(value));
@@ -37,7 +36,6 @@ public abstract class NewTypeSerializer : IElementSerializer
       element.SetAttributeValue(XName.Get(TYPE_NAME_ATTRIBUTE), typeName);
     }
   }
-
   protected abstract void SerializeDataMember(object value, string dataMemberName, XElement element, IXmlContext ctx);
   protected abstract IEnumerable<string> GetDataMemberNames(Type type);
 }

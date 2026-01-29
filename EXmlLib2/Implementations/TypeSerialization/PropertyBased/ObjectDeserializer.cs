@@ -1,21 +1,23 @@
 ﻿using ESystem.Asserting;
 using EXmlLib2.Abstractions;
+using EXmlLib2.Implementations.TypeSerialization.Abstractions;
 using EXmlLib2.Implementations.TypeSerialization.Factories;
 using EXmlLib2.Implementations.TypeSerialization.Helpers;
 using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Factories;
 using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Internal;
 using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties;
+using EXmlLib2.Implementations.TypeSerialization.PropertyBased.Properties.Abstractions;
 using EXmlLib2.Types;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Xml.Linq;
 
-namespace EXmlLib2.Implementations.TypeSerialization.AnyBased;
+namespace EXmlLib2.Implementations.TypeSerialization.PropertyBased;
 
-public class TypeFromAnyDeserializer : NewTypeDeserializer
+public class ObjectDeserializer : TypeDeserializerBase
 {
-  public class TypeOptions<T>(TypeFromAnyDeserializer parent)
+  public class TypeOptions<T>(ObjectDeserializer parent)
   {
     public TypeOptions<T> WithPropertyDeserializer(Expression<Func<T, object?>> propertyExpression, IPropertyDeserializer propertyDeserializer)
     {
@@ -26,16 +28,7 @@ public class TypeFromAnyDeserializer : NewTypeDeserializer
       return this;
     }
 
-    public TypeOptions<T> WithIgnoredProperty(Expression<Func<T, object?>> propertyExpression) 
-      => this.WithPropertyDeserializer(propertyExpression, new IgnoredProperty());
-
-    public TypeOptions<T> WithOptionalProperty(Expression<Func<T, object?>> propertyExpression)
-    {
-      EAssert.Argument.IsNotNull(propertyExpression, nameof(propertyExpression));
-      PropertyInfo propertyInfo = ExtractPropertyInfo(propertyExpression);
-      parent.WithPropertyDeserializerFor(propertyInfo, new PropertyFromAnyDeserializer().WithMissingPropertyElementBehavior(MissingPropertyElementBehavior.ReturnNull));
-      return this;
-    }
+    public TypeOptions<T> WithIgnoredProperty(Expression<Func<T, object?>> propertyExpression) => this.WithPropertyDeserializer(propertyExpression, new IgnoredPropertySerialization());
 
     public TypeOptions<T> WithInstanceFactory(Func<PropertyValuesDictionary<T>, object> factoryMethod)
     {
@@ -44,7 +37,7 @@ public class TypeFromAnyDeserializer : NewTypeDeserializer
     }
   }
 
-  public class DefaultOptions(TypeFromAnyDeserializer parent)
+  public class DefaultOptions(ObjectDeserializer parent)
   {
     public DefaultOptions WithPropertiesProvider(Func<Type, PropertyInfo[]> propertiesProvider)
     {
@@ -68,16 +61,17 @@ public class TypeFromAnyDeserializer : NewTypeDeserializer
   public static readonly Func<Type, PropertyInfo[]> PUBLIC_INSTANCE_PROPERTIES_PROVIDER = q => q.GetProperties(BindingFlags.Public | BindingFlags.Instance);
   private Func<Type, PropertyInfo[]> propertiesProvider = PUBLIC_INSTANCE_PROPERTIES_PROVIDER;
 
-  private IPropertyDeserializer defaultPropertyDeserializer = new PropertyFromAnyDeserializer();
+  private IPropertyDeserializer defaultPropertyDeserializer = new PropertySerialization()
+    .WithMissingXmlSourceBehavior(MissingPropertyXmlSourceBehavior.ThrowException);
   private readonly SmartPropertyInfoDictionary<IPropertyDeserializer> propertyDeserializers = new();
 
-  private IInstanceFactory defaultInstanceFactory = new UniversalTypeFactory();
+  private IInstanceFactory defaultInstanceFactory = new CtorParamMatchTypeFactory();
   private readonly Dictionary<Type, IInstanceFactory> instanceFactories = [];
   private Func<Type, bool> acceptsTypePredicate = q => false;
 
   public override bool AcceptsType(Type type) => acceptsTypePredicate(type);
 
-  public TypeFromAnyDeserializer WithAcceptedType(Type type, bool acceptDerivedTypes = false)
+  public ObjectDeserializer WithAcceptedType(Type type, bool acceptDerivedTypes = false)
   {
     EAssert.Argument.IsNotNull(type, nameof(type));
     if (acceptDerivedTypes)
@@ -85,11 +79,11 @@ public class TypeFromAnyDeserializer : NewTypeDeserializer
     else
       return WithAcceptedType(q => q == type);
   }
-  public TypeFromAnyDeserializer WithAcceptedType<T>(bool acceptDerivedTypes = false)
+  public ObjectDeserializer WithAcceptedType<T>(bool acceptDerivedTypes = false)
   {
     return WithAcceptedType(typeof(T), acceptDerivedTypes);
   }
-  public TypeFromAnyDeserializer WithAcceptedType(Func<Type, bool> predicate)
+  public ObjectDeserializer WithAcceptedType(Func<Type, bool> predicate)
   {
     EAssert.Argument.IsNotNull(predicate, nameof(predicate));
     var tmp = acceptsTypePredicate;
@@ -97,14 +91,14 @@ public class TypeFromAnyDeserializer : NewTypeDeserializer
     return this;
   }
 
-  public TypeFromAnyDeserializer WithTypeOptions<T>(Action<TypeOptions<T>> opts)
+  public ObjectDeserializer WithTypeOptions<T>(Action<TypeOptions<T>> opts)
   {
     TypeOptions<T> typeOpts = new TypeOptions<T>(this);
     opts(typeOpts);
     return this;
   }
 
-  public TypeFromAnyDeserializer WithDefaultOptions(Action<DefaultOptions> opts)
+  public ObjectDeserializer WithDefaultOptions(Action<DefaultOptions> opts)
   {
     DefaultOptions defaultOptions = new(this);
     opts(defaultOptions);
@@ -112,7 +106,7 @@ public class TypeFromAnyDeserializer : NewTypeDeserializer
   }
 
   [EditorBrowsable(EditorBrowsableState.Never)]
-  public TypeFromAnyDeserializer WithPropertyDeserializerFor(PropertyInfo propertyInfo, IPropertyDeserializer propertyDeserializer)
+  public ObjectDeserializer WithPropertyDeserializerFor(PropertyInfo propertyInfo, IPropertyDeserializer propertyDeserializer)
   {
     EAssert.Argument.IsNotNull(propertyInfo, nameof(propertyInfo));
     EAssert.Argument.IsNotNull(propertyDeserializer, nameof(propertyDeserializer));
@@ -120,18 +114,24 @@ public class TypeFromAnyDeserializer : NewTypeDeserializer
     return this;
   }
 
-  public TypeFromAnyDeserializer WithInstanceFactory(Func<Type, Dictionary<string, object?>, object> factoryMethod)
+  public ObjectDeserializer WithInstanceFactory(Func<Type, Dictionary<string, object?>, object> factoryMethod)
   {
-    defaultInstanceFactory = new DelegatedInstanceFactory(factoryMethod);
+    defaultInstanceFactory = new DelegateInstanceFactory(factoryMethod);
     return this;
   }
 
-  public TypeFromAnyDeserializer WithInstanceFactoryFor(Type type, IInstanceFactory instanceFactory)
+  public ObjectDeserializer WithInstanceFactoryFor(Type type, IInstanceFactory instanceFactory)
   {
     EAssert.Argument.IsNotNull(type, nameof(type));
     EAssert.Argument.IsNotNull(instanceFactory, nameof(instanceFactory));
     instanceFactories[type] = instanceFactory;
     return this;
+  }
+
+  public ObjectDeserializer WithInstanceFactoryFor<T>(Func<PropertyValuesDictionary<T>, object> factoryMethod)
+  {
+    DelegatedInstanceFactory<T> instanceFactory = new(factoryMethod);
+    return WithInstanceFactoryFor(typeof(T), instanceFactory);
   }
 
 

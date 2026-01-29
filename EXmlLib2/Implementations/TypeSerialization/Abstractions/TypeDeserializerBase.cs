@@ -4,11 +4,11 @@ using EXmlLib2.Implementations.TypeSerialization.Helpers;
 using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 
-namespace EXmlLib2.Implementations.TypeSerialization;
+namespace EXmlLib2.Implementations.TypeSerialization.Abstractions;
 
-public abstract class NewTypeDeserializer : IElementDeserializer
+public abstract class TypeDeserializerBase : IElementDeserializer
 {
-  public const string TYPE_NAME_ATTRIBUTE = NewTypeSerializer.TYPE_NAME_ATTRIBUTE;
+  public const string TYPE_NAME_ATTRIBUTE = TypeSerializerBase.TYPE_NAME_ATTRIBUTE;
   public abstract bool AcceptsType(Type type);
 
   protected abstract DeserializationResult DeserializeDataMember(Type targetType, string dataMemberName, XElement element, IXmlContext ctx);

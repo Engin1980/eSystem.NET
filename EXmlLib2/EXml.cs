@@ -163,13 +163,13 @@ namespace EXmlLib2
 
     private EXml WithObjectDeserializers()
     {
-      this.ElementDeserializers.AddLast(new NewTypeByPropertyDeserializer().WithAcceptedType<object>(true));
+      this.ElementDeserializers.AddLast(new ObjectDeserializer().WithAcceptedType<object>(true));
       return this;
     }
 
     private EXml WithObjectSerializers()
     {
-      this.ElementSerializers.AddLast(new NewTypeByPropertySerializer().WithAcceptedType<object>(true));
+      this.ElementSerializers.AddLast(new ObjectSerializer().WithAcceptedType<object>(true));
       return this;
     }
 
