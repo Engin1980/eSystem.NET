@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -22,12 +23,20 @@ public class SimpleRecordDeserializer<T> : TypeDeserializerBase
 {
   private readonly Func<Type, bool> typeAccepter = q => q == typeof(T);
   private readonly Dictionary<PropertyInfo, Func<object?>> optionalProperties = [];
+  private readonly HashSet<PropertyInfo> ignoredProperties = [];
   private readonly Func<Type, PropertyInfo[]> propertiesProvider = PropertyProviders.PublicInstancePropertiesProvider;
   private readonly IPropertyDeserializer propertyDeserializer = new PropertySerialization()
     .WithNameCaseMatching(NameCaseMatching.IgnoreCase)
     .WithMissingXmlSourceBehavior(MissingPropertyXmlSourceBehavior.Ignore);
 
   public override bool AcceptsType(Type type) => typeAccepter(type);
+
+  public SimpleRecordDeserializer<T> WithIgnoredProperty<V>(Expression<Func<T, V?>> propertyExpression)
+  {
+    PropertyInfo propertyInfo = ExtractPropertyInfo(propertyExpression);
+    ignoredProperties.Add(propertyInfo);
+    return this;
+  }
 
   public SimpleRecordDeserializer<T> WithOptionalProperty<V>(Expression<Func<T, V?>> propertyExpression)
     => WithOptionalProperty(propertyExpression, () => default);
@@ -81,7 +90,11 @@ public class SimpleRecordDeserializer<T> : TypeDeserializerBase
     DeserializationResult deserializedValue = pds.DeserializeProperty(pi, element, ctx);
     if (deserializedValue.HasResult == false)
     {
-      if (optionalProperties.TryGetValue(pi, out Func<object?>? defaultValueProvider))
+      if (ignoredProperties.Contains(pi))
+      {
+        deserializedValue = DeserializationResult.FromNoResult();
+      }
+      else if (optionalProperties.TryGetValue(pi, out Func<object?>? defaultValueProvider))
       {
         object? defaultValue = defaultValueProvider();
         deserializedValue = DeserializationResult.From(defaultValue);

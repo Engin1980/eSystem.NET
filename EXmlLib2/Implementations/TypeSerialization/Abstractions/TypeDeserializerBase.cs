@@ -1,4 +1,5 @@
-﻿using EXmlLib2.Abstractions;
+﻿using ESystem;
+using EXmlLib2.Abstractions;
 using EXmlLib2.Abstractions.Interfaces;
 using EXmlLib2.Implementations.TypeSerialization.Helpers;
 using System.Runtime.CompilerServices;
@@ -39,7 +40,15 @@ public abstract class TypeDeserializerBase : IElementDeserializer
     Type realTargetType = EvaluateRealTargetType(element, targetType);
 
     BeforeInstanceCreation?.Invoke(deserializedValues);
-    object ret = CreateInstance(realTargetType, deserializedValues);
+    object ret;
+    try
+    {
+      ret = CreateInstance(realTargetType, deserializedValues);
+    }
+    catch (Exception ex)
+    {
+      throw new EXmlException($"Failed to create an instance of {realTargetType.Name}.", ex);
+    }
 
     AfterInstanceCreation?.Invoke(ret);
     return ret;

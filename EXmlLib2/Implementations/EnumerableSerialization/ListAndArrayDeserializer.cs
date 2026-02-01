@@ -68,7 +68,7 @@ namespace EXmlLib2.Implementations.EnumerableSerialization
 
     public ListAndArrayDeserializer WithAcceptedType<T>()
     {
-      EAssert.IsTrue(EnumerableTypeUtils.IsListOrArray(typeof(T)), 
+      EAssert.IsTrue(EnumerableTypeUtils.IsListOrArray(typeof(T)),
         $"Typ {typeof(T).FullName} is not Array or IEnumerable.");
       this.typeAccepter = q => q == typeof(T);
       return this;
@@ -147,7 +147,14 @@ namespace EXmlLib2.Implementations.EnumerableSerialization
             }
             EAssert.IsNotNull(childType);
             IElementDeserializer elementDeserializer = ctx.ElementDeserializers.GetByType(childType);
-            item = elementDeserializer.Deserialize(childElement, childType, ctx);
+            try
+            {
+              item = elementDeserializer.Deserialize(childElement, childType, ctx);
+            }
+            catch (Exception ex)
+            {
+              throw new EXmlException("Failed to deserialize item of type " + childType.Name + " from element " + childElement.Name.LocalName + ".", ex);
+            }
             break;
           case XmlRepresentation.Attribute:
             if (childElement.Name.LocalName != this.defaultItemElementName)
@@ -170,7 +177,14 @@ namespace EXmlLib2.Implementations.EnumerableSerialization
                 continue;
               else
                 throw new InvalidOperationException($"Cannot determine item type from attribute(s) of element '{childElement.Name.LocalName}'");
-            item = attributeDeserializer.Deserialize(attr.Value, childType, ctx);
+            try
+            {
+              item = attributeDeserializer.Deserialize(attr.Value, childType, ctx);
+            }
+            catch (Exception ex)
+            {
+              throw new EXmlException("Failed to deserialize item of type " + childType.Name + " from attribute " + attr.Name.LocalName + ".", ex);
+            }
             break;
           default:
             throw new ESystem.Exceptions.UnexpectedEnumValueException(this.itemXmlRepresentation);

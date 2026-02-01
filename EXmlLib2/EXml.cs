@@ -178,7 +178,7 @@ namespace EXmlLib2
     public object? Deserialize(XElement element, Type expectedType)
     {
       object? ret;
-      logger.Log(LogLevel.INFO, $"Deserializing type {expectedType.Name} from {element}.");
+      logger.Log(LogLevel.INFO, $"Deserializing type {expectedType.Name} from {element.Name}.");
       try
       {
         IElementDeserializer deserializer = ctx.ElementDeserializers.GetByType(expectedType);
@@ -186,7 +186,7 @@ namespace EXmlLib2
       }
       catch (Exception ex)
       {
-        var eex = new EXmlException($"Failed to deserialize {expectedType.Name} to {element}.", ex);
+        var eex = new EXmlException($"Failed to deserialize {expectedType.Name} from {element.Name}.", ex);
         logger.LogException(eex);
         throw eex;
       }
@@ -210,7 +210,7 @@ namespace EXmlLib2
       }
       catch (Exception ex)
       {
-        var eex = new EXmlException($"Failed to serialize {value} to {element}.", ex);
+        var eex = new EXmlException($"Failed to serialize {value} to {element.Name}.", ex);
         logger.LogException(eex);
         throw eex;
       }
