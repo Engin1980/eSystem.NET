@@ -12,6 +12,18 @@ namespace ESystem.Asserting
   {
     public class Argument
     {
+      public static void IsRegex(string value, string pattern, string argumentName, Func<string> violationDescription)
+      {
+        EAssert.Argument.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(value, pattern),
+          argumentName,
+          violationDescription);
+      }
+      public static void IsRegex(string value, string pattern, string argumentName)
+      {
+        EAssert.Argument.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(value, pattern),
+          argumentName,
+          () => $"Argument '{argumentName}' with value '{value}' does not match regex pattern '{pattern}'.");
+      }
       public static void IfThen(bool antecedent, bool consequent, string argumentName, Func<string> violationDescription)
       {
         EAssert.IfThen(antecedent,

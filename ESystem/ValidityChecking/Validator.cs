@@ -13,7 +13,7 @@ namespace ESystem.ValidityChecking
     public void Validate(object obj)
     {
       if (isActive)
-        throw new ApplicationException("Validat cannot be started twice at once.");
+        throw new ApplicationException("Validator cannot be started twice at once.");
       isActive = true;
       checkedObjects.Clear();
 
